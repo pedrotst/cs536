@@ -1,0 +1,95 @@
+Chapter 1 -*- mode: org -*-
+
+
+* What in a Computer Network?
+** Host Devices (PC, Laptops, Handholds)
+** Routers & Switches
+** links (wires, wireless, quantum)
+** protocols (IP, TCP, UDP)
+** Applications (DNS, SSL, HTTP)
+** Humans & BOts
+   
+* Protocols are the "glue" that link everything together
+
+* Today information is digital but transmission is analog
+** Digital stuff are the bits
+** Analog are electromagnetic waves
+   
+* Networks can be of the form:
+** Point-to-point :: Direct link between A & B
+** Broadcast-link :: what A sends can be heard by everyone (not just B)
+** Internetworkk :: network of networks
+*** e.g.: Purdue Campus Network, Global IP Internet
+** Everything else is a mixture of the first two really
+
+* A wants to send a message to B through a network N
+  What capabilities do they need to have?
+** Digital content representation
+*** encode/decode
+*** from endian to message format
+**** header, payload, trailer
+*** App payload
+**** file, media, protocal interaction
+** Analog representation of digital info
+** Information Protocol
+   how to deal with:
+*** Information corruption
+**** bit flips
+*** Information loss
+**** packet drops
+*** Security
+**** confidentiality, authentication
+
+* How to design a network?
+  Here are some problems to keep in mind
+** Conectivity
+** Scalability
+
+A wants to send a message to B
+* Definition: A wants to send a message to B. A and B are called _nodes_
+** The physical medium used to send the message is called a _link_
+   
+   
+* Switched Network
+** A _Switch_ stores & forwards data
+** A switched networks can be of two forms
+*** Circuit Switch
+**** Telephone System
+**** It streams the data
+**** Does not store the date
+*** Pack Switch
+**** sends discrete blocks of data
+***** aka packet or message
+**** store & forward strategy
+**** stores the data
+** Nodes outside the network _use_ the network
+*** they are called _hosts_
+    
+* Convention 
+** internet is a generic internet network
+** Internet is the TCP/IP Internet
+   
+* A node conected to two ore more networks is called a _router_ or _gateway_
+** The router forwards messages as well (like the switch)
+   
+* Q: How do we know how to find the recipient of a message
+* A: By assigning addresses
+* The procedure of deciding how to forward messages until it reatches its address is called routing
+  
+* Q: How can hosts share the network?
+* A: Multiplexing
+** like timesharing in the OS level
+** Synchronous time-division multiplexing (STDM)
+*** Round Robing
+*** In quantum 1, data from 1st flow is transfered
+*** In quantum 2, data from 2nd flow is transfered
+*** and so on...
+*** Con: if no data is sent from flow x, then quantum x is wasted
+** Frequency Division Multiplexing (FDM)
+*** transmit on different frequencies
+*** Not practical to add new frequencies
+** Statistical Multiplexing
+*** Basically STDM but solving the "no data" problem
+*** It only transfers when a node asks for a timeslice
+*** Keeps the use fair by setting a maximum data limit
+**** this data limit is called a _packet_
