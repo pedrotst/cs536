@@ -1,11 +1,10 @@
 Chapter 1 -*- mode: org -*-
 
-
 * What in a Computer Network?
 ** Host Devices (PC, Laptops, Handholds)
 ** Routers & Switches
 ** links (wires, wireless, quantum)
-** protocols (IP, TCP, UDP)
+** protocols (IP, Abanic, UDP)
 ** Applications (DNS, SSL, HTTP)
 ** Humans & BOts
    
@@ -40,12 +39,12 @@ Chapter 1 -*- mode: org -*-
 *** Security
 **** confidentiality, authentication
 
+
 * How to design a network?
   Here are some problems to keep in mind
 ** Conectivity
 ** Scalability
 
-A wants to send a message to B
 * Definition: A wants to send a message to B. A and B are called _nodes_
 ** The physical medium used to send the message is called a _link_
    
@@ -65,31 +64,39 @@ A wants to send a message to B
 ** Nodes outside the network _use_ the network
 *** they are called _hosts_
     
+
 * Convention 
 ** internet is a generic internet network
 ** Internet is the TCP/IP Internet
    
-* A node conected to two ore more networks is called a _router_ or _gateway_
+* A node connected to two ore more networks is called a _router_ or _gateway_
 ** The router forwards messages as well (like the switch)
    
 * Q: How do we know how to find the recipient of a message
 * A: By assigning addresses
-* The procedure of deciding how to forward messages until it reatches its address is called routing
+
+* The procedure of deciding how to forward messages until it reaches its address is called routing
   
 * Q: How can hosts share the network?
 * A: Multiplexing
-** like timesharing in the OS level
-** Synchronous time-division multiplexing (STDM)
-*** Round Robing
-*** In quantum 1, data from 1st flow is transfered
-*** In quantum 2, data from 2nd flow is transfered
-*** and so on...
-*** Con: if no data is sent from flow x, then quantum x is wasted
-** Frequency Division Multiplexing (FDM)
-*** transmit on different frequencies
-*** Not practical to add new frequencies
-** Statistical Multiplexing
-*** Basically STDM but solving the "no data" problem
-*** It only transfers when a node asks for a timeslice
-*** Keeps the use fair by setting a maximum data limit
+** Like time-sharing in the OS level
+** It can be of three kinds
+*** Synchronous time-division multiplexing (STDM)
+**** Round Robing
+**** In quantum 1, data from 1st flow is transfered
+**** In quantum 2, data from 2nd flow is transfered
+**** and so on...
+**** Con: if no data is sent from flow x, then quantum x is wasted
+*** Frequency Division Multiplexing (FDM)
+**** Transmit on different frequencies
+**** Con: not practical to add new frequencies
+*** Statistical Multiplexing
+**** Basically STDM but solving the "no data" problem
+**** It only transfers when a node asks for a time-slice
+**** Keeps the use fair by setting a maximum data limit
 **** this data limit is called a _packet_
+** This is why a switch stores the data
+*** If it received more packets than the link can accommodated, what would happen with the data?
+*** When a switch runs out of buffer it is said to be _congested_
+    
+* Asynchronous Transfer Mode (ATM)
