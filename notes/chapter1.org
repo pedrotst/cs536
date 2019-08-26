@@ -99,4 +99,14 @@ Chapter 1 -*- mode: org -*-
 *** If it received more packets than the link can accommodated, what would happen with the data?
 *** When a switch runs out of buffer it is said to be _congested_
     
-* Asynchronous Transfer Mode (ATM)
+  
+* Designing the network
+  A network provides the means for communication between parties. There are a lot of complicated things
+  going on, so instead of making every application to decide how to implement some common communication patterns,
+  we develop some common patterns within the network. This way we free the application designer from the burder of
+  designing communication aspects as well, his only worry will be choosing the right pattern to use.
+
+channels connects one process to another.
+  
+* 
+  

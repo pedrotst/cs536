@@ -1,0 +1,20 @@
+Lec 3 -*- mode: org -*-
+
+* We transfer data via Electromagnetic Waves (EM)
+** EM is a "pysical object" which strength may vary over time
+** They are senoidal
+** We use the top to represent the bit 1 and the bottom of the sine wave to represent the bit 0
+*** The name of this waves manipulation is _amplitude modulation_ (AM)
+**** AM radio does the same
+** The 3 key featores of EM
+*** Period (or cycle): T
+**** 1/T is called frequency named Hertz (Hz),
+*** Amplitude
+*** Phase
+    
+* How the router Works:
+** Using Time-Division Multiplexing (TDM)
+*** Basically means that it Multiplexes the signal to different computers
+
+
+     
