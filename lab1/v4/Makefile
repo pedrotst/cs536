@@ -1,14 +1,16 @@
 CC=gcc
-CFLAGS=-I.
 
-OBJ=fifocli-v1.o fifoserver-v1.o
- 
-all: $(OBJ) clean_fifos
+all: clean_all client server
 
-%.o: %.c
-	$(CC) -o $@ $^ $(CFLAGS)
+client:
+	$(CC) -g -o client fifocli-v3.c
+
+server:
+	$(CC) -g -o server fifoser-v3.c
 
 .PHONY:
-clean_fifos:
+clean_all:
 	rm -f server_queue
 	rm -f client_queue
+	rm -f client
+	rm -f server
