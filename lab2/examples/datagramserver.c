@@ -1,7 +1,3 @@
-/*
-** listener.c -- a datagram sockets "server" demo
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,9 +8,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
-// Let it dynamically assign
-#define SERVERPORT 4950   // the port users will be connecting to
 
 #define MAXBUFLEN 100
 
@@ -31,23 +24,13 @@ void *get_in_addr(struct sockaddr *sa)
 int main(void)
 {
     int sockfd;
-    struct addrinfo hints, *servinfo, *p;
-    int rv;
+    struct addrinfo;
     int numbytes;
     struct sockaddr_storage their_addr;
     char buf[MAXBUFLEN];
     socklen_t addr_len;
     char s[INET6_ADDRSTRLEN];
 
-    /* memset(&hints, 0, sizeof hints); */
-    /* hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4 */
-    /* hints.ai_socktype = SOCK_DGRAM; */
-    /* hints.ai_flags = AI_PASSIVE; // use my IP */
-
-    /* if ((rv = getaddrinfo(NULL, 0, &hints, &servinfo)) != 0) { */
-    /*     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)); */
-    /*     return 1; */
-    /* } */
     struct sockaddr_in addr;
     socklen_t addrLen;
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -68,23 +51,6 @@ int main(void)
       exit(1);
     }
     printf("Listening at port %d\n", htons(addr.sin_port));
-
-    /* bind(sockfd, (struct sockaddr *)&addr, addrLen); */
-
-    /* p = servinfo; */
-
-    /* sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol); */
-
-    /* char hostnamebuf[1000]; */
-    /* gethostname(hostnamebuf, 1000); */
-    /* printf("hostname: %s\n", hostnamebuf); */
-
-    /* if (p == NULL) { */
-        /* fprintf(stderr, "listener: failed to bind socket\n"); */
-        /* return 2; */
-    /* } */
-
-    /* freeaddrinfo(servinfo); */
 
     printf("listener: waiting to recvfrom...\n");
 
