@@ -132,8 +132,16 @@ int main(void){
       time(&raw_time);
       timeinfo = localtime(&raw_time);
       printf("%s[Server]: Received request for '%s'\n", asctime(timeinfo), buf);
-
       fflush(stdout);
+
+      srand(raw_time);
+      if(rand() % 2){
+        printf("[Server]: You know what, I don't want to process this request\n");
+        printf("[Server]: ¯\\_(ツ)_/¯\n");
+        fflush(stdout);
+        // close(new_fd);
+        exit(0);
+      }
 
       dup2(new_fd, 1);
 
@@ -151,16 +159,11 @@ int main(void){
         exit(1);
       }
 
-
-      /* if(send(new_fd, "I received :)", 10, 0) == -1) */
-        /* perror("send"); */
-
-      close(new_fd);
       exit(0);
 
     }
 
-    close(new_fd); // parent doesn't need this
+    /* close(new_fd); // parent doesn't need this */
 
   }
 
