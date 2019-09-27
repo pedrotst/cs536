@@ -89,7 +89,8 @@ int main(int argc, char *argv[]){
       strcat(cmd, argv[i]);
     }
 
-    if(send(sockfd, cmd, strlen(cmd), 0) == -1)
+    // if(send(sockfd, cmd, strlen(cmd), 0) == -1)
+    if(write(sockfd, cmd, strlen(cmd)) == -1)
       perror("send");
     if(tries == 0)
       printf("client:   sent '%s' to %s\n", cmd, s);

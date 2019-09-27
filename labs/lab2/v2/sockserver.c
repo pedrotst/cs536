@@ -122,7 +122,8 @@ int main(void){
 
       int numbytes;
 
-      if((numbytes = recv(new_fd, buf, MAXDATASIZE - 1, 0)) == -1) {
+      // if((numbytes = recv(new_fd, buf, MAXDATASIZE - 1, 0)) == -1) {
+      if((numbytes = read(new_fd, buf, MAXDATASIZE - 1)) == -1) {
         perror("recv");
         exit(1);
       }

@@ -100,16 +100,22 @@ int main(void)
   sigset_t mask;
 
   // Setup non blocking signal handling
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGALRM);
+  // sigemptyset(&mask);
+  // sigaddset(&mask, SIGALRM);
 
-  struct sigaction sa;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = 0; // DO interrupt blocking system calls
-  sa.sa_handler = handle_alarm;
+  // struct sigaction sa;
+  // sigfillset(&sa.sa_mask);
+  // sa.sa_flags = 0; // DO interrupt blocking system calls
+  // sa.sa_handler = handle_alarm;
 
-  if (sigaction(SIGALRM, &sa, 0)) {
-    perror("sigaction");
+  // if (sigaction(SIGALRM, &sa, 0)) {
+  //   perror("sigaction");
+  //   return 1;
+  // }
+
+
+  if (signal(SIGALRM, &handle_alarm)) {
+    perror("signal");
     return 1;
   }
 
