@@ -1,3 +1,6 @@
+# Vim Swap Files
+*.swp
+
 # Dev is supposed to be a directory for easy of development over ssh
 dev
 
