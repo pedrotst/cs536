@@ -18,10 +18,10 @@
 #include <netdb.h>
 
 char* allocate_sendstr(int size){
-  char *s = calloc(sizeof(char), size + 1);
+  char *s = calloc(sizeof(char), size);
   for(int i = 0; i < size; i++)
     s[i] = '3';
-  s[size] = '\0';
+  /* s[size - 1] = '\0'; */
   return s;
 }
 
@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
   char cli_port[8];
   int filesize, blocksize;
   int num_sends, timeout;
+  int seqno = 0;
 
   if (argc != 6) {
     fprintf(stderr,"usage: filesize blocksize timeout cli-ip cli-port\n");
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
 
 
   sendstr = allocate_sendstr(blocksize);
+  sendstr[0] = seqno;
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -89,15 +91,16 @@ int main(int argc, char *argv[]) {
   fflush(stdout);
 
   int addr_len = sizeof their_addr;
-  for(int i = 0; i < num_sends; i++){
-    if ((numbytes = sendto(sockfd, sendstr, blocksize+1, 0,
+  for(int i = 0; i <= num_sends; i++){
+    if ((numbytes = sendto(sockfd, sendstr, blocksize, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
 
-    printf("sender: sent %s, %d bytes to '%s:%s'\n", sendstr, numbytes, cli_ip, cli_port);
-
+    printf("\nsender: sending packet seq: %d...\n", seqno);
+    printf("sender: sent %d/%d packets to '%s:%s'\n", i, num_sends, cli_ip, cli_port);
+    printf("sender: waiting for ACK...'\n");
     char buf;
     if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
@@ -105,9 +108,11 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    printf("sender: received ACK:%c\n", buf);
+    printf("sender: received ACK:%c\n", buf + '0');
 
-    sleep(1);
+    seqno = (seqno+1)%2;
+    sendstr[0] = seqno;
+    /* sleep(1); */
   }
 
   freeaddrinfo(servinfo);

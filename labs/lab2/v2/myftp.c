@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
   char buf[MAXBUFLEN];
   socklen_t addr_len;
   char s[INET6_ADDRSTRLEN];
-  char seq_no;
+  char seqno;
 
   struct sockaddr_in addr;
   socklen_t addrLen;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
       perror("recvfrom");
       exit(1);
     }
-    seq_no = buf[0];
+    seqno = buf[0];
 
     printf("listener: got packet from %s\n",
            inet_ntop(their_addr.ss_family,
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
                      s, sizeof s));
     printf("listener: packet is %d bytes long\n", numbytes);
     buf[numbytes] = '\0';
-    printf("listener: packet contains \"%s\"\n", buf);
+    printf("listener: packet contains %d\"%s\"\n", seqno, &buf[1]);
 
     acksockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if(acksockfd == -1){
@@ -102,15 +102,15 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (sendto(sockfd, &seq_no, 1, 0,
+    if (sendto(sockfd, &seqno, 1, 0,
                            (struct sockaddr*)&their_addr,
                            sizeof their_addr) == -1) {
-      perror("sender: sendto() failed");
+      perror("listenter: sendto() failed");
       exit(1);
     }
 
     /* printf("sender: sent %s, %d bytes to '%s:%s'\n", sendstr, numbytes, cli_ip, cli_port); */
-    printf("listener: Ack sent\n");
+    printf("listener: Ack %d sent\n", seqno);
 
   }
 
