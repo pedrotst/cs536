@@ -13,6 +13,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <setjmp.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -23,6 +26,17 @@ char* allocate_sendstr(int size){
     s[i] = '3';
   /* s[size - 1] = '\0'; */
   return s;
+}
+
+static jmp_buf env_alarm;
+int timeout_count = 0;
+
+void timeout_handler(int sig){
+  timeout_count++;
+  printf("sender: Timeout, resending request\n");
+  fflush(stdout);
+
+  siglongjmp(env_alarm, timeout_count);
 }
 
 /*
@@ -37,6 +51,7 @@ int main(int argc, char *argv[]) {
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr;
+  struct itimerval itime;
   int rv;
   int numbytes;
   char *sendstr;
@@ -65,10 +80,24 @@ int main(int argc, char *argv[]) {
   num_sends = filesize / blocksize + (filesize % blocksize != 0);
   printf("sender: Starting connection with %s:%s\n", cli_ip, cli_port);
   fflush(stdout);
-
-
   sendstr = allocate_sendstr(blocksize);
   sendstr[0] = seqno;
+
+  // Setup itimer
+
+
+  if (signal(SIGALRM, timeout_handler) == SIG_ERR) {
+    perror("Unable to catch SIGALRM");
+    exit(1);
+  }
+  itime.it_value.tv_sec = timeout / 1000;
+  itime.it_value.tv_usec = (timeout * 1000000) % 1000000;
+  itime.it_interval = itime.it_value;
+
+  if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
+    perror("error calling setitimer()");
+    exit(1);
+  }
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -92,13 +121,21 @@ int main(int argc, char *argv[]) {
 
   int addr_len = sizeof their_addr;
   for(int i = 0; i <= num_sends; i++){
+
+    if (sigsetjmp(env_alarm, 1) > 2){
+      printf("Tried to contact the server too much, dropping request\n");
+      fflush(stdout);
+      return 0;
+    }
+
+    printf("\nsender: sending packet seq: %d...\n", seqno);
+
     if ((numbytes = sendto(sockfd, sendstr, blocksize, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
 
-    printf("\nsender: sending packet seq: %d...\n", seqno);
     printf("sender: sent %d/%d packets to '%s:%s'\n", i, num_sends, cli_ip, cli_port);
     printf("sender: waiting for ACK...\n");
     char buf;
@@ -108,6 +145,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
+    timeout_count = 0;
     printf("sender: received ACK:%c\n", buf + '0');
 
     seqno = (seqno+1)%2;

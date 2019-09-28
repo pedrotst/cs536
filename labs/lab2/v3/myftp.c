@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 
 #define MAXBUFLEN 100
+
 // FIXME: Don't forget to take this off!!
 #define PORT 39140
 
@@ -43,7 +44,8 @@ int main(int argc, char *argv[]) {
 
   struct sockaddr_in addr;
   socklen_t addrLen;
-  int dropwhen, packet_count = 0;
+  int dropwhen, packet_count = 0, packets_dropped = 0;
+  int real_packets_count = 0;
 
   if(argc != 3){
     fprintf(stderr, "usage: cli-ip dropwhen\n");
@@ -51,6 +53,10 @@ int main(int argc, char *argv[]) {
   }
 
   dropwhen = atoi(argv[2]);
+
+
+  // Setup timeout
+
 
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
@@ -94,11 +100,14 @@ int main(int argc, char *argv[]) {
                      get_in_addr((struct sockaddr *)&their_addr),
                      s, sizeof s));
     buf[numbytes] = '\0';
-    printf("listener: this is packet #%d and contains %d\"%s\"\n", packet_count, seqno, &buf[1]);
+    printf("listener: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
     packet_count++;
+    real_packets_count = packet_count - packets_dropped;
 
-    printf("listener: dropwhen: %d, packet_count: %d\n", dropwhen, packet_count);
+    printf("listener: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
     if(packet_count % dropwhen == 0){
+      packets_dropped++;
+      real_packets_count = packet_count - packets_dropped;
       printf("listener: package droped!!\n");
       continue;
     }
