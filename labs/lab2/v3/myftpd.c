@@ -18,10 +18,10 @@
 #include <netdb.h>
 
 char* allocate_sendstr(int size){
-  char *s = calloc(sizeof(char), size + 1);
+  char *s = calloc(sizeof(char), size);
   for(int i = 0; i < size; i++)
     s[i] = '3';
-  s[size] = '\0';
+  /* s[size - 1] = '\0'; */
   return s;
 }
 
@@ -36,6 +36,7 @@ $ myftpd filesize blocksize timeout cli-ip cli-port
 int main(int argc, char *argv[]) {
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
+  struct sockaddr_storage their_addr;
   int rv;
   int numbytes;
   char *sendstr;
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
   char cli_port[8];
   int filesize, blocksize;
   int num_sends, timeout;
+  int seqno = 0;
 
   if (argc != 6) {
     fprintf(stderr,"usage: filesize blocksize timeout cli-ip cli-port\n");
@@ -61,15 +63,19 @@ int main(int argc, char *argv[]) {
   strcpy(cli_ip, argv[4]);
   strcpy(cli_port, argv[5]);
   num_sends = filesize / blocksize + (filesize % blocksize != 0);
+  printf("sender: Starting connection with %s:%s\n", cli_ip, cli_port);
+  fflush(stdout);
+
 
   sendstr = allocate_sendstr(blocksize);
+  sendstr[0] = seqno;
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
 
   if ((rv = getaddrinfo(cli_ip, cli_port, &hints, &servinfo)) != 0) {
-    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+    fprintf(stderr, "sender: failed getaddrinfo(): %s\n", gai_strerror(rv));
     return 1;
   }
 
@@ -77,19 +83,39 @@ int main(int argc, char *argv[]) {
   sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
   if (p == NULL) {
-    fprintf(stderr, "talker: failed to create socket\n");
+    fprintf(stderr, "sender: socket() failed\n");
     return 2;
   }
 
-  if ((numbytes = sendto(sockfd, sendstr, blocksize+1, 0,
-                         p->ai_addr, p->ai_addrlen)) == -1) {
-    perror("talker: sendto");
-    exit(1);
+  printf("sender: Sending file of size %d bytes in %d packets\n", filesize, num_sends);
+  fflush(stdout);
+
+  int addr_len = sizeof their_addr;
+  for(int i = 0; i <= num_sends; i++){
+    if ((numbytes = sendto(sockfd, sendstr, blocksize, 0,
+                           p->ai_addr, p->ai_addrlen)) == -1) {
+      perror("sender: sendto() failed");
+      exit(1);
+    }
+
+    printf("\nsender: sending packet seq: %d...\n", seqno);
+    printf("sender: sent %d/%d packets to '%s:%s'\n", i, num_sends, cli_ip, cli_port);
+    printf("sender: waiting for ACK...\n");
+    char buf;
+    if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
+                             (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+      perror("recvfrom");
+      exit(1);
+    }
+
+    printf("sender: received ACK:%c\n", buf + '0');
+
+    seqno = (seqno+1)%2;
+    sendstr[0] = seqno;
+    /* sleep(1); */
   }
 
   freeaddrinfo(servinfo);
-
-  printf("talker: sent %s, %d bytes to '%s:%s'\n", sendstr, numbytes, cli_ip, cli_port);
 
   // Closing sockets are always a good practice
   close(sockfd);
