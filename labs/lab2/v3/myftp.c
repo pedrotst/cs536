@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
   char buf[MAXBUFLEN];
   socklen_t addr_len;
   char s[INET6_ADDRSTRLEN];
-  char seqno;
+  char seqno = 0;
 
   struct sockaddr_in addr;
   socklen_t addrLen;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
   addr_len = sizeof their_addr;
 
-  while(1){
+  while(seqno != 2){
     printf("\nreceiver: Ready to receive...\n");
 
     if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
@@ -106,6 +106,8 @@ int main(int argc, char *argv[]) {
 
     printf("listener: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
     if(packet_count % dropwhen == 0){
+      // Workaround to fix corner case when the last package is dropped
+      seqno = 0;
       packets_dropped++;
       real_packets_count = packet_count - packets_dropped;
       printf("listener: package droped!!\n");

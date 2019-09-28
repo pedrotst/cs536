@@ -21,10 +21,16 @@
 #include <netdb.h>
 
 char* allocate_sendstr(int size){
-  char *s = calloc(sizeof(char), size);
-  for(int i = 0; i < size; i++)
-    s[i] = '3';
-  /* s[size - 1] = '\0'; */
+  // FIXME: send all '3'
+  char c = 'A';
+  char *s = calloc(sizeof(char), size+1);
+  for(int i = 0; i < size; i++){
+    s[i] = c++;
+    if(c == 'z')
+      c = 'A';
+  }
+  // Don't put \0
+  s[size - 1] = '\0';
   return s;
 }
 
@@ -33,7 +39,7 @@ int timeout_count = 0;
 
 void timeout_handler(int sig){
   timeout_count++;
-  printf("sender: Timeout, resending request\n");
+  printf("sender: Timeout, resending last packet\n");
   fflush(stdout);
 
   siglongjmp(env_alarm, timeout_count);
@@ -60,6 +66,7 @@ int main(int argc, char *argv[]) {
   int filesize, blocksize;
   int num_sends, timeout;
   int seqno = 0;
+  int real_blksize;
 
   if (argc != 6) {
     fprintf(stderr,"usage: filesize blocksize timeout cli-ip cli-port\n");
@@ -68,6 +75,7 @@ int main(int argc, char *argv[]) {
 
   filesize = atoi(argv[1]);
   blocksize = atoi(argv[2]);
+  real_blksize = blocksize - 1;
 
   if(blocksize > 1471){
     fprintf(stderr, "blocksize must be smaller than 1471");
@@ -77,11 +85,10 @@ int main(int argc, char *argv[]) {
   timeout = atoi(argv[3]);
   strcpy(cli_ip, argv[4]);
   strcpy(cli_port, argv[5]);
-  num_sends = filesize / blocksize + (filesize % blocksize != 0);
+  num_sends = filesize / real_blksize + (filesize % real_blksize != 0);
   printf("sender: Starting connection with %s:%s\n", cli_ip, cli_port);
   fflush(stdout);
-  sendstr = allocate_sendstr(blocksize);
-  sendstr[0] = seqno;
+  sendstr = allocate_sendstr(filesize);
 
   // Setup itimer
 
@@ -116,11 +123,26 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  printf("sender: Sending the following file:\n %s\n", sendstr);
   printf("sender: Sending file of size %d bytes in %d packets\n", filesize, num_sends);
   fflush(stdout);
 
   int addr_len = sizeof their_addr;
+  char *buffer;
+  buffer = calloc(sizeof(char), blocksize+1);
+  char buf;
+
   for(int i = 0; i <= num_sends; i++){
+    // Puts sequence number at the head of the buffer
+    buffer[0] = seqno;
+
+    // Adjust last block size according the remaining bytes
+    if(i == num_sends && (filesize % real_blksize != 0))
+      real_blksize = filesize % real_blksize;
+
+    // Slice the string to be sent into the correct block size
+    strncpy(&buffer[1], &sendstr[real_blksize*i], real_blksize);
+    buffer[blocksize] = '\0';
 
     if (sigsetjmp(env_alarm, 1) > 2){
       printf("Tried to contact the server too much, dropping request\n");
@@ -130,18 +152,24 @@ int main(int argc, char *argv[]) {
 
     printf("\nsender: sending packet seq: %d...\n", seqno);
 
-    if ((numbytes = sendto(sockfd, sendstr, blocksize, 0,
+    if ((numbytes = sendto(sockfd, buffer, blocksize, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
 
+    printf("sender: sending %d'%s\n", buffer[0], &buffer[1]);
     printf("sender: sent %d/%d packets to '%s:%s'\n", i, num_sends, cli_ip, cli_port);
     printf("sender: waiting for ACK...\n");
-    char buf;
     if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
+      exit(1);
+    }
+
+    // Resetting timeout
+    if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
+      perror("error calling setitimer()");
       exit(1);
     }
 
@@ -149,9 +177,34 @@ int main(int argc, char *argv[]) {
     printf("sender: received ACK:%c\n", buf + '0');
 
     seqno = (seqno+1)%2;
-    sendstr[0] = seqno;
     /* sleep(1); */
   }
+
+  if (sigsetjmp(env_alarm, 1) > 2){
+    printf("Tried to contact the server too much, dropping request\n");
+    fflush(stdout);
+    return 0;
+  }
+
+  printf("\nsender: Sending end of transmission\n");
+  // Send end of transmission
+  buffer[0] = 2;
+  if ((numbytes = sendto(sockfd, buffer, 1, 0,
+                         p->ai_addr, p->ai_addrlen)) == -1) {
+    perror("sender: sendto() failed");
+    exit(1);
+  }
+
+  if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
+                           (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+    perror("recvfrom");
+    exit(1);
+  }
+
+  printf("sender: End of transmission ACK received\n");
+  printf("sender: Transfer was successful\n");
+  printf("sender: Tearing down the server\n");
+  printf("sender: Good night\n");
 
   freeaddrinfo(servinfo);
 
