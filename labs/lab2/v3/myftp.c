@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     if (sendto(sockfd, &seqno, 1, 0,
                            (struct sockaddr*)&their_addr,
                            sizeof their_addr) == -1) {
-      perror("listenter: sendto() failed");
+      perror("receiver: sendto() failed");
       exit(1);
     }
 

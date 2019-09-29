@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   real_blksize = blocksize - 1;
 
   if(blocksize > 1471){
-    fprintf(stderr, "blocksize must be smaller than 1471");
+    fprintf(stderr, "sender: blocksize must be smaller than 1471");
     exit(1);
   }
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   strcpy(cli_ip, argv[4]);
   strcpy(cli_port, argv[5]);
   num_sends = filesize / real_blksize + (filesize % real_blksize != 0);
-  printf("sender: Starting connection with %s:%s\n", cli_ip, cli_port);
+  printf("sender: starting connection with %s:%s\n", cli_ip, cli_port);
   fflush(stdout);
   sendstr = allocate_sendstr(filesize);
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
 
   if (signal(SIGALRM, timeout_handler) == SIG_ERR) {
-    perror("Unable to catch SIGALRM");
+    perror("sender: unable to catch SIGALRM");
     exit(1);
   }
   itime.it_value.tv_sec = timeout / 1000;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
   itime.it_interval = itime.it_value;
 
   if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
-    perror("error calling setitimer()");
+    perror("sender: error calling setitimer()");
     exit(1);
   }
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     buffer[blocksize] = '\0';
 
     if (sigsetjmp(env_alarm, 1) > 2){
-      printf("Tried to contact the server too much, dropping request\n");
+      printf("sender: tried to contact the server too much, dropping request\n");
       fflush(stdout);
       return 0;
     }
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (sigsetjmp(env_alarm, 1) > 2){
-    printf("Tried to contact the server too much, dropping request\n");
+    printf("sender: tried to contact the server too much, dropping request\n");
     fflush(stdout);
     return 0;
   }
