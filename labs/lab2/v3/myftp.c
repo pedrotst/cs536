@@ -81,16 +81,19 @@ int main(int argc, char *argv[]) {
 
   addr_len = sizeof their_addr;
 
+  // What time did receiving start? We'll need that for final report
   gettimeofday(&starttime, NULL);
+
   while(seqno != 2){
     printf("\nreceiver: Ready to receive...\n");
-
     if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
       exit(1);
     }
-    total_bytes_recv += numbytes;
+
+    // Total bytes received does not account for header
+    total_bytes_recv += numbytes - 1;
 
     // Countes duplicate bytes received
     if(dup){
@@ -122,12 +125,12 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
+    // We got everything alright and we acknowledge it
     acksockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if(acksockfd == -1){
       printf("ack socket() failed\n");
       exit(1);
     }
-
     if (sendto(sockfd, &seqno, 1, 0,
                            (struct sockaddr*)&their_addr,
                            sizeof their_addr) == -1) {
@@ -135,10 +138,10 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    /* printf("sender: sent %s, %d bytes to '%s:%s'\n", sendstr, numbytes, cli_ip, cli_port); */
     printf("receiver: Ack %d sent\n", seqno);
 
   }
+  // Cool, all went well. How much time did it take?
   gettimeofday(&endtime, NULL);
   float completion_time =
     (endtime.tv_sec - starttime.tv_sec) * 1000

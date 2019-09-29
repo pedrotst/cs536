@@ -92,8 +92,6 @@ int main(int argc, char *argv[]) {
   sendstr = allocate_sendstr(filesize);
 
   // Setup itimer
-
-
   if (signal(SIGALRM, timeout_handler) == SIG_ERR) {
     perror("sender: unable to catch SIGALRM");
     exit(1);
