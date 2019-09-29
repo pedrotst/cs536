@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -34,18 +35,21 @@ $ myftp cli-ip dropwhen
 int main(int argc, char *argv[]) {
   int sockfd, acksockfd;
   struct addrinfo;
-  int numbytes;
   struct sockaddr_storage their_addr;
+  struct sockaddr_in addr;
   struct sockaddr ack_addr;
+  struct timeval starttime, endtime;
+  int numbytes;
   char buf[MAXBUFLEN];
   socklen_t addr_len;
   char s[INET6_ADDRSTRLEN];
   char seqno = 0;
-
-  struct sockaddr_in addr;
   socklen_t addrLen;
-  int dropwhen, packet_count = 0, packets_dropped = 0;
+  int dropwhen, dup=0, packet_count = 0, packets_dropped = 0;
   int real_packets_count = 0;
+  int total_bytes_recv = 0;
+  int dup_bytes_recv = 0;
+  int dup_bytes = 0;
 
   if(argc != 3){
     fprintf(stderr, "usage: cli-ip dropwhen\n");
@@ -53,10 +57,6 @@ int main(int argc, char *argv[]) {
   }
 
   dropwhen = atoi(argv[2]);
-
-
-  // Setup timeout
-
 
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
@@ -66,11 +66,7 @@ int main(int argc, char *argv[]) {
 
   addr.sin_family = AF_INET;
   addr.sin_port =  htons(PORT); //0; //htons(SERVERPORT);
-  addr.sin_addr.s_addr =
-    inet_addr(argv[1]);
-  /* INADDR_ANY; */
-  // inet_pton(AF_INET, argv[0], &addr.sin_addr);
-
+  addr.sin_addr.s_addr = inet_addr(argv[1]); /* INADDR_ANY; */
 
   if (bind(sockfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
     printf("bind() failed\n");
@@ -85,6 +81,7 @@ int main(int argc, char *argv[]) {
 
   addr_len = sizeof their_addr;
 
+  gettimeofday(&starttime, NULL);
   while(seqno != 2){
     printf("\nreceiver: Ready to receive...\n");
 
@@ -93,6 +90,14 @@ int main(int argc, char *argv[]) {
       perror("recvfrom");
       exit(1);
     }
+    total_bytes_recv += numbytes;
+
+    // Countes duplicate bytes received
+    if(dup){
+      dup_bytes_recv += numbytes;
+      dup = 0;
+    }
+
     seqno = buf[0];
 
     printf("listener: got packet from %s\n",
@@ -109,6 +114,9 @@ int main(int argc, char *argv[]) {
       // Workaround to fix corner case when the last package is dropped
       seqno = 0;
       packets_dropped++;
+
+      // dup is a flag to point that the next byte is duplicate
+      dup = 1;
       real_packets_count = packet_count - packets_dropped;
       printf("listener: package droped!!\n");
       continue;
@@ -131,8 +139,16 @@ int main(int argc, char *argv[]) {
     printf("listener: Ack %d sent\n", seqno);
 
   }
+  gettimeofday(&endtime, NULL);
+  float completion_time =
+    (endtime.tv_sec - starttime.tv_sec) * 1000
+    + (endtime.tv_usec - starttime.tv_usec) / 1000;
 
   printf("listener: End of transmission received, tearing down communication\n");
+  printf("\nlistener: Total bytes received: %d\n", total_bytes_recv);
+  printf("listener: Duplicate Bytes: %d\n", dup_bytes_recv);
+  printf("listener: Completion Time: %d ms\n", (int) completion_time);
+  printf("listener: Speed: %.4f bps\n", ((total_bytes_recv / completion_time) * 1000));
 
   close(sockfd);
 

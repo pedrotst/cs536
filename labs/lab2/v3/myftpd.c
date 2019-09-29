@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr;
   struct itimerval itime;
+  struct timeval starttime, endtime;
   int rv;
   int numbytes;
   char *sendstr;
