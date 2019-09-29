@@ -4,7 +4,7 @@
 
 umount $(pwd)/dev
 # If unmount does not work try the following:
-## diskutil unmount force $(pwd)/dev
+# diskutil unmount force $(pwd)/dev
 
 rm -rf dev
 mkdir dev

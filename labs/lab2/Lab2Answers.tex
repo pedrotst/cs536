@@ -1,0 +1,175 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Example: Project Report
+%
+% Source: http://www.howtotex.com
+%
+% Feel free to distribute this example, but please keep the referral
+% to howtotex.com
+% Date: March 2011 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on the
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+% If you're new to LaTeX, the wikibook is a great place to start:
+% http://en.wikibooks.org/wiki/LaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the title below to update the display in My Documents
+%\title{Project Report}
+%
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+\usepackage{titlesec}
+%\usepackage{lstlisting}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot[L]{}											% Empty 
+\fancyfoot[C]{}											% Empty
+\fancyfoot[R]{\thepage}									% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+%% Section Format
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{University of Purdue\\
+      Data Communication and Computer Networks\\
+      CS 53600 Fall 2019} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge Assignment x\\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont\normalsize Pedro da Costa Abreu Júnior\\ [-5pt]
+    \normalsize Student ID 0030878383\\[-5pt]
+    \normalsize \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+
+\section*{Exercise 3 Discussions}
+
+\begin{enumerate}
+\item The experiment B was perfomed running the receiver on pod1-1 and the sender on escher01.
+  Running \verb|ping pod1-1.cs.purdue.edu| in escher01 outputs the following:
+
+\begin{verbatim}
+  escher01 52 $ ping pod1-1.cs.purdue.edu
+PING pod1-1.cs.purdue.edu (128.10.25.201) 56(84) bytes of data.
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=1 ttl=60 time=0.907 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=2 ttl=60 time=0.891 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=3 ttl=60 time=0.841 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=4 ttl=60 time=1.26 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=5 ttl=60 time=1.02 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=6 ttl=60 time=1.24 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=7 ttl=60 time=1.15 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=8 ttl=60 time=1.26 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=9 ttl=60 time=1.25 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=10 ttl=60 time=1.31 ms
+^C
+--- pod1-1.cs.purdue.edu ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9041ms
+rtt min/avg/max/mdev = 0.841/1.117/1.316/0.178 ms
+\end{verbatim}
+
+Therefore the RTT is 1.117 and K = 2 * 1.117 = 2.234.
+Since we can send 1471 bytes in 1.117s in 4s we can send
+$1471 * 4 / 1.117 \approx 5267681 bytes$
+
+Using these parameters we get:
+
+\begin{verbatim}
+receiver: Total bytes received: 5267681
+receiver: Duplicate Bytes: 0
+receiver: Completion Time: 4535 ms
+receiver: Speed: 1161561.3750 bps
+\end{verbatim}
+Which means that our calculations were right.
+
+
+  \item The experiment A was performed running the receiver on pod1-1 and the sender on pod2-2.
+  Running \verb|ping pod1-1.cs.purdue.edu| in pod2-1 outputs the following:
+
+  \\
+
+\begin{verbatim}
+pod2-1 53 $ ping pod1-1.cs.purdue.edu
+PING pod1-1.cs.purdue.edu (128.10.25.201) 56(84) bytes of data.
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=1 ttl=64 time=0.216 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=2 ttl=64 time=0.203 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=3 ttl=64 time=0.202 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=4 ttl=64 time=0.207 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=5 ttl=64 time=0.205 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=6 ttl=64 time=0.205 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=7 ttl=64 time=0.207 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=8 ttl=64 time=0.210 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=9 ttl=64 time=0.208 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=10 ttl=64 time=0.220 ms
+^C
+--- pod1-1.cs.purdue.edu ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9222ms
+rtt min/avg/max/mdev = 0.202/0.208/0.220/0.012 ms
+\end{verbatim}
+
+Therefore the RTT is 0.208 and so K = 2*0.208 = 0.416
+
+Using this parameters, and sending the same file size we get:
+
+\begin{verbatim}
+receiver: Total bytes received: 5267681
+receiver: Duplicate Bytes: 0
+receiver: Completion Time: 1083 ms
+receiver: Speed: 4863971.0000 bps
+\end{verbatim}
+
+As expected, these results shows that running the experiment over the same network is roughly four times faster in this case.
+
+
+\end{enumerate}
+
+
+%%% End document
+\end{document}
