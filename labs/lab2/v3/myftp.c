@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     real_packets_count = packet_count - packets_dropped;
 
     printf("listener: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
-    if(packet_count % dropwhen == 0){
+    if(dropwhen != -1 && packet_count % dropwhen == 0){
       // Workaround to fix corner case when the last package is dropped
       seqno = 0;
       packets_dropped++;
@@ -131,6 +131,8 @@ int main(int argc, char *argv[]) {
     printf("listener: Ack %d sent\n", seqno);
 
   }
+
+  printf("listener: End of transmission received, tearing down communication\n");
 
   close(sockfd);
 

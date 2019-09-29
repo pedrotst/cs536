@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   }
 
   printf("sender: Sending the following file:\n %s\n", sendstr);
-  printf("sender: Sending file of size %d bytes in %d packets\n", filesize, num_sends);
+  printf("sender: Sending file of size %d bytes in %d packets\n", filesize, num_sends+1);
   fflush(stdout);
 
   int addr_len = sizeof their_addr;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
   buffer = calloc(sizeof(char), blocksize+1);
   char buf;
 
-  for(int i = 0; i <= num_sends; i++){
+  for(int i = 0; i < num_sends; i++){
     // Puts sequence number at the head of the buffer
     buffer[0] = seqno;
 
@@ -150,16 +150,14 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
-    printf("\nsender: sending packet seq: %d...\n", seqno);
-
     if ((numbytes = sendto(sockfd, buffer, blocksize, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
 
-    printf("sender: sending %d'%s\n", buffer[0], &buffer[1]);
-    printf("sender: sent %d/%d packets to '%s:%s'\n", i, num_sends, cli_ip, cli_port);
+    printf("\nsender: sending %d'%s\n", buffer[0], &buffer[1]);
+    printf("sender: sent %d/%d packets to '%s:%s'\n", i+1, num_sends, cli_ip, cli_port);
     printf("sender: waiting for ACK...\n");
     if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
