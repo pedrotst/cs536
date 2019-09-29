@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr;
   struct itimerval itime;
-  struct timeval starttime, endtime;
   int rv;
   int numbytes;
   char *sendstr;
@@ -139,23 +138,24 @@ int main(int argc, char *argv[]) {
     if(i == num_sends && (filesize % real_blksize != 0))
       real_blksize = filesize % real_blksize;
 
-    // Slice the string to be sent into the correct block size
+    // Slice the correct block size of the string to be sent
     strncpy(&buffer[1], &sendstr[real_blksize*i], real_blksize);
     buffer[blocksize] = '\0';
 
+    // If alarm goes off we restart the communication from here
     if (sigsetjmp(env_alarm, 1) > 2){
       printf("sender: tried to contact the server too much, dropping request\n");
       fflush(stdout);
       return 0;
     }
 
+    // All set, we can send the packet now
+    printf("\nsender: sending %d'%s\n", buffer[0], &buffer[1]);
     if ((numbytes = sendto(sockfd, buffer, blocksize, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
-
-    printf("\nsender: sending %d'%s\n", buffer[0], &buffer[1]);
     printf("sender: sent %d/%d packets to '%s:%s'\n", i+1, num_sends, cli_ip, cli_port);
     printf("sender: waiting for ACK...\n");
     if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
@@ -164,27 +164,31 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    // Resetting timeout
+    // Communication went well, reset timeout
     if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
-      perror("error calling setitimer()");
+      perror("sender: error calling setitimer()");
       exit(1);
     }
-
     timeout_count = 0;
+
     printf("sender: received ACK:%c\n", buf + '0');
 
     seqno = (seqno+1)%2;
-    /* sleep(1); */
   }
 
+  // Sweet, all packages dully sent.
+  // Let's send the end of transmission message now.
+  // We retry twice by the way
   if (sigsetjmp(env_alarm, 1) > 2){
     printf("sender: tried to contact the server too much, dropping request\n");
+    printf("sender: Transfer was successful anyways though\n");
+    printf("sender: Tearing down the server\n");
+    printf("sender: Good night\n");
     fflush(stdout);
     return 0;
   }
 
   printf("\nsender: Sending end of transmission\n");
-  // Send end of transmission
   buffer[0] = 2;
   if ((numbytes = sendto(sockfd, buffer, 1, 0,
                          p->ai_addr, p->ai_addrlen)) == -1) {
@@ -203,13 +207,13 @@ int main(int argc, char *argv[]) {
   printf("sender: Tearing down the server\n");
   printf("sender: Good night\n");
 
-  freeaddrinfo(servinfo);
-
   // Closing sockets are always a good practice
   close(sockfd);
+  freeaddrinfo(servinfo);
 
-  // Don't forget to free the string!
+  // Don't forget to free the strings!
   free(sendstr);
+  free(buffer);
 
   return 0;
 }
