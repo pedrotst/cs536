@@ -100,16 +100,16 @@ int main(int argc, char *argv[]) {
 
     seqno = buf[0];
 
-    printf("listener: got packet from %s\n",
+    printf("receiver: got packet from %s\n",
            inet_ntop(their_addr.ss_family,
                      get_in_addr((struct sockaddr *)&their_addr),
                      s, sizeof s));
     buf[numbytes] = '\0';
-    printf("listener: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
+    printf("receiver: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
     packet_count++;
     real_packets_count = packet_count - packets_dropped;
 
-    printf("listener: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
+    printf("receiver: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
     if(dropwhen != -1 && packet_count % dropwhen == 0){
       // Workaround to fix corner case when the last package is dropped
       seqno = 0;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
       // dup is a flag to point that the next byte is duplicate
       dup = 1;
       real_packets_count = packet_count - packets_dropped;
-      printf("listener: package droped!!\n");
+      printf("receiver: package droped!!\n");
       continue;
     }
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* printf("sender: sent %s, %d bytes to '%s:%s'\n", sendstr, numbytes, cli_ip, cli_port); */
-    printf("listener: Ack %d sent\n", seqno);
+    printf("receiver: Ack %d sent\n", seqno);
 
   }
   gettimeofday(&endtime, NULL);
@@ -144,11 +144,11 @@ int main(int argc, char *argv[]) {
     (endtime.tv_sec - starttime.tv_sec) * 1000
     + (endtime.tv_usec - starttime.tv_usec) / 1000;
 
-  printf("listener: End of transmission received, tearing down communication\n");
-  printf("\nlistener: Total bytes received: %d\n", total_bytes_recv);
-  printf("listener: Duplicate Bytes: %d\n", dup_bytes_recv);
-  printf("listener: Completion Time: %d ms\n", (int) completion_time);
-  printf("listener: Speed: %.4f bps\n", ((total_bytes_recv / completion_time) * 1000));
+  printf("receiver: End of transmission received, tearing down communication\n");
+  printf("\nreceiver: Total bytes received: %d\n", total_bytes_recv);
+  printf("receiver: Duplicate Bytes: %d\n", dup_bytes_recv);
+  printf("receiver: Completion Time: %d ms\n", (int) completion_time);
+  printf("receiver: Speed: %.4f bps\n", ((total_bytes_recv / completion_time) * 1000));
 
   close(sockfd);
 
