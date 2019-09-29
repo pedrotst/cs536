@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define MAXBUFLEN 100
+#define MAXBUFLEN 1500
 
 // FIXME: Don't forget to take this off!!
 #define PORT 39140
@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
                      get_in_addr((struct sockaddr *)&their_addr),
                      s, sizeof s));
     buf[numbytes] = '\0';
-    printf("receiver: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
+    printf("receiver: this is packet #%d seq: %d size: %d\n", real_packets_count+1, seqno, numbytes);
+    // printf("receiver: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
     packet_count++;
     real_packets_count = packet_count - packets_dropped;
 

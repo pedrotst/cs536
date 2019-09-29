@@ -76,6 +76,8 @@ int main(int argc, char *argv[]) {
   filesize = atoi(argv[1]);
   blocksize = atoi(argv[2]);
   real_blksize = blocksize - 1;
+  printf("sender: filesize %d\n", filesize);
+  printf("sender: blocksize %d\n", blocksize);
 
   if(blocksize > 1471){
     fprintf(stderr, "sender: blocksize must be smaller than 1471");
@@ -121,7 +123,7 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
-  printf("sender: Sending the following file:\n %s\n", sendstr);
+  // printf("sender: Sending the following file:\n %s\n", sendstr);
   printf("sender: Sending file of size %d bytes in %d packets\n", filesize, num_sends+1);
   fflush(stdout);
 
@@ -135,12 +137,12 @@ int main(int argc, char *argv[]) {
     buffer[0] = seqno;
 
     // Adjust last block size according the remaining bytes
-    if(i == num_sends && (filesize % real_blksize != 0))
+    if(i == num_sends - 1 && (filesize % real_blksize != 0))
       real_blksize = filesize % real_blksize;
 
     // Slice the correct block size of the string to be sent
     strncpy(&buffer[1], &sendstr[real_blksize*i], real_blksize);
-    buffer[blocksize] = '\0';
+    // buffer[blocksize] = '\0';
 
     // If alarm goes off we restart the communication from here
     if (sigsetjmp(env_alarm, 1) > 2){
@@ -150,8 +152,9 @@ int main(int argc, char *argv[]) {
     }
 
     // All set, we can send the packet now
-    printf("\nsender: sending %d'%s\n", buffer[0], &buffer[1]);
-    if ((numbytes = sendto(sockfd, buffer, blocksize, 0,
+    printf("\nsender: sending %d bytes seq %d\n", real_blksize, buffer[0]);
+    // printf("\nsender: sending seq %d'%s\n", buffer[0], &buffer[1]);
+    if ((numbytes = sendto(sockfd, buffer, real_blksize+1, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
