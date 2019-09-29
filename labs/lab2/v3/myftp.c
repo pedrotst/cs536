@@ -84,6 +84,12 @@ int main(int argc, char *argv[]) {
   // What time did receiving start? We'll need that for final report
   gettimeofday(&starttime, NULL);
 
+  acksockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if(acksockfd == -1){
+    printf("ack socket() failed\n");
+    exit(1);
+  }
+
   while(seqno != 2){
     printf("\nreceiver: Ready to receive...\n");
     if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
@@ -127,12 +133,7 @@ int main(int argc, char *argv[]) {
     }
 
     // We got everything alright and we acknowledge it
-    acksockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(acksockfd == -1){
-      printf("ack socket() failed\n");
-      exit(1);
-    }
-    if (sendto(sockfd, &seqno, 1, 0,
+    if (sendto(acksockfd, &seqno, 1, 0,
                            (struct sockaddr*)&their_addr,
                            sizeof their_addr) == -1) {
       perror("receiver: sendto() failed");
@@ -155,6 +156,7 @@ int main(int argc, char *argv[]) {
   printf("receiver: Speed: %.4f bps\n", ((total_bytes_recv / completion_time) * 1000));
 
   close(sockfd);
+  close(acksockfd);
 
   return 0;
 }

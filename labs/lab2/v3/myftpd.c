@@ -64,7 +64,8 @@ int main(int argc, char *argv[]) {
   char cli_ip[16];
   char cli_port[8];
   int filesize, blocksize;
-  int num_sends, timeout;
+  int num_sends;
+  long long timeout;
   int seqno = 0;
   int real_blksize;
 
@@ -75,16 +76,16 @@ int main(int argc, char *argv[]) {
 
   filesize = atoi(argv[1]);
   blocksize = atoi(argv[2]);
+  timeout = atoi(argv[3]);
   real_blksize = blocksize - 1;
   printf("sender: filesize %d\n", filesize);
   printf("sender: blocksize %d\n", blocksize);
+  printf("sender: timeout %lld\n", timeout);
 
   if(blocksize > 1471){
     fprintf(stderr, "sender: blocksize must be smaller than 1471");
     exit(1);
   }
-
-  timeout = atoi(argv[3]);
   strcpy(cli_ip, argv[4]);
   strcpy(cli_port, argv[5]);
   num_sends = filesize / real_blksize + (filesize % real_blksize != 0);
@@ -97,9 +98,12 @@ int main(int argc, char *argv[]) {
     perror("sender: unable to catch SIGALRM");
     exit(1);
   }
-  itime.it_value.tv_sec = timeout / 1000;
-  itime.it_value.tv_usec = (timeout * 1000000) % 1000000;
+  itime.it_value.tv_sec = (int) timeout / 1000;
+  itime.it_value.tv_usec = (timeout / 1000.0 - itime.it_value.tv_sec) * 1000;
+  //itime.it_value.tv_usec = (timeout * 1000000) % 1000000;
   itime.it_interval = itime.it_value;
+
+  printf("tv_usec: %ld\n", itime.it_value.tv_usec);
 
   if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
     perror("sender: error calling setitimer()");
