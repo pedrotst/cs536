@@ -1,3 +1,7 @@
+# Pdf files
+*.aux
+*.log
+
 # Vim Swap Files
 *.swp
 

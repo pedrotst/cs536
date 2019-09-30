@@ -108,5 +108,20 @@ Chapter 1 -*- mode: org -*-
 
 channels connects one process to another.
   
-* 
+
+* A brief linear algebra recap
+** Linear independence
+   A set of vectors {v1, v2, ..., vn} is said to be linear independent if the equation
+                      x1 * v1 + x2 * v2 + ... + xn * vn = 0
+   has only the trivial solution.
+  
+*** trivial here means that x1, ..., xn are all 0.
+   
+
+** Ortogonality 
+   Two vectors v1 and v2 are orthogonal if their dot product sums to zero
+                                  v1 ⊙ v2 = 0
+
+
+
   
