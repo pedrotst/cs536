@@ -50,7 +50,7 @@
 \renewcommand{\headrulewidth}{0pt}			% Remove header underlines
 \renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
 \setlength{\headheight}{13.6pt}
-
+\usepackage[margin=0.5in]{geometry}
 
 %%% Equation and float numbering
 \numberwithin{equation}{section}		% Equationnumbering: section.eq#
@@ -75,7 +75,7 @@
       Data Communication and Computer Networks\\
       CS 53600 Fall 2019} \\ [25pt]
 		\horrule{0.5pt} \\[0.4cm]
-		\huge Assignment x\\
+		\huge Assignment 2\\
 		\horrule{2pt} \\[0.5cm]
 }
 \author{
@@ -94,43 +94,45 @@
 
 \begin{enumerate}
 \item The experiment B was perfomed running the receiver on pod1-1 and the sender on escher01.
+
   Running \verb|ping pod1-1.cs.purdue.edu| in escher01 outputs the following:
 
 \begin{verbatim}
-  escher01 52 $ ping pod1-1.cs.purdue.edu
+escher01 60 $ ping pod1-1.cs.purdue.edu -c 10
 PING pod1-1.cs.purdue.edu (128.10.25.201) 56(84) bytes of data.
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=1 ttl=60 time=0.907 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=2 ttl=60 time=0.891 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=3 ttl=60 time=0.841 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=4 ttl=60 time=1.26 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=5 ttl=60 time=1.02 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=6 ttl=60 time=1.24 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=7 ttl=60 time=1.15 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=8 ttl=60 time=1.26 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=9 ttl=60 time=1.25 ms
-64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=10 ttl=60 time=1.31 ms
-^C
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=1 ttl=60 time=0.872 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=2 ttl=60 time=1.08 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=3 ttl=60 time=0.962 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=4 ttl=60 time=0.964 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=5 ttl=60 time=1.08 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=6 ttl=60 time=1.10 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=7 ttl=60 time=1.04 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=8 ttl=60 time=1.05 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=9 ttl=60 time=1.24 ms
+64 bytes from pod1-1.cs.purdue.edu (128.10.25.201): icmp_seq=10 ttl=60 time=0.995 ms
+
 --- pod1-1.cs.purdue.edu ping statistics ---
-10 packets transmitted, 10 received, 0% packet loss, time 9041ms
-rtt min/avg/max/mdev = 0.841/1.117/1.316/0.178 ms
+10 packets transmitted, 10 received, 0% packet loss, time 9011ms
+rtt min/avg/max/mdev = 0.872/1.041/1.245/0.099 ms
 \end{verbatim}
 
-Therefore the RTT is 1.117 and K = 2 * 1.117 = 2.234.
-Since we can send 1471 bytes in 1.117s in 4s we can send
-$1471 * 4 / 1.117 \approx 5267681 bytes$
+Therefore the RTT is 1.117 and K = 2 * 1.041 = 2.082.
+Since we can send 1471 bytes in 1.041s in 4s we can send
+$1471 * 4 / 1.041 * 1000 \approx 5652257 Bytes$
 
 Using these parameters we get:
 
 \begin{verbatim}
-receiver: Total bytes received: 5267681
-receiver: Duplicate Bytes: 0
-receiver: Completion Time: 4535 ms
-receiver: Speed: 1161561.3750 bps
+receiver: Total bytes received:	 5652257
+receiver: Duplicate Bytes:	 0
+receiver: Completion Time:	 4.1446 s
+receiver: Speed:		 1363764.8308 bps
 \end{verbatim}
+
 Which means that our calculations were right.
 
 
-  \item The experiment A was performed running the receiver on pod1-1 and the sender on pod2-2.
+The experiment A was performed running the receiver on pod1-1 and the sender on pod2-2.
   Running \verb|ping pod1-1.cs.purdue.edu| in pod2-1 outputs the following:
 
   \\
@@ -156,17 +158,67 @@ rtt min/avg/max/mdev = 0.202/0.208/0.220/0.012 ms
 
 Therefore the RTT is 0.208 and so K = 2*0.208 = 0.416
 
-Using this parameters, and sending the same file size we get:
+Using these parameters, and sending the same file size we get:
 
 \begin{verbatim}
-receiver: Total bytes received: 5267681
-receiver: Duplicate Bytes: 0
-receiver: Completion Time: 1083 ms
-receiver: Speed: 4863971.0000 bps
+receiver: Total bytes received:	 5652257
+receiver: Duplicate Bytes:	 0
+receiver: Completion Time:	 0.5988 s
+receiver: Speed:		 9439574.6824 bps
 \end{verbatim}
 
-As expected, these results shows that running the experiment over the same network is roughly four times faster in this case.
+As expected, these results shows that running the experiment over the same
+network is roughly 6.5 times faster in this case.
+Which also meets our expectations, since ping shows that
+the connection is 6.5 faster.
 
+\item For the second Part we set dropwhen to 10
+
+  For Experiment B we get the following results:
+
+\begin{verbatim}
+receiver: Total bytes received:	 6279947
+receiver: Duplicate Bytes:	 628117
+receiver: Completion Time:	 4.9360 s
+receiver: Speed:		 1272266.3125 bps
+\end{verbatim}
+
+As expected, 10\% of the bytes received were duplicates, which means 10% were
+dropped.
+
+And we also get a 11\% slowdown, which is roughly what would be expected
+since 10\% of the packets were lost.
+
+For experiment A we get:
+
+\begin{verbatim}
+receiver: Total bytes received:	 6279947
+receiver: Duplicate Bytes:	 628117
+receiver: Completion Time:	 1.6722 s
+receiver: Speed:		 3755578.1973 bps
+\end{verbatim}
+
+\item Now using K of 1.2 RTT we have a timeout of 1.25 for experiment B.
+  Running the experiment with the same parameters of item 1 we get
+
+\begin{verbatim}
+receiver: Total bytes received:	 5652257
+receiver: Duplicate Bytes:	 0
+receiver: Completion Time:	 4.2348 s
+receiver: Speed:		 1334716.3974 bps
+\end{verbatim}
+
+This shows that the numbers did not alter very much, which was expected.
+Since the timeout was not triggered to make any difference.
+
+For Experiments A we get very similar results:
+
+\begin{verbatim}
+receiver: Total bytes received:	 5652257
+receiver: Duplicate Bytes:	 0
+receiver: Completion Time:	 0.4973 s
+receiver: Speed:		 11365889.80494 bps
+\end{verbatim}
 
 \end{enumerate}
 
