@@ -14,7 +14,6 @@
 #include <sys/wait.h>
 
 
-#define PORT "3493"
 #define MAXDATASIZE (100) // max number of bytes we can get at once
 
 #define BACKLOG 10 // how many pending connections queue will hold
@@ -37,10 +36,11 @@ void *get_in_addr(struct sockaddr *sa){
   return &(((struct sockaddr_in6*) sa)->sin6_addr);
 }
 
-int main(void){
+int main(int argc, char *argv[]){
   int sockfd, new_fd; // Listen on sock_fd, new connection on new_fd
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr; // connector's address information
+  struct sockaddr_in addr;
   socklen_t sin_size;
   struct sigaction sa;
   int yes = 1;
@@ -56,7 +56,7 @@ int main(void){
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-  if((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0){
+  if((rv = getaddrinfo(NULL, "0", &hints, &servinfo)) != 0){
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     return 1;
   }
@@ -94,6 +94,14 @@ int main(void){
   char hostnamebuf[1000];
   gethostname(hostnamebuf, 1000);
   printf("hostname: %s\n", hostnamebuf);
+
+  socklen_t addrLen = sizeof addr;
+  if (getsockname(sockfd, (struct sockaddr *)&addr, &addrLen) == -1) {
+    printf("getsockname() failed\n");
+    exit(1);
+  }
+  printf("Listening at port %d\n", htons(addr.sin_port));
+
   struct hostent *h = gethostbyname(hostnamebuf);
 
   sa.sa_handler = sigchld_handler; // reap all dead processes

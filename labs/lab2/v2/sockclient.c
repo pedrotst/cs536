@@ -12,7 +12,6 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 
-#define PORT "3493" // the port client will be connection to
 #define MAXDATASIZE (100000) // max number of bytes we can get at once
 
 // get sockaddr, IPV4 or IPV6:
@@ -49,7 +48,7 @@ int main(int argc, char *argv[]){
 
 
   do{
-    if((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) {
+    if((rv = getaddrinfo(argv[1], argv[2], &hints, &servinfo)) != 0) {
       fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
       return 1;
     }
@@ -82,9 +81,9 @@ int main(int argc, char *argv[]){
 
     // Build the command into a single string
     cmd[0] = '\0';
-    strcat(cmd, argv[2]);
+    strcat(cmd, argv[3]);
 
-    for(int i = 3; i < argc; i++){
+    for(int i = 4; i < argc; i++){
       strcat(cmd, " ");
       strcat(cmd, argv[i]);
     }
