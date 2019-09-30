@@ -21,7 +21,6 @@
 #include <netdb.h>
 
 char* allocate_sendstr(int size){
-  // FIXME: send all '3'
   char *s = calloc(sizeof(char), size);
   for(int i = 0; i < size; i++){
     s[i] = 3;
@@ -62,7 +61,6 @@ int main(int argc, char *argv[]) {
   int num_sends;
   double timeout;
   int seqno = 0;
-  int real_blksize;
 
   if (argc != 6) {
     fprintf(stderr,"usage: filesize blocksize timeout cli-ip cli-port\n");
@@ -72,7 +70,6 @@ int main(int argc, char *argv[]) {
   filesize = atoi(argv[1]);
   blocksize = atoi(argv[2]);
   timeout = atof(argv[3]);
-  real_blksize = blocksize - 1;
   printf("sender: filesize %d\n", filesize);
   printf("sender: blocksize %d\n", blocksize);
   printf("sender: timeout %f\n", timeout);
@@ -84,7 +81,7 @@ int main(int argc, char *argv[]) {
   }
   strcpy(cli_ip, argv[4]);
   strcpy(cli_port, argv[5]);
-  num_sends = filesize / real_blksize + (filesize % real_blksize != 0);
+  num_sends = filesize / blocksize + (filesize % blocksize != 0);
   printf("sender: starting connection with %s:%s\n", cli_ip, cli_port);
   fflush(stdout);
   sendstr = allocate_sendstr(filesize);
@@ -138,11 +135,11 @@ int main(int argc, char *argv[]) {
     buffer[0] = seqno;
 
     // Adjust last block size according the remaining bytes
-    if(i == num_sends - 1 && (filesize % real_blksize != 0))
-      real_blksize = filesize % real_blksize;
+    if(i == num_sends - 1 && (filesize % blocksize != 0))
+      blocksize = filesize % blocksize;
 
     // Slice the correct block size of the string to be sent
-    strncpy(&buffer[1], &sendstr[real_blksize*i], real_blksize);
+    strncpy(&buffer[1], &sendstr[blocksize*i], blocksize);
     // buffer[blocksize] = '\0';
 
     // If alarm goes off we restart the communication from here
@@ -153,9 +150,9 @@ int main(int argc, char *argv[]) {
     }
 
     // All set, we can send the packet now
-    printf("\nsender: sending %d bytes seq %d\n", real_blksize, buffer[0]);
+    printf("\nsender: sending %d bytes seq %d\n", blocksize, buffer[0]);
     // printf("\nsender: sending seq %d'%s\n", buffer[0], &buffer[1]);
-    if ((numbytes = sendto(sockfd, buffer, real_blksize+1, 0,
+    if ((numbytes = sendto(sockfd, buffer, blocksize+1, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
