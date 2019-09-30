@@ -14,9 +14,6 @@
 
 #define MAXBUFLEN 1500
 
-// FIXME: Don't forget to take this off!!
-#define PORT 39140
-
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -27,7 +24,6 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 /*
-
 $ myftp cli-ip dropwhen
   * cli-ip is the ip I will bind
   *
@@ -66,7 +62,7 @@ int main(int argc, char *argv[]) {
   }
 
   addr.sin_family = AF_INET;
-  addr.sin_port =  htons(PORT); //0; //htons(SERVERPORT);
+  addr.sin_port =  0;
   addr.sin_addr.s_addr = inet_addr(argv[1]); /* INADDR_ANY; */
 
   if (bind(sockfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
@@ -120,7 +116,6 @@ int main(int argc, char *argv[]) {
                      s, sizeof s));
     buf[numbytes] = '\0';
     printf("receiver: this is packet #%d seq: %d size: %d\n", real_packets_count+1, seqno, numbytes);
-    // printf("receiver: this is packet #%d and contains %d\"%s\"\n", real_packets_count, seqno, &buf[1]);
     packet_count++;
     real_packets_count = packet_count - packets_dropped;
 

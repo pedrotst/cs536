@@ -22,15 +22,10 @@
 
 char* allocate_sendstr(int size){
   // FIXME: send all '3'
-  char c = 'A';
-  char *s = calloc(sizeof(char), size+1);
+  char *s = calloc(sizeof(char), size);
   for(int i = 0; i < size; i++){
-    s[i] = c++;
-    if(c == 'z')
-      c = 'A';
+    s[i] = 3;
   }
-  // Don't put \0
-  s[size - 1] = '\0';
   return s;
 }
 
@@ -102,11 +97,10 @@ int main(int argc, char *argv[]) {
 
   itime.it_value.tv_sec = timeout / 1000;
   itime.it_value.tv_usec = (timeout - itime.it_value.tv_sec) * 1000;
-  /* itime.it_value.tv_usec = ((int) (timeout * 1000000)) % 1000000; */
   itime.it_interval = itime.it_value;
 
-  printf("tv_usec: %ld\n", itime.it_value.tv_sec);
-  printf("tv_usec: %ld\n", itime.it_value.tv_usec);
+  /* printf("tv_usec: %ld\n", itime.it_value.tv_sec); */
+  /* printf("tv_usec: %ld\n", itime.it_value.tv_usec); */
 
   if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
     perror("sender: error calling setitimer()");
