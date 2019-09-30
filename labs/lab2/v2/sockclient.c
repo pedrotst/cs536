@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
   struct timeval tv = {1, 0};
 
   if(argc < 3){
-    fprintf(stderr, "usage: client hostname message\n");
+    fprintf(stderr, "usage: client hostname port message\n");
     exit(1);
   }
 
