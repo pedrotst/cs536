@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
   int total_bytes_recv = 0;
   int dup_bytes_recv = 0;
   int dup_bytes = 0;
+  int fst_rec = 1;
 
   if(argc != 3){
     fprintf(stderr, "usage: cli-ip dropwhen\n");
@@ -81,8 +82,6 @@ int main(int argc, char *argv[]) {
 
   addr_len = sizeof their_addr;
 
-  // What time did receiving start? We'll need that for final report
-  gettimeofday(&starttime, NULL);
 
   acksockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(acksockfd == -1){
@@ -96,6 +95,12 @@ int main(int argc, char *argv[]) {
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
       exit(1);
+    }
+
+    if(fst_rec){
+      // What time did receiving start? We'll need that for final report
+      gettimeofday(&starttime, NULL);
+      fst_rec = 0;
     }
 
     // Total bytes received does not account for header
@@ -145,15 +150,14 @@ int main(int argc, char *argv[]) {
   }
   // Cool, all went well. How much time did it take?
   gettimeofday(&endtime, NULL);
-  float completion_time =
-    (endtime.tv_sec - starttime.tv_sec) * 1000
-    + (endtime.tv_usec - starttime.tv_usec) / 1000;
+  double completion_time =
+    (endtime.tv_sec + (endtime.tv_usec / 1000000.0)) - (starttime.tv_sec + (starttime.tv_usec / 1000000.0));
 
   printf("receiver: End of transmission received, tearing down communication\n");
-  printf("\nreceiver: Total bytes received: %d\n", total_bytes_recv);
-  printf("receiver: Duplicate Bytes: %d\n", dup_bytes_recv);
-  printf("receiver: Completion Time: %d ms\n", (int) completion_time);
-  printf("receiver: Speed: %.4f bps\n", ((total_bytes_recv / completion_time) * 1000));
+  printf("\nreceiver: Total bytes received:\t %d\n", total_bytes_recv);
+  printf("receiver: Duplicate Bytes:\t %d\n", dup_bytes_recv);
+  printf("receiver: Completion Time:\t %.4f s\n", completion_time);
+  printf("receiver: Speed:\t\t %.4f bps\n", total_bytes_recv / completion_time);
 
   close(sockfd);
   close(acksockfd);

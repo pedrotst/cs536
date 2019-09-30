@@ -212,6 +212,12 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+  // Communication went well, reset timeout
+  if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+    perror("sender: error calling setitimer()");
+    exit(1);
+  }
+
   printf("sender: End of transmission ACK received\n");
   printf("sender: Transfer was successful\n");
   printf("sender: Tearing down the server\n");
