@@ -95,7 +95,8 @@
 \begin{enumerate}
 \item The experiment B was perfomed running the receiver on pod1-1 and the sender on escher01.
 
-  Running \verb|ping pod1-1.cs.purdue.edu| in escher01 outputs the following:
+  In order to set the timeout we need first to figure out what is the RTT between pod1-1 and escer01.
+  For this we run \verb|ping pod1-1.cs.purdue.edu| in escher01. Which outputs the following:
 
 \begin{verbatim}
 escher01 60 $ ping pod1-1.cs.purdue.edu -c 10
@@ -116,7 +117,7 @@ PING pod1-1.cs.purdue.edu (128.10.25.201) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.872/1.041/1.245/0.099 ms
 \end{verbatim}
 
-Therefore the RTT is 1.117 and K = 2 * 1.041 = 2.082.
+This output suggests that the the RTT between escher01 and pod1-1 is 1.117 and K = 2 * 1.041 = 2.082.
 Since we can send 1471 bytes in 1.041s in 4s we can send
 $1471 * 4 / 1.041 * 1000 \approx 5652257 Bytes$
 
@@ -133,9 +134,10 @@ Which means that our calculations were right.
 
 
 The experiment A was performed running the receiver on pod1-1 and the sender on pod2-2.
-  Running \verb|ping pod1-1.cs.purdue.edu| in pod2-1 outputs the following:
 
-  \\
+Running \verb|ping pod1-1.cs.purdue.edu| in pod2-1 outputs the following:
+
+\\
 
 \begin{verbatim}
 pod2-1 53 $ ping pod1-1.cs.purdue.edu
@@ -156,7 +158,8 @@ PING pod1-1.cs.purdue.edu (128.10.25.201) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.202/0.208/0.220/0.012 ms
 \end{verbatim}
 
-Therefore the RTT is 0.208 and so K = 2*0.208 = 0.416
+Therefore the RTT between pod2-1 and pod101 is 0.208
+and so K = 2*0.208 = 0.416.
 
 Using these parameters, and sending the same file size we get:
 
