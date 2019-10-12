@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 
 #define MAXBUFSZM (1000000)
+#define MAXCHARSIZE (100)
+#define BACKLOG 10 // how many pending connections queue will hold
 
 
 // get sockaddr, IPv4 or IPv6:
@@ -27,7 +29,7 @@ void *get_in_addr(struct sockaddr *sa) {
   $ myfetchfiled blocksize srv-port
  */
 int main(int argc, char *argv[]) {
-  int sockfd;
+  int sockfd, new_fd;
   struct addrinfo;
   int numbytes;
   struct sockaddr_storage their_addr;
@@ -35,18 +37,19 @@ int main(int argc, char *argv[]) {
   char s[INET6_ADDRSTRLEN];
   struct sockaddr_in addr;
   socklen_t addrLen;
+  socklen_t sin_size;
   int srv_port, blocksize;
-  char filename[MAXBUFSZM];
+  char filename[100];
 
   if(argc != 3){
-    fprintf(stderr, "usage: myfetchfiled blocksize srv-port");
+    fprintf(stderr, "usage: myfetchfiled blocksize srv-port\n");
     exit(1);
   }
 
   blocksize = atoi(argv[1]);
   srv_port = atoi(argv[2]);
 
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd == -1){
     fprintf(stderr, "Failed to create socket\n");
     exit(1);
@@ -68,19 +71,48 @@ int main(int argc, char *argv[]) {
   }
 
   addr_len = sizeof their_addr;
-  if((numbytes = recvfrom(sockfd, filename, MAXBUFSZM-1, 0,
-                          (struct sockaddr *)&their_addr, &addr_len)) == -1) {
-    fprintf(stderr, "recvfrom() failed\n");
+
+  if(listen(sockfd, BACKLOG) == -1){
+    perror("listen");
     exit(1);
   }
 
-  printf("sender: got packet from %s\n",
-         inet_ntop(their_addr.ss_family,
-                   get_in_addr((struct sockaddr *)&their_addr),
-                   s, sizeof s));
-  printf("sender: packet is %d bytes long\n", numbytes);
-  filename[numbytes] = '\0';
-  printf("sender: packet contains '%s'\n", filename);
+
+  char hostnamebuf[1000];
+  gethostname(hostnamebuf, 1000);
+  printf("Listening at %s:%d\n", hostnamebuf, srv_port);
+
+  while(1){
+    sin_size = sizeof their_addr;
+    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+
+    if(new_fd == -1){
+      perror("accept");
+      continue;
+    }
+
+    inet_ntop(their_addr.ss_family,
+              get_in_addr((struct sockaddr *) &their_addr),
+              s, sizeof s);
+    printf("server: got connection from %s\n", s);
+
+    int k = fork();
+
+    if(k != 0) { // this is the child process
+      /* close(sockfd); //child doesn't need the listener */
+
+      int numbytes;
+
+      if((numbytes = read(new_fd, filename, MAXCHARSIZE - 1)) == -1) {
+        perror("recv");
+        exit(1);
+      }
+      filename[numbytes] = '\0';
+      fprintf(stderr, "sender: received filename '%s'\n", filename);
+
+    }
+
+  }
 
   close(sockfd);
 

@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_socktype = SOCK_STREAM;
 
   if ((rv = getaddrinfo(srv_ip, srv_port, &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -53,16 +53,30 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
-  if((numbytes = sendto(sockfd, filename, strlen(filename), 0,
-                        p->ai_addr, p->ai_addrlen)) == -1) {
-    perror("receiver: sendto");
-    exit(1);
+
+  if(connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+    close(sockfd);
+    perror("receiver: connect\n");
   }
+
+  if (p == NULL) {
+    fprintf(stderr, "client: failed to connect \n");
+    return 2;
+  }
+
+
+  /* if((numbytes = sendto(sockfd, filename, strlen(filename), 0, */
+                        /* p->ai_addr, p->ai_addrlen)) == -1) { */
+    /* perror("receiver: sendto"); */
+    /* exit(1); */
+  /* } */
 
   freeaddrinfo(servinfo);
 
-  printf("talker: sent %d bytes to '%s:%s'\n", numbytes, srv_ip, srv_port);
+  if((numbytes = write(sockfd, filename, strlen(filename))) == -1)
+    perror("send");
 
+  printf("receiver: sent %d bytes to '%s:%s'\n", numbytes, srv_ip, srv_port);
 
   close(sockfd);
 
