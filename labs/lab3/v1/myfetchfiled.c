@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
   char hostnamebuf[1000];
   gethostname(hostnamebuf, 1000);
-  printf("Listening at %s:%d\n", hostnamebuf, srv_port);
+  printf("sender: Listening at %s:%d\n", hostnamebuf, srv_port);
 
   while(1){
     sin_size = sizeof their_addr;
@@ -107,8 +107,28 @@ int main(int argc, char *argv[]) {
         perror("recv");
         exit(1);
       }
+
       filename[numbytes] = '\0';
       fprintf(stderr, "sender: received filename '%s'\n", filename);
+
+      FILE *fptr;
+
+      fptr = fopen(filename, "r");
+
+      if(fptr == NULL){
+        fprintf(stderr, "sender: file %s does not exist\n", filename);
+        write(new_fd, "0", 1);
+        close(new_fd);
+      }
+
+      int c = fgetc(fptr);
+      if(c == EOF){
+        fprintf(stderr, "sender: file %s is empty\n", filename);
+        write(new_fd, "1", 1);
+        close(new_fd);
+      }
+
+      write(new_fd, "2", 1);
 
     }
 

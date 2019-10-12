@@ -64,19 +64,32 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
-
-  /* if((numbytes = sendto(sockfd, filename, strlen(filename), 0, */
-                        /* p->ai_addr, p->ai_addrlen)) == -1) { */
-    /* perror("receiver: sendto"); */
-    /* exit(1); */
-  /* } */
-
   freeaddrinfo(servinfo);
 
+  // Send the name of the file to be fetched from the server
   if((numbytes = write(sockfd, filename, strlen(filename))) == -1)
     perror("send");
 
   printf("receiver: sent %d bytes to '%s:%s'\n", numbytes, srv_ip, srv_port);
+
+
+  char c;
+  // Receive message code
+  if(read(sockfd, &c, 1) == -1)
+    perror("read");
+
+  if(c == '0'){
+    printf("receiver: file %s does not exist\n", filename);
+    close(sockfd);
+    return 0;
+  }
+  else if(c == '1'){
+    printf("receiver: file %s is empty\n", filename);
+    close(sockfd);
+    return 0;
+  }
+
+  printf("receiver: begining to receive file\n");
 
   close(sockfd);
 
