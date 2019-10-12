@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   char filename[STRSZ];
   char srv_ip[16];
   char srv_port[8];
+  char buf[MAXBUFSZM];
 
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
@@ -90,6 +91,28 @@ int main(int argc, char *argv[]) {
   }
 
   printf("receiver: begining to receive file\n");
+
+  FILE *fptr;
+  char writefile[150];
+
+  strcpy(writefile, "/tmp/");
+  strcat(writefile, filename);
+
+  // Overwrite old file
+  fptr = fopen(writefile, "w");
+  /* fwrite('\0', 1, 1, fptr); */
+  fclose(fptr);
+
+  fprintf(stderr, "receiver: setting up file at %s\n", writefile);
+  do{
+    numbytes = recv(sockfd, buf, MAXBUFSZM, 0);
+    buf[numbytes] = '\0';
+    fprintf(stderr, "receiver: received %d bytes '%s'\n", numbytes, buf);
+
+    fptr = fopen(writefile, "a");
+    fwrite(buf, sizeof(char), numbytes, fptr);
+    fclose(fptr);
+  }while(numbytes != 0);
 
   close(sockfd);
 

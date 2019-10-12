@@ -49,6 +49,9 @@ int main(int argc, char *argv[]) {
   blocksize = atoi(argv[1]);
   srv_port = atoi(argv[2]);
 
+  if(blocksize > MAXBUFSZM)
+    blocksize = MAXBUFSZM;
+
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd == -1){
     fprintf(stderr, "Failed to create socket\n");
@@ -128,8 +131,23 @@ int main(int argc, char *argv[]) {
         close(new_fd);
       }
 
+      fseek(fptr, 0, SEEK_SET); // goto begin of file
       write(new_fd, "2", 1);
 
+      char *buf;
+      buf = calloc(sizeof(char), blocksize);
+
+      while(!feof(fptr)){
+        numbytes = fread(buf, sizeof(char), blocksize, fptr);
+        printf("sender: read '%s'\n", buf);
+        fflush(stdout);
+        write(new_fd, buf, numbytes);
+      }
+      printf("sender: File sent!\n");
+
+      free(buf);
+
+      close(new_fd);
     }
 
   }
