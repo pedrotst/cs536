@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]) {
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
   int rv, numbytes;
+  struct timeval start_time, end_time;
 
   if(argc != 4){
     fprintf(stderr, "usage: myfetchfile filename srv-ip srv-port\n");
@@ -89,6 +91,13 @@ int main(int argc, char *argv[]) {
     close(sockfd);
     return 0;
   }
+  else if(c != '2'){
+    printf("receiver: received weird control number, terminating\n");
+    close(sockfd);
+    return 0;
+  }
+
+  gettimeofday(&start_time, NULL);
 
   printf("receiver: begining to receive file\n");
 
@@ -100,19 +109,34 @@ int main(int argc, char *argv[]) {
 
   // Overwrite old file
   fptr = fopen(writefile, "w");
-  /* fwrite('\0', 1, 1, fptr); */
   fclose(fptr);
 
   fprintf(stderr, "receiver: setting up file at %s\n", writefile);
+  int totsize = 0;
   do{
     numbytes = recv(sockfd, buf, MAXBUFSZM, 0);
+    totsize += numbytes;
     buf[numbytes] = '\0';
-    fprintf(stderr, "receiver: received %d bytes '%s'\n", numbytes, buf);
+    /* fprintf(stderr, "receiver: received %d bytes\n", numbytes); */
 
     fptr = fopen(writefile, "a");
     fwrite(buf, sizeof(char), numbytes, fptr);
     fclose(fptr);
   }while(numbytes != 0);
+  gettimeofday(&end_time, NULL);
+  double time;
+
+  time = (end_time.tv_sec * 1000 + end_time.tv_usec / 1000.0) - (start_time.tv_sec * 1000+ start_time.tv_usec / 1000.0);
+  /* double completion_time = */
+    /* (endtime.tv_sec + (endtime.tv_usec / 1000000.0)) - (starttime.tv_sec + (starttime.tv_usec / 1000000.0)); */
+
+  printf("receiver: file successfuly written to %s\n", writefile);
+  printf("receiver: completion time: %fms\n", time);
+  printf("receiver: file size: %d bytes\n", totsize);
+  printf("receiver: bps: %f\n", (totsize / (time / 1000)));
+  /* printf("receiver: Mbps: %f\n", (totsize / (time / 1000)) / 1000000); */
+  printf("receiver: Shutting Down\n");
+  printf("receiver: Good Night!\n");
 
   close(sockfd);
 

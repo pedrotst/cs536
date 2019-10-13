@@ -139,14 +139,14 @@ int main(int argc, char *argv[]) {
 
       while(!feof(fptr)){
         numbytes = fread(buf, sizeof(char), blocksize, fptr);
-        printf("sender: read '%s'\n", buf);
-        fflush(stdout);
         write(new_fd, buf, numbytes);
+        /* printf("sender: sent %d bytes\n", numbytes); */
       }
       printf("sender: File sent!\n");
 
       free(buf);
 
+      shutdown(new_fd, SHUT_WR);
       close(new_fd);
     }
 
