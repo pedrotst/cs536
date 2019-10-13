@@ -14,13 +14,18 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <signal.h>
-#include <sys/time.h>
 #include <setjmp.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include "utils.h"
 
 #define RTT_weight (0.7)
+
+typedef struct missed_acks_s {
+  ack_t ack;
+  struct missed_acks_s *next;
+} missed_acks;
 
 char* allocate_sendstr(int size){
   char *s = calloc(sizeof(char), size);
@@ -32,11 +37,24 @@ char* allocate_sendstr(int size){
 
 static jmp_buf env_alarm;
 int timeout_count = 0;
+ack_t missed_ack;
+missed_acks *ack_arr;
 
 void timeout_handler(int sig){
   timeout_count++;
   printf("sender: Timeout, resending last packet\n");
   fflush(stdout);
+
+  missed_acks *last_ack = ack_arr;
+  missed_acks *next_ack = ack_arr == NULL ? NULL : ack_arr->next;
+
+  while(next_ack != NULL){
+    last_ack = next_ack;
+    next_ack = next_ack->next;
+  }
+  next_ack = malloc(sizeof(missed_acks));
+  next_ack->ack = missed_ack;
+  next_ack->next = NULL;
 
   siglongjmp(env_alarm, timeout_count);
 }
@@ -55,6 +73,9 @@ int main(int argc, char *argv[]) {
   struct sockaddr_storage their_addr;
   struct itimerval itime;
   struct timeval starttime, endtime;
+  ack_t ack;
+  packet_t pack;
+
   int rv;
   int numbytes;
   char *sendstr;
@@ -135,14 +156,16 @@ int main(int argc, char *argv[]) {
 
   for(int i = 0; i < num_sends; i++){
     // Puts sequence number at the head of the buffer
-    buffer[0] = seqno;
+    pack.seqno = seqno;
+    /* buffer[0] = seqno; */
 
     // Adjust last block size according the remaining bytes
     if(i == num_sends - 1 && (filesize % blocksize != 0))
       blocksize = filesize % blocksize;
 
     // Slice the correct block size of the string to be sent
-    strncpy(&buffer[1], &sendstr[blocksize*i], blocksize);
+    /* strncpy(&buffer[1], &sendstr[blocksize*i], blocksize); */
+    strncpy(pack.buf, &sendstr[blocksize*i], blocksize);
 
     // If alarm goes off we restart the communication from here
     if (sigsetjmp(env_alarm, 1) > 2){
@@ -152,23 +175,49 @@ int main(int argc, char *argv[]) {
     }
 
     // All set, we can send the packet now
-    printf("\nsender: sending %d bytes seq %d\n", blocksize, buffer[0]);
+    printf("\nsender: sending %d bytes seq %d\n", blocksize, pack.seqno);
     // printf("\nsender: sending seq %d'%s\n", buffer[0], &buffer[1]);
     gettimeofday(&starttime, NULL);
+    pack.timestamp = starttime;
 
-    if ((numbytes = sendto(sockfd, buffer, blocksize+1, 0,
+    /* if ((numbytes = sendto(sockfd, buffer, blocksize+1, 0, */
+                           /* p->ai_addr, p->ai_addrlen)) == -1) { */
+    if ((numbytes = sendto(sockfd, &pack, sizeof(packet_t), 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
       perror("sender: sendto() failed");
       exit(1);
     }
+
+    // Mount missed_ack. if recvfrom timesout then the handler will add this to the array
+    missed_ack.seqno = pack.seqno;
+    missed_ack.timestamp = starttime;
+
     printf("sender: sent %d/%d packets to '%s:%s'\n", i+1, num_sends, cli_ip, cli_port);
     printf("sender: waiting for ACK...\n");
-    if ((numbytes = recvfrom(sockfd, &buf, 1 , 0,
+    if ((numbytes = recvfrom(sockfd, &ack, sizeof(ack_t), 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
       exit(1);
     }
     gettimeofday(&endtime, NULL);
+
+    // Check if this ack is the latest one, otherwise it's a missed one
+    // In which case we iterate through missed_acks array to find when it was sent
+    if(timercmp(&ack.timestamp, &starttime, !=)){
+      missed_acks *_ack_arr = ack_arr;
+      missed_acks *last_ack = ack_arr;
+      while(_ack_arr != NULL && timercmp(&ack.timestamp, &_ack_arr->ack.timestamp, !=)){
+        last_ack = ack_arr;
+        ack_arr = ack_arr->next;
+      }
+      // If the element was found then get the timestamp and free the node
+      if(ack_arr != NULL){
+        starttime = ack_arr->ack.timestamp;
+        last_ack->next = ack_arr->next;
+        free(ack_arr);
+      }
+
+    }
 
     struct timeval rtt;
     timersub(&endtime, &starttime, &rtt);
@@ -207,7 +256,7 @@ int main(int argc, char *argv[]) {
 
     printf("sender: received ACK:%c\n", buf + '0');
 
-    seqno = (seqno+1)%2;
+    seqno = (pack.seqno+1)%2;
   }
 
   // Sweet, all packages dully sent.
@@ -223,8 +272,8 @@ int main(int argc, char *argv[]) {
   }
 
   printf("\nsender: Sending end of transmission\n");
-  buffer[0] = 2;
-  if ((numbytes = sendto(sockfd, buffer, 1, 0,
+  pack.seqno = 2;
+  if ((numbytes = sendto(sockfd, &pack, sizeof(int), 0,
                          p->ai_addr, p->ai_addrlen)) == -1) {
     perror("sender: sendto() failed");
     exit(1);
@@ -248,6 +297,7 @@ int main(int argc, char *argv[]) {
   printf("sender: Good night\n");
 
   // Closing sockets are always a good practice
+  shutdown(sockfd, SHUT_WR);
   close(sockfd);
   freeaddrinfo(servinfo);
 

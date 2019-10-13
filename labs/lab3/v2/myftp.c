@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define MAXBUFLEN 1500
+#include "utils.h"
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa) {
@@ -36,7 +36,10 @@ int main(int argc, char *argv[]) {
   struct sockaddr ack_addr;
   struct timeval starttime, endtime;
   int numbytes;
-  char buf[MAXBUFLEN];
+  /* char buf[MAXBUFLEN]; */
+  packet_t pack;
+  ack_t ack;
+
   socklen_t addr_len;
   char s[INET6_ADDRSTRLEN];
   char seqno = 0;
@@ -87,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   while(seqno != 2){
     printf("\nreceiver: Ready to receive...\n");
-    if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0,
+    if ((numbytes = recvfrom(sockfd, &pack, sizeof(packet_t) , 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
       exit(1);
@@ -108,13 +111,15 @@ int main(int argc, char *argv[]) {
       dup = 0;
     }
 
-    seqno = buf[0];
+    seqno = pack.seqno;
+    ack.seqno = seqno;
+    ack.timestamp = pack.timestamp;
 
     printf("receiver: got packet from %s\n",
            inet_ntop(their_addr.ss_family,
                      get_in_addr((struct sockaddr *)&their_addr),
                      s, sizeof s));
-    buf[numbytes] = '\0';
+    /* pack.buf[numbytes] = '\0'; */
     printf("receiver: this is packet #%d seq: %d size: %d\n", real_packets_count+1, seqno, numbytes);
     packet_count++;
     real_packets_count = packet_count - packets_dropped;
@@ -133,14 +138,14 @@ int main(int argc, char *argv[]) {
     }
 
     // We got everything alright and we acknowledge it
-    if (sendto(acksockfd, &seqno, 1, 0,
+    if (sendto(acksockfd, &ack, sizeof(ack_t), 0,
                            (struct sockaddr*)&their_addr,
                            sizeof their_addr) == -1) {
       perror("receiver: sendto() failed");
       exit(1);
     }
 
-    printf("receiver: Ack %d sent\n", seqno);
+    printf("receiver: Ack %d sent\n", ack.seqno);
 
   }
   // Cool, all went well. How much time did it take?
