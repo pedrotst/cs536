@@ -174,13 +174,13 @@ int main(int argc, char *argv[]) {
     timersub(&endtime, &starttime, &rtt);
 
     double sec_rem =
-      RTT_weight * itime.it_value.tv_sec
-      + (1 - RTT_weight) * rtt.tv_sec;
+      1.2 * (RTT_weight * itime.it_value.tv_sec
+       + (1 - RTT_weight) * rtt.tv_sec);
 
     double usec_rem =
-      RTT_weight * itime.it_value.tv_usec
-      + (1 - RTT_weight) * rtt.tv_usec
-      + ((sec_rem - (int) sec_rem) * 1000000);
+      1.2 * (RTT_weight * itime.it_value.tv_usec
+             + (1 - RTT_weight) * rtt.tv_usec
+             + ((sec_rem - (int) sec_rem) * 1000000));
 
     printf("sec_rem: %f\n", sec_rem);
     printf("usec_rem: %f\n", usec_rem);
