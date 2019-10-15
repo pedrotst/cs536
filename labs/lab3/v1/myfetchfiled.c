@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
   socklen_t sin_size;
   int srv_port, blocksize;
   char filename[100];
+  char full_filename[104];
 
   if(argc != 3){
     fprintf(stderr, "usage: myfetchfiled blocksize srv-port\n");
@@ -112,21 +113,25 @@ int main(int argc, char *argv[]) {
       }
 
       filename[numbytes] = '\0';
+      strcpy(full_filename, "/tmp/");
+      strcat(full_filename, filename);
+
       fprintf(stderr, "sender: received filename '%s'\n", filename);
+      fprintf(stderr, "sender: full filename '%s'\n", full_filename);
 
       FILE *fptr;
 
-      fptr = fopen(filename, "r");
+      fptr = fopen(full_filename, "r");
 
       if(fptr == NULL){
-        fprintf(stderr, "sender: file %s does not exist\n", filename);
+        fprintf(stderr, "sender: file %s does not exist\n", full_filename);
         write(new_fd, "0", 1);
         close(new_fd);
       }
 
       int c = fgetc(fptr);
       if(c == EOF){
-        fprintf(stderr, "sender: file %s is empty\n", filename);
+        fprintf(stderr, "sender: file %s is empty\n", full_filename);
         write(new_fd, "1", 1);
         close(new_fd);
       }

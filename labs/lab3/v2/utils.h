@@ -13,7 +13,7 @@ typedef struct ack {
 typedef struct packet {
   int seqno;
   struct timeval timestamp;
-  char buf[1343];
+  char buf[1455];
 } packet_t;
 
 #endif // __UTILS_H_
