@@ -1,11 +1,3 @@
-/*
-** Run The Server, get the port and then invoke this program as
-** $ gcc -o client datagramclient.c && ./client hostname port message
-** hostname will probably be data.cs.purdue.edu
-** port is fetched from the output of the server
-** and message is whatever you feel like, have fun
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,6 +13,8 @@
 #include "utils.h"
 
 #define RTT_weight (0.7)
+
+#define RTTPRINT
 
 typedef struct missed_acks_s {
   ack_t ack;
@@ -40,9 +34,23 @@ int timeout_count = 0;
 ack_t missed_ack;
 missed_acks *ack_arr;
 
+void print_list(){
+  missed_acks *l;
+  l = ack_arr;
+  printf("\n\n-------------- Printing Ack List ---------------\n\n");
+  while(l != NULL){
+    printf("addr:\t\t%p\n", l);
+    printf("timestamp:\t%lds%ldus\n\n", l->ack.timestamp.tv_sec, l->ack.timestamp.tv_usec);
+    l = l->next;
+  }
+  printf("-------------- ----------------- ---------------\n\n");
+}
+
 void timeout_handler(int sig){
   timeout_count++;
   printf("sender: Timeout, resending last packet\n");
+  printf("sender: adding seqno %d to missed ack arr\n", missed_ack.seqno);
+  printf("sender: adding timestamp %lds%ldus to missed ack arr\n", missed_ack.timestamp.tv_sec, missed_ack.timestamp.tv_usec);
   fflush(stdout);
 
   missed_acks *last_ack = ack_arr;
@@ -55,6 +63,11 @@ void timeout_handler(int sig){
   next_ack = malloc(sizeof(missed_acks));
   next_ack->ack = missed_ack;
   next_ack->next = NULL;
+
+  if(last_ack == NULL)
+    ack_arr = next_ack;
+  else
+    last_ack->next = next_ack;
 
   siglongjmp(env_alarm, timeout_count);
 }
@@ -84,7 +97,8 @@ int main(int argc, char *argv[]) {
   int filesize, blocksize;
   int num_sends;
   double timeout;
-  int seqno = 0;
+  int seqno = 0, getnewack = 0;
+  double old_rtt_ms = 0;
 
   if (argc != 6) {
     fprintf(stderr,"usage: filesize blocksize timeout cli-ip cli-port\n");
@@ -119,6 +133,8 @@ int main(int argc, char *argv[]) {
   itime.it_value.tv_sec = timeout / 1000;
   itime.it_value.tv_usec = (timeout - itime.it_value.tv_sec * 1000) * 1000;
   itime.it_interval = itime.it_value;
+
+  old_rtt_ms = (itime.it_value.tv_usec / 1000 + (itime.it_value.tv_sec * 1000.0));
 
   printf("tv_sec: %ld\n", itime.it_value.tv_sec);
   printf("tv_usec: %ld\n", itime.it_value.tv_usec);
@@ -179,6 +195,9 @@ int main(int argc, char *argv[]) {
     // printf("\nsender: sending seq %d'%s\n", buffer[0], &buffer[1]);
     gettimeofday(&starttime, NULL);
     pack.timestamp = starttime;
+    // Mount missed_ack. if recvfrom timesout then the handler will add this to the array
+    missed_ack.seqno = pack.seqno;
+    missed_ack.timestamp = starttime;
 
     /* if ((numbytes = sendto(sockfd, buffer, blocksize+1, 0, */
                            /* p->ai_addr, p->ai_addrlen)) == -1) { */
@@ -188,12 +207,11 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    // Mount missed_ack. if recvfrom timesout then the handler will add this to the array
-    missed_ack.seqno = pack.seqno;
-    missed_ack.timestamp = starttime;
-
     printf("sender: sent %d/%d packets to '%s:%s'\n", i+1, num_sends, cli_ip, cli_port);
+    printf("sender: sent timestamp %lds%ldus\n", missed_ack.timestamp.tv_sec, missed_ack.timestamp.tv_usec);
     printf("sender: waiting for ACK...\n");
+    getnewack = 0;
+GETACK:
     if ((numbytes = recvfrom(sockfd, &ack, sizeof(ack_t), 0,
                              (struct sockaddr *)&their_addr, &addr_len)) == -1) {
       perror("recvfrom");
@@ -203,48 +221,61 @@ int main(int argc, char *argv[]) {
 
     // Check if this ack is the latest one, otherwise it's a missed one
     // In which case we iterate through missed_acks array to find when it was sent
-    if(timercmp(&ack.timestamp, &starttime, !=)){
+    if(timercmp(&ack.timestamp, &starttime, !=) == 1){
       missed_acks *_ack_arr = ack_arr;
       missed_acks *last_ack = ack_arr;
-      while(_ack_arr != NULL && timercmp(&ack.timestamp, &_ack_arr->ack.timestamp, !=)){
-        last_ack = ack_arr;
-        ack_arr = ack_arr->next;
+      fprintf(stdout, "\n\nsender: got timestamp %lds%ldus\n", ack.timestamp.tv_sec, ack.timestamp.tv_usec);
+      int x = ack_arr == NULL ? 0 : 1;
+      print_list();
+      while(_ack_arr != NULL && (timercmp(&ack.timestamp, &_ack_arr->ack.timestamp, !=) == 1)){
+        last_ack = _ack_arr;
+        _ack_arr = _ack_arr->next;
+        fprintf(stdout, ".");
+        x++;
       }
+      /* fprintf(stdout, "sender: size of ack list: %d\n", x); */
       // If the element was found then get the timestamp and free the node
-      if(ack_arr != NULL){
-        starttime = ack_arr->ack.timestamp;
-        last_ack->next = ack_arr->next;
-        free(ack_arr);
-      }
+      if(_ack_arr != NULL){
+        printf("Entrou\n");
+        starttime = _ack_arr->ack.timestamp;
+        fprintf(stdout, "sender: found it!!\n");
+        fflush(stdout);
+        printf("head:\t%p\n", ack_arr);
+        printf("el:\t%p\n", _ack_arr);
+        printf("previous:\t%p\n", last_ack);
+        last_ack->next = _ack_arr->next;
 
+        // if the found element is the head
+        if(_ack_arr == ack_arr){
+          ack_arr = _ack_arr->next;
+          printf("newhead:\t%p\n", ack_arr);
+        }
+        free(_ack_arr);
+      }
+      getnewack = 1;
     }
 
-    struct timeval rtt;
-    timersub(&endtime, &starttime, &rtt);
+    struct timeval new_rtt;
+    timersub(&endtime, &starttime, &new_rtt);
+    // What we want is newrtt = A * oldrtt + (1 - A) * newrtt
+    // First we convert everything to ms
+    double new_rtt_ms = new_rtt.tv_usec / 1000.0 + (new_rtt.tv_sec * 1000.0);
 
-    double sec_rem =
-      1.2 * (RTT_weight * itime.it_value.tv_sec
-       + (1 - RTT_weight) * rtt.tv_sec);
 
-    double usec_rem =
-      1.2 * (RTT_weight * itime.it_value.tv_usec
-             + (1 - RTT_weight) * rtt.tv_usec
-             + ((sec_rem - (int) sec_rem) * 1000000));
+    // Ok cool, we have the updated rtt in ms, let's convert to ms and us
+    double updated_rtt_ms = RTT_weight * old_rtt_ms + (1 - RTT_weight) * new_rtt_ms;
 
-    printf("sec_rem: %f\n", sec_rem);
-    printf("usec_rem: %f\n", usec_rem);
-
-    itime.it_value.tv_sec =
-      (int) sec_rem
-      + (int) (usec_rem / 1000000);
-
-    itime.it_value.tv_usec =
-      usec_rem - ((int) (usec_rem / 1000000) * 1000000);
-
-    /* printf("tv_sec: %f\n", RTT_weight * itime.it_value.tv_sec); */
-    printf("tv_sec: %ld\n", itime.it_value.tv_sec);
-    printf("tv_usec: %ld\n", itime.it_value.tv_usec);
+    #ifdef RTTPRINT
+    printf("Old RTT:\t%.5fms\n", old_rtt_ms);
+    printf("New RTT:\t%.5fms\n", new_rtt_ms);
+    printf("Updated RTT:\t%.5fms\n", updated_rtt_ms);
     fflush(stdout);
+    #endif
+
+    old_rtt_ms = updated_rtt_ms;
+    double fullupdated = 1.2 * (updated_rtt_ms / 1000.0);
+    itime.it_value.tv_sec = fullupdated;
+    itime.it_value.tv_usec = (fullupdated - itime.it_value.tv_sec) * 1000000;
 
     itime.it_interval = itime.it_value;
     // Communication went well, reset timeout
@@ -253,8 +284,10 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     timeout_count = 0;
-
     printf("sender: received ACK:%c\n", buf + '0');
+
+    if(getnewack)
+      goto GETACK;
 
     seqno = (pack.seqno+1)%2;
   }

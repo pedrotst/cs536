@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   printf("receiver: Listening at %d\n", htons(addr.sin_port));
+  fflush(stdout);
 
   addr_len = sizeof their_addr;
 
@@ -112,7 +113,7 @@ int main(int argc, char *argv[]) {
     }
 
     seqno = pack.seqno;
-    ack.seqno = seqno;
+    ack.seqno = pack.seqno;
     ack.timestamp = pack.timestamp;
 
     printf("receiver: got packet from %s\n",
@@ -146,7 +147,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("receiver: Ack %d sent\n", ack.seqno);
-
+    printf("receiver: Ack timestamp %lds%ldus sent\n", ack.timestamp.tv_sec, ack.timestamp.tv_usec);
+    fflush(stdout);
   }
   // Cool, all went well. How much time did it take?
   gettimeofday(&endtime, NULL);
