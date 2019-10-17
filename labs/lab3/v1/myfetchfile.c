@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define MAXBUFSZM (1000000)
+#define MAXBUFSZM (10000) 
 #define STRSZ (100)
 
 /*
