@@ -99,12 +99,12 @@ escher03.
 We set the frame size of the server to 1472. For a completion
 time of 3 seconds we need a file size of approximately 34mb.
 
-To create such a file create a file with one character per line,
+For such we create a file with one character per line,
 and for debuging purposes we set each character to a number between
 0 and 9. Since each character is one byte and each line break
 is also one byte we need exactly $34.000.000 / 2 = 17$ thousand lines.
 
-To create such a file we use the following bash script
+For that we use the following bash script:
 
 \begin{verbatim}
 for i in {1..17000000}; do echo $(($i % 10)) >> /tmp/myfile; done
@@ -351,9 +351,29 @@ receiver: Good Night!
 
 As expected the completion time has increased by a factor of approximately 10.
 
+\subsection{Varying block size}
+Running every block size 10 times and taking the average on them
+we get the following run times:
+
+\begin{table}[h]
+\begin{tabular}{|l|l|}
+  \hline
+ Block Size &  Completion Time (ms) \\
+ 500        &  3014.307861ms \\
+ 10000      &  3015.312012ms \\
+ 50000      &  3015.166016ms\\
+ 100000     &  3017.062988ms\\
+ \hline
+\end{tabular}
+\end{table}
+
+Since the variation on this data is so small it suggests that there is
+no correlation between completion time and block size on the client side.
+
+
 \section{Exercise 2 Discussions}
 My first idea to solve the matching problem was the following:
-If the client does not receive an ACK then we store that message
+if the client does not receive an ACK then we store that message
 timestamp and the sequence number in a variable, and when we receive
 that ACK we see if the sequence number matches. But this can
 match the wrong ACK with same sequence number.
@@ -381,6 +401,23 @@ Notice that we had to shrink the max size of the buffer due to this new
 timestamp. Since timeval has the size of two longs, in the worse case scenario
 it will be 128 bits or 16 bytes.
 Since the buffer max size is originally 1471, 1471-16 = 1455.
+
+In order to make this work we first implement a simple linked list
+on the client side, encoding all the timestamp that have been sent.
+So that when we receive an ACK, we have the correct log of when that message was
+sent to the client.
+
+There were also several new corner cases that had to be handled
+that were not an issue before, for example, now the server
+might actually request for a package due to a timeout.
+The way my client was implemented before it always knew
+when the server was going to re-send a packet, and therefore it
+simplified the algorithm significantly.
+
+When running ``under the gun'' at some point the slack becomes too thin and the server
+simply drops the connection.
+
+All the other experiments worked as expected.
 
 \section{Exercise 3 Discussions}
 Using a file size of 300 and a blocksize of 30 we analyzed the
@@ -582,8 +619,7 @@ and the receiver
 \end{lstlisting}
 
 
-
-At \ref{fig:wireshark} we can see a picture of wireshark, great a tool
+At the figure bellow we can see a picture of wireshark, great a tool
 to help us analyze the traffic logs.
 
 \begin{figure}[h]
