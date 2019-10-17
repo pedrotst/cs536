@@ -106,33 +106,27 @@ int main(int argc, char *argv[]) {
       gettimeofday(&starttime, NULL);
       fst_rec = 0;
     }
-    numbytes -= sizeof(int) + sizeof(struct timeval);
 
     printf("receiver: got packet from %s\n",
            inet_ntop(their_addr.ss_family,
                      get_in_addr((struct sockaddr *)&their_addr),
                      s, sizeof s));
-    printf("receiver: this is packet #%d seq: %d size: %d\n", real_packets_count+1, pack.seqno, numbytes);
-
-    // The server missed the last packet
-    if(pack.seqno != expected_seq){
-      printf("receiver: resending last packet was resent, we ack again\n");
-      dup_bytes_recv += numbytes;
-      packet_count--;
-      /* continue; */
-    }
-
-    expected_seq = (expected_seq + 1) % 2;
 
     // Total bytes received does not account for header
-    total_bytes_recv += numbytes - 1;
-
+    total_bytes_recv += numbytes - sizeof(struct timeval) - sizeof(int);
     ack.seqno = pack.seqno;
     ack.timestamp = pack.timestamp;
-
     packet_count++;
-    real_packets_count = packet_count - packets_dropped;
 
+    if(pack.seqno == expected_seq){
+      expected_seq = (expected_seq + 1) % 2;
+      real_packets_count++;
+    }
+    else{
+      printf("receiver: got bogus pack, let's ack it anyways\n");
+      dup_bytes_recv += numbytes;
+    }
+    printf("receiver: this is packet #%d seq: %d size: %d\n", real_packets_count, pack.seqno, numbytes);
     printf("receiver: dropwhen: %d, packet_count: %d, real_packets_sent: %d\n", dropwhen, packet_count, real_packets_count);
     if(dropwhen != -1 && packet_count % dropwhen == 0){
       // Workaround to fix corner case when the last package is dropped
@@ -141,8 +135,9 @@ int main(int argc, char *argv[]) {
 
       // dup is a flag to point that the next byte is duplicate
       /* dup = 1; */
-      real_packets_count = packet_count - packets_dropped;
-      printf("receiver: package droped!!\n");
+      /* real_packets_count = packet_count - packets_dropped; */
+      /* real_packets_count--; */
+      printf("receiver: packet droped!!\n");
       continue;
     }
 

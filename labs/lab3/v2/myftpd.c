@@ -73,14 +73,6 @@ void timeout_handler(int sig){
   siglongjmp(env_alarm, timeout_count);
 }
 
-/*
-$ myftpd filesize blocksize timeout cli-ip cli-port
-* filesize - total byte to be sent
-* blocksize - max of 1471
-* timeout - in ms
-* cli-port cli-ip - obvious
-*/
-
 int main(int argc, char *argv[]) {
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
@@ -239,24 +231,17 @@ GETACK:
     while(_ack_arr != NULL && (timercmp(&ack.timestamp, &_ack_arr->ack.timestamp, !=) == 1)){
       last_ack = _ack_arr;
       _ack_arr = _ack_arr->next;
-      /* fprintf(stdout, "."); */
+      fprintf(stdout, ".");
     }
-    /* fprintf(stdout, "sender: size of ack list: %d\n", x); */
     // If the element was found then get the timestamp and free the node
     if(_ack_arr != NULL){
-      /* printf("Entrou\n"); */
       starttime = _ack_arr->ack.timestamp;
-      /* fprintf(stdout, "sender: found it!!\n"); */
       fflush(stdout);
-      /* printf("head:\t%p\n", ack_arr); */
-      /* printf("el:\t%p\n", _ack_arr); */
-      /* printf("previous:\t%p\n", last_ack); */
       last_ack->next = _ack_arr->next;
 
       // if the found element is the head
       if(_ack_arr == ack_arr){
         ack_arr = _ack_arr->next;
-        /* printf("newhead:\t%p\n", ack_arr); */
       }
       free(_ack_arr);
     }
@@ -269,6 +254,7 @@ GETACK:
 
     struct timeval new_rtt;
     timersub(&endtime, &starttime, &new_rtt);
+
     // What we want is newrtt = A * oldrtt + (1 - A) * newrtt
     // First we convert everything to ms
     double new_rtt_ms = new_rtt.tv_usec / 1000.0 + (new_rtt.tv_sec * 1000.0);
@@ -281,11 +267,12 @@ GETACK:
     printf("Old RTT:\t%.5fms\n", old_rtt_ms);
     printf("New RTT:\t%.5fms\n", new_rtt_ms);
     printf("Updated RTT:\t%.5fms\n", updated_rtt_ms);
+    printf("Slack RTT:\t%.5fms\n", updated_rtt_ms * 1.2);
     fflush(stdout);
     #endif
 
     old_rtt_ms = updated_rtt_ms;
-    double fullupdated = 1.2 * (updated_rtt_ms / 1000.0);
+    double fullupdated = 1.2 * updated_rtt_ms / 1000.0;
     itime.it_value.tv_sec = fullupdated;
     itime.it_value.tv_usec = (fullupdated - itime.it_value.tv_sec) * 1000000;
 
