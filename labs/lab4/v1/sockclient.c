@@ -19,6 +19,18 @@
 
 #define MAXBUF 30
 
+char myencoder(char x, unsigned int pubkey){
+  static int pad = 0;
+  return (x ^ (pubkey & (0x000000FF << (pad++ % 4))));
+}
+
+// Implace decoder
+void encode(char *s, unsigned int pubkey){
+  for(int i = 0; i < strlen(s); i++){
+    s[i] = myencoder(s[i], pubkey);
+  }
+}
+
 int main(int argc, char *argv[]) {
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
@@ -27,19 +39,23 @@ int main(int argc, char *argv[]) {
   char cmd[1000];
 
   if (argc < 4) {
-    fprintf(stderr,"usage: talker-hostname port message\n");
+    fprintf(stderr,"usage: talker-hostname port private-key message\n");
     exit(1);
   }
+
+  int privkey = atoi(argv[3]);
 
   // Datagram must send one single package, so let's concatenate
   // the command into a single string
   cmd[0] = '\0';
-  strcat(cmd, argv[3]);
+  strcat(cmd, argv[4]);
 
-  for(int i = 4; i < argc; i++){
+  for(int i = 5; i < argc; i++){
     strcat(cmd, " ");
     strcat(cmd, argv[i]);
   }
+  encode(cmd, privkey);
+  printf("Encoded message: %s\n", cmd);
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;

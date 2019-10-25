@@ -22,6 +22,18 @@ void *get_in_addr(struct sockaddr *sa) {
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+char mydecoder(char x, unsigned int pubkey){
+  static int pad = 0;
+  return (x ^ (pubkey & (0x000000FF << (pad++ % 4))));
+}
+
+// Implace decoder
+void decode(char *s, unsigned int pubkey){
+  for(int i = 0; i < strlen(s); i++){
+    s[i] = mydecoder(s[i], pubkey);
+  }
+}
+
 int main(void) {
     int sockfd;
     struct addrinfo;
@@ -65,6 +77,8 @@ int main(void) {
       if(numbytes > MAXBUFLEN - 1)
         printf("Command exceeded max size of %d, dropping package\n", MAXBUFLEN);
     }while(numbytes > MAXBUFLEN - 1);
+    int privkey = 123;
+    decode(buf, privkey);
 
     printf("Got packet from %s!\n",
         inet_ntop(their_addr.ss_family,
