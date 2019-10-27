@@ -6,6 +6,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <setjmp.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -24,7 +25,8 @@ typedef struct packet_s {
   unsigned int key;
 } packet_t;
 
-// get sockaddr, IPv4 or IPv6:
+static jmp_buf sockio_alarm;
+
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -34,6 +36,12 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 void terve_msg_receive(){
+
+  siglongjmp(sockio_alarm, 1);
+}
+
+void receive_msg(){
+
   int numbytes;
   packet_t packet;
   struct sockaddr_storage their_addr;
@@ -46,8 +54,8 @@ void terve_msg_receive(){
     exit(1);
   }
   printf("Received %c:%d\n", packet.sig, packet.key);
-
 }
+
 
 void initiate_session(){
   struct addrinfo *servinfo, *p;
@@ -136,8 +144,11 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  initiate_session();
-
+  if (sigsetjmp(sockio_alarm, 0) > 0){
+    receive_msg();
+  }
+  else
+    initiate_session();
 
   return 0;
 }
