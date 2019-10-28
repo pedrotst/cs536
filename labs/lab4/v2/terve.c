@@ -24,10 +24,17 @@ void receive_msg();
 
 int sockfd;
 
-typedef struct handshake_s {
-  char sig;
+// We want to avoid struct padding here
+#pragma pack(1)
+typedef struct message_s {
+  uint8_t sig;
   unsigned int key;
-} handshake_t;
+  char msg[45];
+} message_t;
+
+int message_size(message_t msg){
+  return (sizeof(msg.sig) + sizeof(msg.key) + strlen(msg.msg));
+}
 
 enum state { standby,
              request_initiated,
@@ -62,8 +69,8 @@ in_port_t get_in_port(struct sockaddr *sa)
 }
 
 void terve_msg_receive(){
-  printf("SIGIO!\n");
-  fflush(stdout);
+  /* printf("SIGIO!\n"); */
+  /* fflush(stdout); */
   siglongjmp(sockio_alarm, 1);
 }
 
@@ -76,16 +83,37 @@ void terve_resend_initiation_request(){
   siglongjmp(resend_alarm, timeout_count);
 }
 
-void talk(){
+void talk(struct sockaddr *their_addr, socklen_t their_addrlen){
+  message_t msg;
+  int numbytes;
   state = talking;
-  printf("talking... :)\n");
+
+  while(1){
+    printf("your msg: ");
+    /* scanf("%[^\n]", msg.msg); */
+    /* fflush(stdin); */
+
+    fgets(msg.msg,50,stdin);
+    // Strip \n
+    msg.msg[strlen(msg.msg) - 1] = '\0';
+    msg.sig = 8;
+    msg.key = session_key;
+    printf("msg: %s, %d\n", msg.msg, message_size(msg));
+
+    if ((numbytes = sendto(sockfd, &msg, message_size(msg), 0,
+                           their_addr, their_addrlen)) == -1) {
+      perror("handshake sendto");
+      exit(1);
+    }
+
+  }
 }
 
 
 void handle_session_request(struct sockaddr *their_addr, socklen_t their_addrlen, unsigned int key){
   char ans = 'x';
   int numbytes;
-  handshake_t packet;
+  message_t packet;
 
   state = handling_request;
 
@@ -105,23 +133,23 @@ void handle_session_request(struct sockaddr *their_addr, socklen_t their_addrlen
 
   // Send answer
   printf("sending '%d:%d'\n", packet.sig, packet.key);
-  if ((numbytes = sendto(sockfd, &packet, sizeof(handshake_t), 0,
+  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                          their_addr, their_addrlen)) == -1) {
     perror("talker: sendto");
     exit(1);
   }
-  talk();
+  talk(their_addr, their_addrlen);
 }
 
 void receive_msg(){
   int numbytes;
-  handshake_t packet;
+  message_t packet;
   struct sockaddr_storage their_addr;
   socklen_t their_addrlen;
   char s[INET6_ADDRSTRLEN];
 
   their_addrlen = sizeof their_addr;
-  if((numbytes = recvfrom(sockfd, &packet, sizeof(handshake_t), 0,
+  if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
                           (struct sockaddr *)&their_addr, &their_addrlen)) == -1){
     perror("recvfrom");
     exit(1);
@@ -131,8 +159,8 @@ void receive_msg(){
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
   int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
-  printf("\nMessage Received '%d:%d' from %s %d\n", packet.sig, packet.key, s, port);
-    fflush(stdout);
+  /* printf("\nMessage Received '%d:%d' from %s %d\n", packet.sig, packet.key, s, port); */
+  /* fflush(stdout); */
 
   // This is our state machine
   if(packet.sig == 5){
@@ -155,7 +183,14 @@ void receive_msg(){
       perror("sender: error calling setitimer()");
       exit(1);
     }
-    talk();
+    talk((struct sockaddr *)&their_addr, their_addrlen);
+  }
+  else if(packet.sig == 8 && packet.key == session_key){
+    printf("numbytes: %d\n", numbytes);
+    numbytes -= sizeof(packet.sig) + sizeof(packet.key);
+    printf("numbytes: %d\n", numbytes);
+    packet.msg[numbytes] = '\0';
+    printf("\nreceived msg: '%s'\n", packet.msg);
   }
 
   /* printf("Exit receivemsg\n"); */
@@ -167,7 +202,7 @@ void initiate_session(){
   struct addrinfo *servinfo, *p;
   struct addrinfo hints;
   struct itimerval itime;
-  handshake_t packet;
+  message_t packet;
 
   int numbytes, rv;
   char s[INET6_ADDRSTRLEN];
@@ -208,8 +243,8 @@ void initiate_session(){
   }
 
   // Send the initial handshake
-  printf("sending '%d:%d'\n", packet.sig, packet.key);
-  if ((numbytes = sendto(sockfd, &packet, sizeof(handshake_t), 0,
+  /* printf("sending '%d:%d'\n", packet.sig, packet.key); */
+  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                           p->ai_addr, p->ai_addrlen)) == -1) {
     perror("handshake sendto");
     exit(1);
@@ -277,8 +312,9 @@ int main(int argc, char *argv[]) {
     scanf("%[^ ] %[^\n]", their_ip, their_port);
     initiate_session();
   }
+
   while(getchar()){
-    printf("alive\n");
+    printf(".");
   };
 
   return 0;
