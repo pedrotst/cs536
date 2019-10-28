@@ -21,13 +21,21 @@
 
 int sockfd;
 
-typedef struct packet_s {
+typedef struct handshake_s {
   char sig;
   unsigned int key;
-} packet_t;
+} handshake_t;
+
+enum state { standby,
+             initiate_request,
+             talking,
+             closed };
+
+enum state state = standby;
 
 static jmp_buf sockio_alarm;
-static jmp_buf env_alarm;
+static jmp_buf resend_alarm;
+unsigned int session_key = 0;
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -48,9 +56,9 @@ in_port_t get_in_port(struct sockaddr *sa)
 }
 
 void terve_msg_receive(){
-
   siglongjmp(sockio_alarm, 1);
 }
+
 void terve_resend_initiation_request(){
   static int timeout_count = 0;
 
@@ -58,29 +66,63 @@ void terve_resend_initiation_request(){
   printf("\nTimeout, resending communication request\n");
   fflush(stdout);
 
-  siglongjmp(env_alarm, timeout_count);
+  siglongjmp(resend_alarm, timeout_count);
+}
+
+void talk(){
+  printf("Talking was a success, terminating\n");
 }
 
 void receive_msg(){
   int numbytes;
-  packet_t packet;
+  handshake_t packet;
   struct sockaddr_storage their_addr;
   socklen_t their_addrlen;
   char s[INET6_ADDRSTRLEN];
+  char ans = 'x';
 
   their_addrlen = sizeof their_addr;
-  if((numbytes = recvfrom(sockfd, &packet, sizeof(packet_t), 0,
+  if((numbytes = recvfrom(sockfd, &packet, sizeof(handshake_t), 0,
                           (struct sockaddr *)&their_addr, &their_addrlen)) == -1){
     perror("recvfrom");
     exit(1);
   }
-  if(packet.sig == '5'){
-    inet_ntop(their_addr.ss_family,
-              get_in_addr((struct sockaddr *)&their_addr),
-              s, sizeof s);
-    int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
-    printf("\nSession Request from %s %d\n", s, port);
+  // Maybe I should be smarter about my state
+  if(packet.sig != 5){
+    return;
   }
+
+  inet_ntop(their_addr.ss_family,
+            get_in_addr((struct sockaddr *)&their_addr),
+            s, sizeof s);
+  int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
+  printf("\nSession Request from %s %d\n", s, port);
+
+  while(ans != 'y' && ans != 'n'){
+    printf("ready: ");
+    scanf("%c", &ans);
+    // Flush the buffer
+    /* fseek(stdin,0,SEEK_END); */
+    getchar();
+
+    if(ans == 'y'){
+      packet.sig = 6;
+      session_key = packet.key;
+    }
+    if(ans == 'n'){
+      packet.sig = 7;
+      session_key = packet.key;
+    }
+  }
+
+  // Send answer
+  printf("sending '%d:%d'\n", packet.sig, packet.key);
+  if ((numbytes = sendto(sockfd, &packet, sizeof(handshake_t), 0,
+                         (struct sockaddr *)&their_addr, their_addrlen)) == -1) {
+    perror("talker: sendto");
+    exit(1);
+  }
+  talk();
 }
 
 
@@ -90,14 +132,18 @@ void initiate_session(char *their_ip, char *their_port, int port){
   struct addrinfo *servinfo, *p;
   struct addrinfo hints;
   struct itimerval itime;
-  packet_t packet;
+  struct sockaddr_storage their_addr;
+  socklen_t their_addrlen;
+  handshake_t packet;
   int numbytes, rv, true;
+  char s[INET6_ADDRSTRLEN];
 
   // Correctly close the old socket before opening it again
   true = 1;
   close(sockfd);
   setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int));
 
+  // Now we reopen the socket with the information to where we are sending the data
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
@@ -126,11 +172,17 @@ void initiate_session(char *their_ip, char *their_port, int port){
   // Generate our random key
   srand(time(0));
   // Sig to send will be "Let's Talk" - i.e. 5
-  packet.sig = '5';
-  packet.key = rand();
+  packet.sig = 5;
+  session_key = rand();
+  packet.key = session_key;
 
+  // Setup message send timeout
+  if (signal(SIGALRM, &terve_resend_initiation_request) == SIG_ERR) {
+    perror("sender: unable to catch SIGALRM");
+    exit(1);
+  }
 
-  if (sigsetjmp(sockio_alarm, 0) > 2){
+  if (sigsetjmp(resend_alarm, 1) > 2){
     fprintf(stderr, "tried sending message too much, dropping request\n");
     exit(1);
   }
@@ -145,11 +197,30 @@ void initiate_session(char *their_ip, char *their_port, int port){
     exit(1);
   }
 
-  printf("sending '%c:%d'\n", packet.sig, packet.key);
-  if ((numbytes = sendto(sockfd, &packet, sizeof(packet_t), 0,
+  // Send the initial handshake
+  printf("sending '%d:%d'\n", packet.sig, packet.key);
+  if ((numbytes = sendto(sockfd, &packet, sizeof(handshake_t), 0,
                          p->ai_addr, p->ai_addrlen)) == -1) {
     perror("talker: sendto");
     exit(1);
+  }
+
+  while(state != talking){
+    // Wait for response
+    if((numbytes = recvfrom(sockfd, &packet, sizeof(handshake_t), 0,
+                            (struct sockaddr *)&their_addr, &their_addrlen)) == -1){
+      perror("recvfrom");
+      exit(1);
+    }
+    inet_ntop(their_addr.ss_family,
+              get_in_addr((struct sockaddr *)&their_addr),
+              s, sizeof s);
+
+    if(packet.sig == 6 && packet.key == session_key){
+      int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
+      printf("\nsuccess: %s %d\n", s, port);
+      state = talking;
+    }
   }
 
   if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
@@ -157,8 +228,7 @@ void initiate_session(char *their_ip, char *their_port, int port){
     exit(1);
   }
 
-  printf("could send everything fine, terminating\n");
-
+  talk();
 }
 
 int main(int argc, char *argv[]) {
@@ -191,7 +261,6 @@ int main(int argc, char *argv[]) {
 
   // Register the socket to be non blocking
   // And to raise a SIGIO upon data being received
-  /* fcntl(sockfd, F_SETFL, O_NONBLOCK); */
   signal(SIGIO, &terve_msg_receive);
 
   pgrp=getpid();
@@ -204,18 +273,12 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  // Setup message send timeout
-  if (signal(SIGALRM, terve_resend_initiation_request) == SIG_ERR) {
-    perror("sender: unable to catch SIGALRM");
-    exit(1);
-  }
-
 
   if (sigsetjmp(sockio_alarm, 0) > 0){
     receive_msg();
   }
   else{
-    printf("#ready: ");
+    printf("ready: ");
     scanf("%[^ ] %[^\n]", their_ip, their_port);
     initiate_session(their_ip, their_port, myport);
   }
