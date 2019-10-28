@@ -49,6 +49,9 @@ static sigjmp_buf resend_alarm;
 unsigned int session_key = 0;
 char their_ip[16], their_port[8];
 int myport;
+struct sockaddr *their_addr;
+socklen_t their_addrlen;
+
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -83,7 +86,7 @@ void terve_resend_initiation_request(){
   siglongjmp(resend_alarm, timeout_count);
 }
 
-void talk(struct sockaddr *their_addr, socklen_t their_addrlen){
+void talk(){
   message_t msg;
   int numbytes;
   state = talking;
@@ -110,7 +113,7 @@ void talk(struct sockaddr *their_addr, socklen_t their_addrlen){
 }
 
 
-void handle_session_request(struct sockaddr *their_addr, socklen_t their_addrlen, unsigned int key){
+void handle_session_request(unsigned int key){
   char ans = 'x';
   int numbytes;
   message_t packet;
@@ -135,36 +138,36 @@ void handle_session_request(struct sockaddr *their_addr, socklen_t their_addrlen
   printf("sending '%d:%d'\n", packet.sig, packet.key);
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                          their_addr, their_addrlen)) == -1) {
-    perror("talker: sendto");
+    perror("handle_request sendto");
     exit(1);
   }
-  talk(their_addr, their_addrlen);
+  talk();
 }
 
 void receive_msg(){
   int numbytes;
   message_t packet;
-  struct sockaddr_storage their_addr;
-  socklen_t their_addrlen;
+  struct sockaddr_storage theiraddr;
   char s[INET6_ADDRSTRLEN];
 
   their_addrlen = sizeof their_addr;
   if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
-                          (struct sockaddr *)&their_addr, &their_addrlen)) == -1){
+                          (struct sockaddr *)&theiraddr, &their_addrlen)) == -1){
     perror("recvfrom");
     exit(1);
   }
 
-  inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
+  their_addr = (struct sockaddr *)&theiraddr;
+
+  inet_ntop(theiraddr.ss_family,
+            get_in_addr((struct sockaddr *)&theiraddr),
             s, sizeof s);
-  int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
+  int port = ntohs(get_in_port((struct sockaddr *)&theiraddr));
   /* printf("\nMessage Received '%d:%d' from %s %d\n", packet.sig, packet.key, s, port); */
   /* fflush(stdout); */
 
   // This is our state machine
   if(packet.sig == 5){
-    // FIXME: uncomment next line
     printf("\nSession Request from %s %d\n", s, port);
     fflush(stdout);
     // If we don't answer in a timely maner we end up here again
@@ -172,7 +175,7 @@ void receive_msg(){
       printf("Handle Session Request\n");
       fflush(stdout);
       session_key = packet.key;
-      handle_session_request((struct sockaddr *)&their_addr, their_addrlen, packet.key);
+      handle_session_request(packet.key);
     }
   }
   else if(packet.sig == 6 && packet.key == session_key){
@@ -183,12 +186,10 @@ void receive_msg(){
       perror("sender: error calling setitimer()");
       exit(1);
     }
-    talk((struct sockaddr *)&their_addr, their_addrlen);
+    talk();
   }
   else if(packet.sig == 8 && packet.key == session_key){
-    printf("numbytes: %d\n", numbytes);
     numbytes -= sizeof(packet.sig) + sizeof(packet.key);
-    printf("numbytes: %d\n", numbytes);
     packet.msg[numbytes] = '\0';
     printf("\nreceived msg: '%s'\n", packet.msg);
   }
@@ -198,7 +199,6 @@ void receive_msg(){
 }
 
 void initiate_session(){
-  struct sockaddr_in addr;
   struct addrinfo *servinfo, *p;
   struct addrinfo hints;
   struct itimerval itime;
@@ -251,8 +251,6 @@ void initiate_session(){
   }
   state = request_initiated;
 
-  /* sleep(100); */
-  /* printf("Exit initiate_session\n"); */
 }
 
 int main(int argc, char *argv[]) {
@@ -313,9 +311,16 @@ int main(int argc, char *argv[]) {
     initiate_session();
   }
 
-  while(getchar()){
-    printf(".");
-  };
+  if(state == talking){
+    talk();
+  }
+
+  // Do kind of a busy wait
+  if(state == request_initiated){
+    while(getchar()){
+      printf(".");
+    };
+  }
 
   return 0;
 }
