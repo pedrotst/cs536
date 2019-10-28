@@ -19,6 +19,9 @@
 
 #define MAXBUFLEN 51
 
+void initiate_session();
+void receive_msg();
+
 int sockfd;
 
 typedef struct handshake_s {
@@ -27,7 +30,7 @@ typedef struct handshake_s {
 } handshake_t;
 
 enum state { standby,
-             initiate_request,
+             request_initiated,
              handling_request,
              talking,
              closed };
@@ -37,6 +40,8 @@ enum state state = standby;
 static sigjmp_buf sockio_alarm;
 static sigjmp_buf resend_alarm;
 unsigned int session_key = 0;
+char their_ip[16], their_port[8];
+int myport;
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -59,22 +64,21 @@ in_port_t get_in_port(struct sockaddr *sa)
 void terve_msg_receive(){
   printf("SIGIO!\n");
   fflush(stdout);
-  longjmp(sockio_alarm, 1);
+  siglongjmp(sockio_alarm, 1);
 }
 
 void terve_resend_initiation_request(){
   static int timeout_count = 0;
 
   timeout_count++;
-  printf("\nTimeout, resending communication request\n");
   fflush(stdout);
 
-  longjmp(resend_alarm, timeout_count);
+  siglongjmp(resend_alarm, timeout_count);
 }
 
 void talk(){
   state = talking;
-  printf("Talking was a success, terminating\n");
+  printf("talking... :)\n");
 }
 
 
@@ -88,8 +92,6 @@ void handle_session_request(struct sockaddr *their_addr, socklen_t their_addrlen
   while(ans != 'y' && ans != 'n'){
     printf("ready: ");
     scanf("%c", &ans);
-    // Flush the buffer
-    /* fseek(stdin,0,SEEK_END); */
     getchar();
 
     if(ans == 'y'){
@@ -130,18 +132,24 @@ void receive_msg(){
             s, sizeof s);
   int port = ntohs(get_in_port((struct sockaddr *)&their_addr));
   printf("\nMessage Received '%d:%d' from %s %d\n", packet.sig, packet.key, s, port);
+    fflush(stdout);
 
   // This is our state machine
   if(packet.sig == 5){
     // FIXME: uncomment next line
-    /* printf("\nSession Request from %s %d\n", s, port); */
+    printf("\nSession Request from %s %d\n", s, port);
     fflush(stdout);
-    if(state == standby){
+    // If we don't answer in a timely maner we end up here again
+    if(state == standby || state == handling_request){
+      printf("Handle Session Request\n");
+      fflush(stdout);
       session_key = packet.key;
       handle_session_request((struct sockaddr *)&their_addr, their_addrlen, packet.key);
     }
   }
   else if(packet.sig == 6 && packet.key == session_key){
+    printf("Handshake Completed\n");
+    fflush(stdout);
     // Received answer we were expecting, turns off timer
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
       perror("sender: error calling setitimer()");
@@ -150,15 +158,18 @@ void receive_msg(){
     talk();
   }
 
+  /* printf("Exit receivemsg\n"); */
+
 }
 
-void initiate_session(char *their_ip, char *their_port, int port){
+void initiate_session(){
   struct sockaddr_in addr;
   struct addrinfo *servinfo, *p;
   struct addrinfo hints;
   struct itimerval itime;
-  handshake_t send_packet;
-  int numbytes, rv, ;
+  handshake_t packet;
+
+  int numbytes, rv;
   char s[INET6_ADDRSTRLEN];
 
   // Now we reopen the socket with the information to where we are sending the data
@@ -176,18 +187,13 @@ void initiate_session(char *their_ip, char *their_port, int port){
   // Generate our random key
   srand(time(0));
   // Sig to send will be "Let's Talk" - i.e. 5
-  send_packet.sig = 5;
+  packet.sig = 5;
   session_key = rand();
-  send_packet.key = session_key;
+  packet.key = session_key;
 
   // Setup message send timeout
   if (signal(SIGALRM, &terve_resend_initiation_request) == SIG_ERR) {
     perror("sender: unable to catch SIGALRM");
-    exit(1);
-  }
-
-  if (setjmp(resend_alarm) > 2){
-    fprintf(stderr, "tried sending message too much, dropping request\n");
     exit(1);
   }
 
@@ -197,28 +203,27 @@ void initiate_session(char *their_ip, char *their_port, int port){
 
   // Set send timeout waiting for a response
   if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
-    perror("sender: error calling setitimer()");
+    perror("error calling setitimer()");
     exit(1);
   }
 
   // Send the initial handshake
-  printf("sending '%d:%d'\n", send_packet.sig, send_packet.key);
-  if ((numbytes = sendto(sockfd, &send_packet, sizeof(handshake_t), 0,
+  printf("sending '%d:%d'\n", packet.sig, packet.key);
+  if ((numbytes = sendto(sockfd, &packet, sizeof(handshake_t), 0,
                           p->ai_addr, p->ai_addrlen)) == -1) {
     perror("handshake sendto");
     exit(1);
   }
+  state = request_initiated;
 
-  sleep(100);
-
+  /* sleep(100); */
+  /* printf("Exit initiate_session\n"); */
 }
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
-  int myport;
   int on = 1;
   pid_t pgrp;
-  char their_ip[16], their_port[8];
 
   if(argc != 2){
     fprintf(stderr, "usage: terve port\n");
@@ -255,14 +260,26 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (setjmp(sockio_alarm) > 0){
+  int jmpret = sigsetjmp(resend_alarm, 1);
+  if (jmpret > 2){
+    fprintf(stderr, "tried sending message too much, dropping request\n");
+    exit(1);
+  }
+  else if (jmpret != 0){
+    printf("\nTimeout, resending communication request\n");
+    initiate_session();
+  }
+  else if (sigsetjmp(sockio_alarm, 1) > 0){
     receive_msg();
   }
   else{
     printf("ready: ");
     scanf("%[^ ] %[^\n]", their_ip, their_port);
-    initiate_session(their_ip, their_port, myport);
+    initiate_session();
   }
+  while(getchar()){
+    printf("alive\n");
+  };
 
   return 0;
 }
