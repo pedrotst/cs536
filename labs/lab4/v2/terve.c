@@ -18,14 +18,12 @@
 #include <sys/time.h>
 
 #define MAXMSGLEN 45
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
 
-void initiate_session();
-void receive_msg();
 void standby();
-
-int sockfd;
+void greet();
+void handshake();
+void talk();
+void receive_msg();
 
 // We want to avoid struct padding here
 #pragma pack(1)
@@ -35,24 +33,21 @@ typedef struct message_s {
   char msg[MAXMSGLEN];
 } message_t;
 
-int message_size(message_t msg){
-  return (sizeof(msg.sig) + sizeof(msg.key) + strlen(msg.msg));
-}
-
-enum state { st_standby,
-             request_initiated,
-             handling_request,
-             talking };
-
-enum state state = st_standby;
+enum state { standby_st,
+             greeting_st,
+             handshake_st,
+             talking_st
+} state = standby_st;
 
 static sigjmp_buf sockio_alarm;
 static sigjmp_buf resend_alarm;
+struct sockaddr *their_addr;
 unsigned int session_key = 0;
+socklen_t their_addrlen;
 char their_ip[16], their_port[8];
 int myport;
-struct sockaddr *their_addr;
-socklen_t their_addrlen;
+int sockfd;
+
 
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -73,21 +68,18 @@ in_port_t get_in_port(struct sockaddr *sa)
     return (((struct sockaddr_in6*)sa)->sin6_port);
 }
 
-void terve_msg_receive(){
-  siglongjmp(sockio_alarm, 1);
-}
-
 void terve_quit(int sig){
+  // 1234567891234567891234567891234567891234567891
   int numbytes;
   message_t msg;
 
-  if(state == talking){
+  if(state == talking_st){
     msg.sig = 9;
     msg.key = session_key;
     msg.msg[0] = '\0';
 
 
-    if ((numbytes = sendto(sockfd, &msg, message_size(msg), 0,
+    if ((numbytes = sendto(sockfd, &msg, sizeof(msg.sig) + sizeof(msg.key), 0,
                            their_addr, their_addrlen)) == -1) {
       perror("handshake sendto");
       exit(1);
@@ -98,92 +90,8 @@ void terve_quit(int sig){
   exit(0);
 }
 
-void terve_resend_initiation_request(){
-  static int timeout_count = 0;
-
-  timeout_count++;
-  fflush(stdout);
-  siglongjmp(resend_alarm, timeout_count);
-}
-
-void talk(){
-  message_t msg;
-  int numbytes;
-  char c;
-  // +1 for the \n and +1 for the \0
-  char buf[MAXMSGLEN+2];
-
-  state = talking;
-
-  while(1){
-    printf("your msg: ");
-    fgets(buf, MAXMSGLEN+2, stdin);
-    // If fgets didn't read the \n it means there is more than
-    // MAXMSGLEN in the stdin, in which case we flush them
-    // Otherwise we strip that silly \n off
-    if(buf[strlen(buf) - 1] != '\n')
-      while((c = getchar()) != '\n');
-    else
-      buf[strlen(buf) - 1] = '\0';
-
-    // My version of strncpy without the \0
-    for(int i = 0; i < strlen(buf) - 1; i++){
-      msg.msg[i] = buf[i];
-      printf("%c", buf[i]);
-    }
-
-    msg.sig = 8;
-    msg.key = session_key;
-
-    if ((numbytes = sendto(sockfd, &msg, message_size(msg), 0,
-                           their_addr, their_addrlen)) == -1) {
-      perror("handshake sendto");
-      exit(1);
-    }
-  }
-}
-
-
-void handle_session_request(unsigned int key){
-  char ans = 'x';
-  int numbytes;
-  message_t packet;
-
-  state = handling_request;
-
-  while(ans != 'y' && ans != 'n'){
-    printf("ready: ");
-    scanf("%c", &ans);
-    getchar();
-
-    if(ans == 'y'){
-      packet.sig = 6;
-    }
-    if(ans == 'n'){
-      packet.sig = 7;
-    }
-  }
-  packet.key = key;
-
-  // Send answer
-  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
-                         their_addr, their_addrlen)) == -1) {
-    perror("handle_request sendto");
-    exit(1);
-  }
-
-  if(ans != 'y'){
-    standby();
-  }
-  else
-    talk();
-}
-
-void standby(){
-    state = st_standby;
-    printf("ready: ");
-    scanf("%[^ ] %[^\n]", their_ip, their_port);
-    initiate_session();
+void terve_msg_receive(){
+  siglongjmp(sockio_alarm, 1);
 }
 
 void receive_msg(){
@@ -211,11 +119,11 @@ void receive_msg(){
     printf("\nSession Request from %s %d\n", ip, port);
     fflush(stdout);
     // If we don't answer in a timely maner we end up here again
-    if(state == st_standby || state == handling_request){
+    if(state == standby_st || state == handshake_st){
       printf("Handle Session Request\n");
       fflush(stdout);
       session_key = packet.key;
-      handle_session_request(packet.key);
+      handshake(packet.key);
     }
   }
   else if(packet.sig == 6 && packet.key == session_key){
@@ -246,7 +154,96 @@ void receive_msg(){
   }
 }
 
-void initiate_session(){
+void resend_handshake(){
+  static int timeout_count = 0;
+
+  timeout_count++;
+  fflush(stdout);
+  siglongjmp(resend_alarm, timeout_count);
+}
+
+void talk(){
+  message_t msg;
+  int numbytes;
+  char c;
+  // +1 for the \n and +1 for the \0
+  char buf[MAXMSGLEN+2];
+
+  state = talking_st;
+
+  while(1){
+    printf("your msg: ");
+    fgets(buf, MAXMSGLEN+2, stdin);
+    // If fgets didn't read the \n it means there is more than
+    // MAXMSGLEN in the stdin, in which case we flush them
+    // Otherwise we strip that silly \n off
+    if(buf[strlen(buf) - 1] != '\n')
+      while((c = getchar()) != '\n');
+    else
+      buf[strlen(buf) - 1] = '\0';
+
+    printf("msg: '");
+    // My version of strncpy without the \0
+    for(int i = 0; i < strlen(buf); i++){
+      msg.msg[i] = buf[i];
+      printf("%c", buf[i]);
+    }
+    printf("'\n");
+
+    msg.sig = 8;
+    msg.key = session_key;
+
+    if ((numbytes = sendto(sockfd, &msg, sizeof(uint8_t)+sizeof(unsigned int)+strlen(buf), 0,
+                           their_addr, their_addrlen)) == -1) {
+      perror("handshake sendto");
+      exit(1);
+    }
+  }
+}
+
+void handshake(unsigned int key){
+  char ans = 'x';
+  int numbytes;
+  message_t packet;
+
+  state = handshake_st;
+
+  while(ans != 'y' && ans != 'n'){
+    printf("ready: ");
+    scanf("%c", &ans);
+    getchar();
+
+    if(ans == 'y'){
+      packet.sig = 6;
+    }
+    if(ans == 'n'){
+      packet.sig = 7;
+    }
+  }
+  packet.key = key;
+
+  // Send answer
+  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
+                         their_addr, their_addrlen)) == -1) {
+    perror("handle_request sendto");
+    exit(1);
+  }
+
+  if(ans != 'y'){
+    standby();
+  }
+  else
+    talk();
+}
+
+void standby(){
+    state = standby_st;
+    printf("ready: ");
+    scanf("%[^ ] %[^\n]", their_ip, their_port);
+    greet();
+}
+
+void greet(){
   struct addrinfo *servinfo, *p;
   struct addrinfo hints;
   struct itimerval itime;
@@ -267,13 +264,12 @@ void initiate_session(){
 
   // Generate our random key
   srand(time(0));
-  // Sig to send will be "Let's Talk" - i.e. 5
   packet.sig = 5;
   session_key = rand();
   packet.key = session_key;
 
   // Setup message send timeout
-  if (signal(SIGALRM, &terve_resend_initiation_request) == SIG_ERR) {
+  if (signal(SIGALRM, &resend_handshake) == SIG_ERR) {
     perror("sender: unable to catch SIGALRM");
     exit(1);
   }
@@ -289,13 +285,12 @@ void initiate_session(){
   }
 
   // Send the initial handshake
-  /* printf("sending '%d:%d'\n", packet.sig, packet.key); */
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                           p->ai_addr, p->ai_addrlen)) == -1) {
     perror("handshake sendto");
     exit(1);
   }
-  state = request_initiated;
+  state = greeting_st;
 
   // Do kind of a busy wait, otherwise the process can terminate
   // without registering an answer
@@ -352,7 +347,7 @@ int main(int argc, char *argv[]) {
   }
   else if (jmpret != 0){
     printf("\nTimeout, resending communication request\n");
-    initiate_session();
+    greet();
   }
   else if (sigsetjmp(sockio_alarm, 1) > 0){
     receive_msg();
@@ -361,7 +356,7 @@ int main(int argc, char *argv[]) {
     standby();
   }
 
-  if(state == talking){
+  if(state == talking_st){
     talk();
   }
 
