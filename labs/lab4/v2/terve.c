@@ -19,13 +19,21 @@
 
 #define MAXMSGLEN 45
 
+#define HNDSHK_REQUEST 5
+#define HNDSHK_ACPT    6
+#define HNDSHK_DCLN    7
+#define MSG_RECV       8
+#define MSG_TERM       9
+
 void standby();
 void greet();
 void handshake();
 void talk();
 void receive_msg();
 
-// We want to avoid struct padding here
+// This is the struct we use for comunication
+// Since we want to send the least number of bytes
+// We avoid padding with #pragma pack(1)
 #pragma pack(1)
 typedef struct message_s {
   uint8_t sig;
@@ -33,12 +41,14 @@ typedef struct message_s {
   char msg[MAXMSGLEN];
 } message_t;
 
+// States of the communication
 enum state { standby_st,
              greeting_st,
              handshake_st,
              talking_st
 } state = standby_st;
 
+// Global Variables
 static sigjmp_buf sockio_alarm;
 static sigjmp_buf resend_alarm;
 struct sockaddr *their_addr;
@@ -48,8 +58,7 @@ char their_ip[16], their_port[8];
 int myport;
 int sockfd;
 
-
-
+// get the IP address
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -68,8 +77,8 @@ in_port_t get_in_port(struct sockaddr *sa)
     return (((struct sockaddr_in6*)sa)->sin6_port);
 }
 
+// Handler for SIGQUIT
 void terve_quit(int sig){
-  // 1234567891234567891234567891234567891234567891
   int numbytes;
   message_t msg;
 
@@ -90,70 +99,12 @@ void terve_quit(int sig){
   exit(0);
 }
 
+// Handler for SIGIO
 void terve_msg_receive(){
   siglongjmp(sockio_alarm, 1);
 }
 
-void receive_msg(){
-  int numbytes;
-  message_t packet;
-  struct sockaddr_storage theiraddr;
-  char ip[INET6_ADDRSTRLEN];
-
-  their_addrlen = sizeof their_addr;
-  if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
-                          (struct sockaddr *)&theiraddr, &their_addrlen)) == -1){
-    perror("recvfrom");
-    exit(1);
-  }
-
-  their_addr = (struct sockaddr *)&theiraddr;
-
-  inet_ntop(theiraddr.ss_family,
-            get_in_addr((struct sockaddr *)&theiraddr),
-            ip, sizeof ip);
-  int port = ntohs(get_in_port((struct sockaddr *)&theiraddr));
-
-  // This is our state machine
-  if(packet.sig == 5){
-    printf("\nSession Request from %s %d\n", ip, port);
-    fflush(stdout);
-    // If we don't answer in a timely maner we end up here again
-    if(state == standby_st || state == handshake_st){
-      printf("Handle Session Request\n");
-      fflush(stdout);
-      session_key = packet.key;
-      handshake(packet.key);
-    }
-  }
-  else if(packet.sig == 6 && packet.key == session_key){
-    printf("#success: %s %d\n", ip, port);
-    fflush(stdout);
-    if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
-      perror("sender: error calling setitimer()");
-      exit(1);
-    }
-    talk();
-  }
-  else if(packet.sig == 7 && packet.key == session_key){
-    printf("#failure: %s %d\n", ip, port);
-    if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
-      perror("sender: error calling setitimer()");
-      exit(1);
-    }
-    standby();
-  }
-  else if(packet.sig == 8 && packet.key == session_key){
-    numbytes -= sizeof(packet.sig) + sizeof(packet.key);
-    packet.msg[numbytes] = '\0';
-    printf("\nreceived msg: '%s'\n", packet.msg);
-  }
-  else if(packet.sig == 9 && packet.key == session_key){
-    printf("\n#session termination received\n");
-    exit(0);
-  }
-}
-
+// Handler for SIGALRM
 void resend_handshake(){
   static int timeout_count = 0;
 
@@ -161,6 +112,7 @@ void resend_handshake(){
   fflush(stdout);
   siglongjmp(resend_alarm, timeout_count);
 }
+
 
 void talk(){
   message_t msg;
@@ -182,13 +134,10 @@ void talk(){
     else
       buf[strlen(buf) - 1] = '\0';
 
-    printf("msg: '");
     // My version of strncpy without the \0
     for(int i = 0; i < strlen(buf); i++){
       msg.msg[i] = buf[i];
-      printf("%c", buf[i]);
     }
-    printf("'\n");
 
     msg.sig = 8;
     msg.key = session_key;
@@ -199,41 +148,6 @@ void talk(){
       exit(1);
     }
   }
-}
-
-void handshake(unsigned int key){
-  char ans = 'x';
-  int numbytes;
-  message_t packet;
-
-  state = handshake_st;
-
-  while(ans != 'y' && ans != 'n'){
-    printf("ready: ");
-    scanf("%c", &ans);
-    getchar();
-
-    if(ans == 'y'){
-      packet.sig = 6;
-    }
-    if(ans == 'n'){
-      packet.sig = 7;
-    }
-  }
-  packet.key = key;
-
-  // Send answer
-  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
-                         their_addr, their_addrlen)) == -1) {
-    perror("handle_request sendto");
-    exit(1);
-  }
-
-  if(ans != 'y'){
-    standby();
-  }
-  else
-    talk();
 }
 
 void standby(){
@@ -264,7 +178,7 @@ void greet(){
 
   // Generate our random key
   srand(time(0));
-  packet.sig = 5;
+  packet.sig = HNDSHK_REQUEST;
   session_key = rand();
   packet.key = session_key;
 
@@ -297,6 +211,102 @@ void greet(){
   while(getchar());
 }
 
+void handshake(unsigned int key){
+  char ans = 'x';
+  int numbytes;
+  message_t packet;
+
+  state = handshake_st;
+
+  while(ans != 'y' && ans != 'n'){
+    printf("ready: ");
+    scanf("%c", &ans);
+    getchar();
+
+    if(ans == 'y'){
+      packet.sig = HNDSHK_ACPT;
+    }
+    if(ans == 'n'){
+      packet.sig = HNDSHK_DCLN;
+    }
+  }
+  packet.key = key;
+
+  if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
+                         their_addr, their_addrlen)) == -1) {
+    perror("handle_request sendto");
+    exit(1);
+  }
+
+  if(ans != 'y'){
+    standby();
+  }
+  else
+    talk();
+}
+
+// Assyncronous function that will be called each time we receive a message
+// It encodes the state machine of the communication
+void receive_msg(){
+  int numbytes;
+  message_t packet;
+  struct sockaddr_storage theiraddr;
+  char ip[INET6_ADDRSTRLEN];
+
+  their_addrlen = sizeof their_addr;
+  if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
+                          (struct sockaddr *)&theiraddr, &their_addrlen)) == -1){
+    perror("recvfrom");
+    exit(1);
+  }
+
+  their_addr = (struct sockaddr *)&theiraddr;
+
+  inet_ntop(theiraddr.ss_family,
+            get_in_addr((struct sockaddr *)&theiraddr),
+            ip, sizeof ip);
+  int port = ntohs(get_in_port((struct sockaddr *)&theiraddr));
+
+  // The State Machine of the communication
+  if(packet.sig == HNDSHK_REQUEST){
+    printf("\nSession Request from %s %d\n", ip, port);
+    fflush(stdout);
+    // If we don't answer in a timely maner we end up here again
+    if(state == standby_st || state == handshake_st){
+      printf("Handle Session Request\n");
+      fflush(stdout);
+      session_key = packet.key;
+      handshake(packet.key);
+    }
+  }
+  else if(packet.sig == HNDSHK_ACPT && packet.key == session_key){
+    printf("#success: %s %d\n", ip, port);
+    fflush(stdout);
+    if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+      perror("sender: error calling setitimer()");
+      exit(1);
+    }
+    talk();
+  }
+  else if(packet.sig == HNDSHK_DCLN && packet.key == session_key){
+    printf("#failure: %s %d\n", ip, port);
+    if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+      perror("sender: error calling setitimer()");
+      exit(1);
+    }
+    standby();
+  }
+  else if(packet.sig == MSG_RECV && packet.key == session_key){
+    numbytes -= sizeof(packet.sig) + sizeof(packet.key);
+    packet.msg[numbytes] = '\0';
+    printf("\nreceived msg: '%s'\n", packet.msg);
+  }
+  else if(packet.sig == MSG_TERM && packet.key == session_key){
+    printf("\n#session termination received\n");
+    exit(0);
+  }
+}
+
 int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
   int on = 1;
@@ -323,10 +333,10 @@ int main(int argc, char *argv[]) {
 
   printf("Listening at port %d\n", htons(addr.sin_port));
 
-  // Register the socket to be non blocking
   // And to raise a SIGIO upon data being received
   signal(SIGIO, &terve_msg_receive);
 
+  // Register the socket to be non blocking
   pgrp=getpid();
   if (ioctl(sockfd, SIOCSPGRP, &pgrp) < 0) {
     perror("ioctl F_SETOWN");
@@ -359,7 +369,6 @@ int main(int argc, char *argv[]) {
   if(state == talking_st){
     talk();
   }
-
 
   return 0;
 }
