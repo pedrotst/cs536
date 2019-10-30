@@ -93,9 +93,7 @@ void tear_down(){
 }
 
 void refresh_top(){
-  /* wmove(bot_txt, 0, 0); */
-  refresh();
-  /* wrefresh(bot_txt); */
+  wrefresh(bot_txt);
   wrefresh(top_txt);
 }
 
@@ -148,14 +146,9 @@ void talk(){
 
   while(1){
     wprintw(bot_txt, "\nyour msg: ");
-    /* wrefresh(bot_txt); */
-    /* refresh_top(); */
+    wrefresh(bot_txt);
+    echo();
     wgetnstr(bot_txt, buf, MAXMSGLEN+1);
-    /* refresh(); */
-    /* wrefresh(bottom); */
-    /* wrefresh(top); */
-    /* wrefresh(bot_txt); */
-    /* wrefresh(top_txt); */
 
     strncpy(msg.msg, buf, MAXMSGLEN);
     msg.sig = MSG;
@@ -177,10 +170,9 @@ void standby(){
     state = standby_st;
     wprintw(top_txt, "Enter IP PORT to connect\n");
     refresh_top();
-    wprintw(bot_txt, "ready: ");
+    wprintw(bot_txt, "\nIP PORT: ");
     wscanw(bot_txt, "%[^ ] %[^\n]", their_ip, their_port);
     wrefresh(bot_txt);
-    refresh();
     greet();
 }
 
@@ -247,7 +239,9 @@ void greet(){
   }
   /* their_addr = p->ai_addr; */
 
+  noecho();
   wprintw(top_txt, "Request sent to %s:%s\n", their_ip, their_port);
+  wprintw(bot_txt, "\nwaiting response...");
   refresh_top();
 
   state = handshake_st;
@@ -267,11 +261,11 @@ void handshake(unsigned int key){
   refresh_top();
 
   while(ans != 'y' && ans != 'n'){
-    wprintw(bot_txt, "ready: ");
+    echo();
+    wprintw(bot_txt, "\n[y/n]: ");
     wrefresh(bot_txt);
     wscanw(bot_txt, "%s", buf);
     ans = buf[0];
-    /* refresh(); */
 
     if(ans == 'y'){
       packet.sig = HNDSHK_ACPT;
@@ -329,11 +323,8 @@ void receive_msg(){
     refresh_top();
     // If we don't answer in a timely maner we end up here again
     if(state == standby_st || state == handshake_st){
-      /* wprintw(top_txt, "Handle Session Request\n"); */
-      /* refresh_top(); */
       strcpy(their_ip, ip);
       sprintf(their_port, "%d", port);
-      /* their_addr = (struct sockaddr *)&theiraddr; */
       get_theiraddr();
       handshake(packet.key);
     }
@@ -412,15 +403,10 @@ int main(int argc, char *argv[]) {
 
   getmaxyx(stdscr,maxy,maxx);
 
-  /* top = newwin(maxy-3,maxx,0,0); */
-  /* top_txt = derwin(top, maxy-5, maxx - 2, 1, 1); */
-  /* bottom= newwin(3,maxx,maxy-3,0); */
-  /* bot_txt = derwin(bottom, 1, maxx - 2, 1, 1); */
-  top = newwin(maxy-4,maxx,0,0);
-  top_txt = derwin(top, maxy-6, maxx - 2, 1, 1);
-  bottom= newwin(4,maxx,maxy-4,0);
-  bot_txt = derwin(bottom, 2, maxx - 2, 1, 1);
-
+  top = newwin(maxy-3,maxx,0,0);
+  top_txt = derwin(top, maxy-5, maxx - 2, 1, 1);
+  bottom= newwin(3,maxx,maxy-3,0);
+  bot_txt = derwin(bottom, 1, maxx - 2, 1, 1);
 
   box(top,'|','-');
   box(bottom,'|','-');
