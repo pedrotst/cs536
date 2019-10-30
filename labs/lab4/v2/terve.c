@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <ncurses.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -48,6 +49,11 @@ enum state { standby_st,
              talking_st
 } state = standby_st;
 
+
+// Curses variables
+WINDOW *top, *top_txt;
+WINDOW *bottom, *bot_txt;
+
 // Global Variables
 static sigjmp_buf sockio_alarm;
 static sigjmp_buf resend_alarm;
@@ -77,6 +83,29 @@ in_port_t get_in_port(struct sockaddr *sa)
     return (((struct sockaddr_in6*)sa)->sin6_port);
 }
 
+void tear_down(){
+  delwin(top_txt);
+  delwin(bot_txt);
+  delwin(top);
+  delwin(bottom);
+  endwin();
+}
+
+void refresh_top(){
+  wmove(bot_txt, 0, 0);
+  refresh();
+  wrefresh(top_txt);
+  // Check if this is necessary
+  /* wrefresh(bot_txt); */
+}
+
+/* void wprintw_bot(char *str){ */
+  /* wprintw(top_txt, "%s", str); */
+  /* wmove(bot_txt, 0, 0); */
+  /* refresh(); */
+  /* wrefresh(top_txt); */
+/* } */
+
 // Handler for SIGQUIT
 void terve_quit(int sig){
   int numbytes;
@@ -90,11 +119,12 @@ void terve_quit(int sig){
 
     if ((numbytes = sendto(sockfd, &msg, sizeof(msg.sig) + sizeof(msg.key), 0,
                            their_addr, their_addrlen)) == -1) {
+      tear_down();
       perror("handshake sendto");
       exit(1);
     }
-    printf("\n#let's terminate chat session\n");
-    fflush(stdout);
+    wprintw(top_txt, "\n#let's terminate chat session\n");
+    refresh_top();
   }
   exit(0);
 }
@@ -124,8 +154,9 @@ void talk(){
   state = talking_st;
 
   while(1){
-    printf("your msg: ");
-    fgets(buf, MAXMSGLEN+2, stdin);
+    wprintw(bot_txt, "your msg: ");
+    wrefresh(bot_txt);
+    wgetnstr(bot_txt, buf, MAXMSGLEN+2);
     // If fgets didn't read the \n it means there is more than
     // MAXMSGLEN in the stdin, in which case we flush them
     // Otherwise we strip that silly \n off
@@ -144,6 +175,7 @@ void talk(){
 
     if ((numbytes = sendto(sockfd, &msg, sizeof(uint8_t)+sizeof(unsigned int)+strlen(buf), 0,
                            their_addr, their_addrlen)) == -1) {
+      tear_down();
       perror("handshake sendto");
       exit(1);
     }
@@ -152,8 +184,9 @@ void talk(){
 
 void standby(){
     state = standby_st;
-    printf("ready: ");
-    scanf("%[^ ] %[^\n]", their_ip, their_port);
+    wprintw(bot_txt, "ready: ");
+    wscanw(bot_txt, "%[^ ] %[^\n]", their_ip, their_port);
+    wrefresh(bot_txt);
     greet();
 }
 
@@ -170,6 +203,7 @@ void greet(){
   hints.ai_socktype = SOCK_DGRAM;
 
   if ((rv = getaddrinfo(their_ip, their_port, &hints, &servinfo)) != 0) {
+    tear_down();
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     exit(1);
   }
@@ -184,6 +218,7 @@ void greet(){
 
   // Setup message send timeout
   if (signal(SIGALRM, &resend_handshake) == SIG_ERR) {
+    tear_down();
     perror("sender: unable to catch SIGALRM");
     exit(1);
   }
@@ -194,6 +229,7 @@ void greet(){
 
   // Set send timeout waiting for a response
   if (setitimer(ITIMER_REAL, &itime, NULL) == -1) {
+    tear_down();
     perror("error calling setitimer()");
     exit(1);
   }
@@ -201,6 +237,7 @@ void greet(){
   // Send the initial handshake
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                           p->ai_addr, p->ai_addrlen)) == -1) {
+    tear_down();
     perror("handshake sendto");
     exit(1);
   }
@@ -219,8 +256,9 @@ void handshake(unsigned int key){
   state = handshake_st;
 
   while(ans != 'y' && ans != 'n'){
-    printf("ready: ");
-    scanf("%c", &ans);
+    wprintw(bot_txt, "ready: ");
+    wscanw(bot_txt, "%c", &ans);
+    wrefresh(bot_txt);
     getchar();
 
     if(ans == 'y'){
@@ -234,6 +272,7 @@ void handshake(unsigned int key){
 
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
                          their_addr, their_addrlen)) == -1) {
+    tear_down();
     perror("handle_request sendto");
     exit(1);
   }
@@ -256,6 +295,7 @@ void receive_msg(){
   their_addrlen = sizeof their_addr;
   if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
                           (struct sockaddr *)&theiraddr, &their_addrlen)) == -1){
+    tear_down();
     perror("recvfrom");
     exit(1);
   }
@@ -269,28 +309,33 @@ void receive_msg(){
 
   // The State Machine of the communication
   if(packet.sig == HNDSHK_REQUEST){
-    printf("\nSession Request from %s %d\n", ip, port);
-    fflush(stdout);
+    wprintw(bot_txt, "Session Request from %s %d\n", ip, port);
+    refresh_top();
     // If we don't answer in a timely maner we end up here again
     if(state == standby_st || state == handshake_st){
-      printf("Handle Session Request\n");
+      wprintw(top_txt, "Handle Session Request\n");
+      refresh_top();
       fflush(stdout);
       session_key = packet.key;
       handshake(packet.key);
     }
   }
   else if(packet.sig == HNDSHK_ACPT && packet.key == session_key){
-    printf("#success: %s %d\n", ip, port);
+    wprintw(top_txt, "#success: %s %d\n", ip, port);
+    refresh_top();
     fflush(stdout);
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+      tear_down();
       perror("sender: error calling setitimer()");
       exit(1);
     }
     talk();
   }
   else if(packet.sig == HNDSHK_DCLN && packet.key == session_key){
-    printf("#failure: %s %d\n", ip, port);
+    wprintw(top_txt, "#failure: %s %d\n", ip, port);
+    refresh_top();
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+      tear_down();
       perror("sender: error calling setitimer()");
       exit(1);
     }
@@ -299,10 +344,12 @@ void receive_msg(){
   else if(packet.sig == MSG_RECV && packet.key == session_key){
     numbytes -= sizeof(packet.sig) + sizeof(packet.key);
     packet.msg[numbytes] = '\0';
-    printf("\nreceived msg: '%s'\n", packet.msg);
+    wprintw(top_txt, "\nreceived msg: '%s'\n", packet.msg);
+    refresh_top();
   }
   else if(packet.sig == MSG_TERM && packet.key == session_key){
-    printf("\n#session termination received\n");
+    wprintw(top_txt, "\n#session termination received\n");
+    refresh_top();
     exit(0);
   }
 }
@@ -311,27 +358,54 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
   int on = 1;
   pid_t pgrp;
+  int maxx,maxy; // Screen dimensions
 
   if(argc != 2){
+    tear_down();
     fprintf(stderr, "usage: terve port\n");
     exit(0);
   }
-  myport = atoi(argv[1]);
 
+  myport = atoi(argv[1]);
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
-    printf("Failed to create socket\n");
+    tear_down();
+    fprintf(stderr, "Failed to create socket\n");
     exit(1);
   }
   addr.sin_family = AF_INET;
   addr.sin_port =  htons(myport);
   addr.sin_addr.s_addr = INADDR_ANY;
   if (bind(sockfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
-    printf("Failed to bind\n");
+    tear_down();
+    fprintf(stderr, "Failed to bind\n");
     exit(1);
   }
 
-  printf("Listening at port %d\n", htons(addr.sin_port));
+  // Set up windows
+  initscr();
+  cbreak();
+  refresh();
+
+  getmaxyx(stdscr,maxy,maxx);
+
+  top = newwin(maxy-3,maxx,0,0);
+  top_txt = derwin(top, maxy-5, maxx - 2, 1, 1);
+  bottom= newwin(3,maxx,maxy-3,0);
+  bot_txt = derwin(bottom, 1, maxx - 2, 1, 1);
+
+  box(top,'|','-');
+  box(bottom,'|','-');
+  wrefresh(top);
+  wrefresh(bottom);
+
+  // This is to allow scrolling
+  scrollok(top_txt, TRUE);
+  scrollok(bot_txt, TRUE);
+  wsetscrreg(top_txt,0,0);
+
+  wprintw(top_txt, "Listening at port %d\n", htons(addr.sin_port));
+  refresh_top();
 
   // And to raise a SIGIO upon data being received
   signal(SIGIO, &terve_msg_receive);
@@ -339,10 +413,12 @@ int main(int argc, char *argv[]) {
   // Register the socket to be non blocking
   pgrp=getpid();
   if (ioctl(sockfd, SIOCSPGRP, &pgrp) < 0) {
+    tear_down();
     perror("ioctl F_SETOWN");
     exit(1);
   }
   if (ioctl(sockfd, FIOASYNC, &on) < 0) {
+    tear_down();
     perror("ioctl F_SETFL, FASYNC");
     exit(1);
   }
@@ -352,11 +428,13 @@ int main(int argc, char *argv[]) {
 
   int jmpret = sigsetjmp(resend_alarm, 1);
   if (jmpret > 2){
+    tear_down();
     fprintf(stderr, "tried sending message too much, dropping request\n");
     exit(1);
   }
   else if (jmpret != 0){
-    printf("\nTimeout, resending communication request\n");
+    wprintw(top_txt, "\nTimeout, resending communication request\n");
+    refresh_top();
     greet();
   }
   else if (sigsetjmp(sockio_alarm, 1) > 0){
