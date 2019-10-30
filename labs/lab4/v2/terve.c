@@ -95,16 +95,9 @@ void tear_down(){
 void refresh_top(){
   /* wmove(bot_txt, 0, 0); */
   refresh();
-  wrefresh(bot_txt);
+  /* wrefresh(bot_txt); */
   wrefresh(top_txt);
 }
-
-/* void wprintw_bot(char *str){ */
-  /* wprintw(top_txt, "%s", str); */
-  /* wmove(bot_txt, 0, 0); */
-  /* refresh(); */
-  /* wrefresh(top_txt); */
-/* } */
 
 // Handler for SIGQUIT
 void terve_quit(int sig){
@@ -154,10 +147,15 @@ void talk(){
   /* refresh_top(); */
 
   while(1){
-    wprintw(bot_txt, "your msg: ");
+    wprintw(bot_txt, "\nyour msg: ");
     /* wrefresh(bot_txt); */
+    /* refresh_top(); */
     wgetnstr(bot_txt, buf, MAXMSGLEN+1);
+    /* refresh(); */
+    /* wrefresh(bottom); */
+    /* wrefresh(top); */
     /* wrefresh(bot_txt); */
+    /* wrefresh(top_txt); */
 
     strncpy(msg.msg, buf, MAXMSGLEN);
     msg.sig = MSG;
@@ -170,7 +168,8 @@ void talk(){
       exit(1);
     }
     wprintw(top_txt, "your msg:\t%s\n", buf);
-    refresh_top();
+    /* refresh_top(); */
+    wrefresh(top_txt);
   }
 }
 
@@ -212,18 +211,6 @@ void greet(){
   int numbytes;
 
   state = greeting_st;
-  // Now we reopen the socket with the information to where we are sending the data
-  /* memset(&hints, 0, sizeof hints); */
-  /* hints.ai_family = AF_INET; */
-  /* hints.ai_socktype = SOCK_DGRAM; */
-
-  /* if ((rv = getaddrinfo(their_ip, their_port, &hints, &servinfo)) != 0) { */
-  /*   tear_down(); */
-  /*   fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)); */
-  /*   exit(1); */
-  /* } */
-
-  /* p = servinfo; */
 
   get_theiraddr();
 
@@ -265,12 +252,6 @@ void greet(){
 
   state = handshake_st;
 
-  // Do kind of a busy wait, otherwise the process can terminate
-  // without registering an answer
-  /* char buf[10000]; */
-  /* while(wgetstr(bot_txt, buf)){ */
-    /* wrefresh(bot_txt); */
-  /* }; */
   sleep(30);
 }
 
@@ -311,8 +292,11 @@ void handshake(unsigned int key){
   if(ans != 'y'){
     standby();
   }
-  else
+  else{
+    wprintw(top_txt, "Success!\nTalking to: %s:%s\n", their_ip, their_port);
+    refresh_top();
     talk();
+  }
 }
 
 // Assyncronous function that will be called each time we receive a message
@@ -428,10 +412,15 @@ int main(int argc, char *argv[]) {
 
   getmaxyx(stdscr,maxy,maxx);
 
-  top = newwin(maxy-3,maxx,0,0);
-  top_txt = derwin(top, maxy-5, maxx - 2, 1, 1);
-  bottom= newwin(3,maxx,maxy-3,0);
-  bot_txt = derwin(bottom, 1, maxx - 2, 1, 1);
+  /* top = newwin(maxy-3,maxx,0,0); */
+  /* top_txt = derwin(top, maxy-5, maxx - 2, 1, 1); */
+  /* bottom= newwin(3,maxx,maxy-3,0); */
+  /* bot_txt = derwin(bottom, 1, maxx - 2, 1, 1); */
+  top = newwin(maxy-4,maxx,0,0);
+  top_txt = derwin(top, maxy-6, maxx - 2, 1, 1);
+  bottom= newwin(4,maxx,maxy-4,0);
+  bot_txt = derwin(bottom, 2, maxx - 2, 1, 1);
+
 
   box(top,'|','-');
   box(bottom,'|','-');
@@ -442,9 +431,9 @@ int main(int argc, char *argv[]) {
   scrollok(top_txt, TRUE);
   scrollok(bot_txt, TRUE);
   wsetscrreg(top_txt,0,0);
-  /* wsetscrreg(bot_txt,0,0); */
-  wrefresh(top);
-  wrefresh(bottom);
+  wsetscrreg(bot_txt,0,0);
+  wrefresh(top_txt);
+  wrefresh(bot_txt);
 
   wprintw(top_txt, "Listening at port %d\n", htons(addr.sin_port));
   refresh_top();
