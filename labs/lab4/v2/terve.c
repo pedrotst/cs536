@@ -23,8 +23,8 @@
 #define HNDSHK_REQUEST 5
 #define HNDSHK_ACPT    6
 #define HNDSHK_DCLN    7
-#define MSG_RECV       8
-#define MSG_TERM       9
+#define MSG            8
+#define TERM           9
 
 void standby();
 void greet();
@@ -59,7 +59,6 @@ static sigjmp_buf sockio_alarm;
 static sigjmp_buf resend_alarm;
 struct sockaddr *their_addr;
 unsigned int session_key = 0;
-socklen_t their_addrlen;
 char their_ip[16], their_port[8];
 
 int timeout_count = 0;
@@ -94,11 +93,10 @@ void tear_down(){
 }
 
 void refresh_top(){
-  wmove(bot_txt, 0, 0);
+  /* wmove(bot_txt, 0, 0); */
   refresh();
-  wrefresh(top_txt);
-  // Check if this is necessary
   wrefresh(bot_txt);
+  wrefresh(top_txt);
 }
 
 /* void wprintw_bot(char *str){ */
@@ -114,15 +112,15 @@ void terve_quit(int sig){
   message_t msg;
 
   if(state == talking_st){
-    msg.sig = 9;
+    msg.sig = TERM;
     msg.key = session_key;
     msg.msg[0] = '\0';
 
 
     if ((numbytes = sendto(sockfd, &msg, sizeof(msg.sig) + sizeof(msg.key), 0,
-                           their_addr, their_addrlen)) == -1) {
+                           their_addr, sizeof(*their_addr))) == -1) {
       tear_down();
-      perror("handshake sendto");
+      perror("quit sendto");
       exit(1);
     }
   }
@@ -148,40 +146,31 @@ void resend_handshake(){
 void talk(){
   message_t msg;
   int numbytes;
-  char c;
   // +1 for the \n and +1 for the \0
   char buf[MAXMSGLEN+2];
 
   state = talking_st;
-  wprintw(top_txt, "Success!\nTalking to: %s:%s\n", their_ip, their_port);
-  refresh_top();
+  /* wprintw(top_txt, "Success!\nTalking to: %s:%s\n", their_ip, their_port); */
+  /* refresh_top(); */
 
   while(1){
     wprintw(bot_txt, "your msg: ");
-    wrefresh(bot_txt);
-    wgetnstr(bot_txt, buf, MAXMSGLEN+2);
-    // If fgets didn't read the \n it means there is more than
-    // MAXMSGLEN in the stdin, in which case we flush them
-    // Otherwise we strip that silly \n off
-    if(buf[strlen(buf) - 1] != '\n')
-      while((c = getchar()) != '\n');
-    else
-      buf[strlen(buf) - 1] = '\0';
+    /* wrefresh(bot_txt); */
+    wgetnstr(bot_txt, buf, MAXMSGLEN+1);
+    /* wrefresh(bot_txt); */
 
-    // My version of strncpy without the \0
-    for(int i = 0; i < strlen(buf); i++){
-      msg.msg[i] = buf[i];
-    }
-
-    msg.sig = 8;
+    strncpy(msg.msg, buf, MAXMSGLEN);
+    msg.sig = MSG;
     msg.key = session_key;
 
     if ((numbytes = sendto(sockfd, &msg, sizeof(uint8_t)+sizeof(unsigned int)+strlen(buf), 0,
-                           their_addr, their_addrlen)) == -1) {
+                           their_addr, sizeof(*their_addr))) == -1) {
       tear_down();
-      perror("handshake sendto");
+      perror("talk sendto");
       exit(1);
     }
+    wprintw(top_txt, "your msg:\t%s\n", buf);
+    refresh_top();
   }
 }
 
@@ -196,14 +185,11 @@ void standby(){
     greet();
 }
 
-void greet(){
-  struct addrinfo *servinfo, *p;
+void get_theiraddr(){
+  struct addrinfo *servinfo;
   struct addrinfo hints;
-  struct itimerval itime;
-  message_t packet;
-  int numbytes, rv;
+  int rv;
 
-  // Now we reopen the socket with the information to where we are sending the data
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
@@ -214,7 +200,32 @@ void greet(){
     exit(1);
   }
 
-  p = servinfo;
+  their_addr = servinfo->ai_addr;
+}
+
+void greet(){
+  /* struct addrinfo *servinfo, *p; */
+  /* struct addrinfo hints; */
+  /* int rv; */
+  struct itimerval itime;
+  message_t packet;
+  int numbytes;
+
+  state = greeting_st;
+  // Now we reopen the socket with the information to where we are sending the data
+  /* memset(&hints, 0, sizeof hints); */
+  /* hints.ai_family = AF_INET; */
+  /* hints.ai_socktype = SOCK_DGRAM; */
+
+  /* if ((rv = getaddrinfo(their_ip, their_port, &hints, &servinfo)) != 0) { */
+  /*   tear_down(); */
+  /*   fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)); */
+  /*   exit(1); */
+  /* } */
+
+  /* p = servinfo; */
+
+  get_theiraddr();
 
   // Generate our random key
   srand(time(0));
@@ -242,27 +253,30 @@ void greet(){
 
   // Send the initial handshake
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
-                          p->ai_addr, p->ai_addrlen)) == -1) {
+                         their_addr, sizeof(*their_addr))) == -1) {
     tear_down();
-    perror("handshake sendto");
+    perror("greet sendto");
     exit(1);
   }
+  /* their_addr = p->ai_addr; */
 
   wprintw(top_txt, "Request sent to %s:%s\n", their_ip, their_port);
   refresh_top();
 
-  state = greeting_st;
+  state = handshake_st;
 
   // Do kind of a busy wait, otherwise the process can terminate
   // without registering an answer
-  char buf[10000];
-  while(wgetstr(bot_txt, buf)){
-    wrefresh(bot_txt);
-  };
+  /* char buf[10000]; */
+  /* while(wgetstr(bot_txt, buf)){ */
+    /* wrefresh(bot_txt); */
+  /* }; */
+  sleep(30);
 }
 
 void handshake(unsigned int key){
   char ans = 'x';
+  char buf[200];
   int numbytes;
   message_t packet;
 
@@ -273,10 +287,10 @@ void handshake(unsigned int key){
 
   while(ans != 'y' && ans != 'n'){
     wprintw(bot_txt, "ready: ");
-    wscanw(bot_txt, "%c", &ans);
     wrefresh(bot_txt);
-    refresh();
-    /* getchar(); */
+    wscanw(bot_txt, "%s", buf);
+    ans = buf[0];
+    /* refresh(); */
 
     if(ans == 'y'){
       packet.sig = HNDSHK_ACPT;
@@ -288,9 +302,9 @@ void handshake(unsigned int key){
   packet.key = key;
 
   if ((numbytes = sendto(sockfd, &packet, sizeof(message_t), 0,
-                         their_addr, their_addrlen)) == -1) {
+                         their_addr, sizeof(*their_addr))) == -1) {
     tear_down();
-    perror("handle_request sendto");
+    perror("handle request sendto");
     exit(1);
   }
 
@@ -308,16 +322,15 @@ void receive_msg(){
   message_t packet;
   struct sockaddr_storage theiraddr;
   char ip[INET6_ADDRSTRLEN];
+  socklen_t their_addrlen;
 
-  their_addrlen = sizeof their_addr;
+  their_addrlen = sizeof(theiraddr);
   if((numbytes = recvfrom(sockfd, &packet, sizeof(message_t), 0,
                           (struct sockaddr *)&theiraddr, &their_addrlen)) == -1){
     tear_down();
     perror("recvfrom");
     exit(1);
   }
-
-  their_addr = (struct sockaddr *)&theiraddr;
 
   inet_ntop(theiraddr.ss_family,
             get_in_addr((struct sockaddr *)&theiraddr),
@@ -336,18 +349,23 @@ void receive_msg(){
       /* refresh_top(); */
       strcpy(their_ip, ip);
       sprintf(their_port, "%d", port);
+      /* their_addr = (struct sockaddr *)&theiraddr; */
+      get_theiraddr();
       handshake(packet.key);
     }
   }
-  else if(packet.sig == HNDSHK_ACPT && packet.key == session_key){
+  else if(state == handshake_st && packet.sig == HNDSHK_ACPT && packet.key == session_key){
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
       tear_down();
       perror("sender: error calling setitimer()");
       exit(1);
     }
+
+    wprintw(top_txt, "Success!\nTalking to: %s:%s\n", their_ip, their_port);
+    refresh_top();
     talk();
   }
-  else if(packet.sig == HNDSHK_DCLN && packet.key == session_key){
+  else if(state == handshake_st && packet.sig == HNDSHK_DCLN && packet.key == session_key){
     wprintw(top_txt, "#failure: %s %d\n", ip, port);
     refresh_top();
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
@@ -357,13 +375,18 @@ void receive_msg(){
     }
     standby();
   }
-  else if(packet.sig == MSG_RECV && packet.key == session_key){
+  else if(state == talking_st && packet.sig == MSG && packet.key == session_key){
+    char buf[MAXMSGLEN+1];
+
     numbytes -= sizeof(packet.sig) + sizeof(packet.key);
-    packet.msg[numbytes] = '\0';
-    wprintw(top_txt, "\nreceived msg: '%s'\n", packet.msg);
+    for(int i=0; i < numbytes; i++)
+      buf[i] = packet.msg[i];
+
+    buf[numbytes] = '\0';
+    wprintw(top_txt, "received msg:\t%s\n", buf);
     refresh_top();
   }
-  else if(packet.sig == MSG_TERM && packet.key == session_key){
+  else if(packet.sig == TERM && packet.key == session_key){
     tear_down();
     printf("Session Termination Received\n");
     exit(0);
@@ -419,6 +442,9 @@ int main(int argc, char *argv[]) {
   scrollok(top_txt, TRUE);
   scrollok(bot_txt, TRUE);
   wsetscrreg(top_txt,0,0);
+  /* wsetscrreg(bot_txt,0,0); */
+  wrefresh(top);
+  wrefresh(bottom);
 
   wprintw(top_txt, "Listening at port %d\n", htons(addr.sin_port));
   refresh_top();
