@@ -61,6 +61,8 @@ struct sockaddr *their_addr;
 unsigned int session_key = 0;
 socklen_t their_addrlen;
 char their_ip[16], their_port[8];
+
+int timeout_count = 0;
 int myport;
 int sockfd;
 
@@ -85,8 +87,8 @@ in_port_t get_in_port(struct sockaddr *sa)
 
 void tear_down(){
   delwin(top_txt);
-  delwin(bot_txt);
   delwin(top);
+  delwin(bot_txt);
   delwin(bottom);
   endwin();
 }
@@ -96,7 +98,7 @@ void refresh_top(){
   refresh();
   wrefresh(top_txt);
   // Check if this is necessary
-  /* wrefresh(bot_txt); */
+  wrefresh(bot_txt);
 }
 
 /* void wprintw_bot(char *str){ */
@@ -123,9 +125,10 @@ void terve_quit(int sig){
       perror("handshake sendto");
       exit(1);
     }
-    wprintw(top_txt, "\n#let's terminate chat session\n");
-    refresh_top();
   }
+
+  tear_down();
+  printf("Session Terminated Sucessfully\n");
   exit(0);
 }
 
@@ -136,8 +139,6 @@ void terve_msg_receive(){
 
 // Handler for SIGALRM
 void resend_handshake(){
-  static int timeout_count = 0;
-
   timeout_count++;
   fflush(stdout);
   siglongjmp(resend_alarm, timeout_count);
@@ -152,6 +153,8 @@ void talk(){
   char buf[MAXMSGLEN+2];
 
   state = talking_st;
+  wprintw(top_txt, "Success!\nTalking to: %s:%s\n", their_ip, their_port);
+  refresh_top();
 
   while(1){
     wprintw(bot_txt, "your msg: ");
@@ -184,9 +187,12 @@ void talk(){
 
 void standby(){
     state = standby_st;
+    wprintw(top_txt, "Enter IP PORT to connect\n");
+    refresh_top();
     wprintw(bot_txt, "ready: ");
     wscanw(bot_txt, "%[^ ] %[^\n]", their_ip, their_port);
     wrefresh(bot_txt);
+    refresh();
     greet();
 }
 
@@ -241,11 +247,18 @@ void greet(){
     perror("handshake sendto");
     exit(1);
   }
+
+  wprintw(top_txt, "Request sent to %s:%s\n", their_ip, their_port);
+  refresh_top();
+
   state = greeting_st;
 
   // Do kind of a busy wait, otherwise the process can terminate
   // without registering an answer
-  while(getchar());
+  char buf[10000];
+  while(wgetstr(bot_txt, buf)){
+    wrefresh(bot_txt);
+  };
 }
 
 void handshake(unsigned int key){
@@ -254,12 +267,16 @@ void handshake(unsigned int key){
   message_t packet;
 
   state = handshake_st;
+  session_key = key;
+  wprintw(top_txt, "Enter 'y' to accept or 'n' do decline\n");
+  refresh_top();
 
   while(ans != 'y' && ans != 'n'){
     wprintw(bot_txt, "ready: ");
     wscanw(bot_txt, "%c", &ans);
     wrefresh(bot_txt);
-    getchar();
+    refresh();
+    /* getchar(); */
 
     if(ans == 'y'){
       packet.sig = HNDSHK_ACPT;
@@ -306,24 +323,23 @@ void receive_msg(){
             get_in_addr((struct sockaddr *)&theiraddr),
             ip, sizeof ip);
   int port = ntohs(get_in_port((struct sockaddr *)&theiraddr));
+  /* their_port = atoi */
+  /* sprintf("% */
 
   // The State Machine of the communication
   if(packet.sig == HNDSHK_REQUEST){
-    wprintw(bot_txt, "Session Request from %s %d\n", ip, port);
+    wprintw(top_txt, "Session Request from %s:%d\n", ip, port);
     refresh_top();
     // If we don't answer in a timely maner we end up here again
     if(state == standby_st || state == handshake_st){
-      wprintw(top_txt, "Handle Session Request\n");
-      refresh_top();
-      fflush(stdout);
-      session_key = packet.key;
+      /* wprintw(top_txt, "Handle Session Request\n"); */
+      /* refresh_top(); */
+      strcpy(their_ip, ip);
+      sprintf(their_port, "%d", port);
       handshake(packet.key);
     }
   }
   else if(packet.sig == HNDSHK_ACPT && packet.key == session_key){
-    wprintw(top_txt, "#success: %s %d\n", ip, port);
-    refresh_top();
-    fflush(stdout);
     if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
       tear_down();
       perror("sender: error calling setitimer()");
@@ -348,8 +364,8 @@ void receive_msg(){
     refresh_top();
   }
   else if(packet.sig == MSG_TERM && packet.key == session_key){
-    wprintw(top_txt, "\n#session termination received\n");
-    refresh_top();
+    tear_down();
+    printf("Session Termination Received\n");
     exit(0);
   }
 }
@@ -428,12 +444,22 @@ int main(int argc, char *argv[]) {
 
   int jmpret = sigsetjmp(resend_alarm, 1);
   if (jmpret > 2){
-    tear_down();
-    fprintf(stderr, "tried sending message too much, dropping request\n");
-    exit(1);
+    /* tear_down(); */
+
+    if (setitimer(ITIMER_REAL, NULL, NULL) == -1) {
+      tear_down();
+      perror("error calling setitimer()");
+      exit(1);
+    }
+    timeout_count = 0;
+
+    wprintw(top_txt, "Tried sending message too much, dropping request\n");
+    refresh_top();
+    standby();
+    /* exit(1); */
   }
   else if (jmpret != 0){
-    wprintw(top_txt, "\nTimeout, resending communication request\n");
+    wprintw(top_txt, "Timeout\n");
     refresh_top();
     greet();
   }
