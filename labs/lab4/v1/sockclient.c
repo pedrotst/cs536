@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   struct addrinfo hints, *servinfo, *p;
   int rv;
   int numbytes;
-  char cmd[1000];
+  char cmd[50];
 
   if (argc < 4) {
     fprintf(stderr,"usage: talker-hostname port private-key message\n");
@@ -47,7 +47,25 @@ int main(int argc, char *argv[]) {
 
   // Datagram must send one single package, so let's concatenate
   // the command into a single string
-  cmd[0] = '\0';
+  char name[50];
+  struct addrinfo *result;
+
+  if (gethostname(name, sizeof(name))) {
+    perror("Invalid");
+  }
+  if (getaddrinfo(name, NULL, NULL, &result)) {
+    perror("Invalid");
+  }
+
+  char realip[20];
+  strcpy(realip, inet_ntoa(((struct sockaddr_in *)result->ai_addr)->sin_addr));
+  unsigned int myip = inet_addr(realip);
+  memcpy(cmd, &myip, 4);
+  cmd[4] = '\0';
+
+  int ip;
+  memcpy(&ip, cmd, 4);
+
   strcat(cmd, argv[4]);
 
   for(int i = 5; i < argc; i++){
@@ -55,7 +73,7 @@ int main(int argc, char *argv[]) {
     strcat(cmd, argv[i]);
   }
   encode(cmd, privkey);
-  printf("Encoded message: %s\n", cmd);
+  /* printf("Encoded message: %s\n", cmd); */
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -73,12 +91,6 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Failed to create socket\n");
     return 2;
   }
-
-  /* int sendsize; */
-  /* if(strlen(cmd) < MAXBUF) */
-  /*   sendsize = strlen(cmd); */
-  /* else */
-  /*   sendsize = MAXBUF; */
 
   if ((numbytes = sendto(sockfd, cmd, strlen(cmd), 0,
                          p->ai_addr, p->ai_addrlen)) == -1) {

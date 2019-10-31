@@ -38,7 +38,10 @@ void decode(char *s, unsigned int pubkey){
   pad = 0;
 }
 
-int assert_decode(char *s){
+int assert_decode(char *s, char* ip1, char* ip2){
+  if(strcmp(ip1, ip2) != 0)
+    return 1;
+
   for(int i = 0; i < strlen(s); i++){
     if(!isascii(s[i])){
       return 1;
@@ -122,6 +125,7 @@ int main(void) {
         continue;
       }
 
+      int ip;
       strcpy(their_ip, inet_ntop(their_addr.ss_family,
                                  get_in_addr((struct sockaddr *)&their_addr),
                                  s, sizeof s));
@@ -130,16 +134,24 @@ int main(void) {
       printf("Packet is %d bytes long\n", numbytes);
 
       privkey = get_privkey(their_ip);
-      printf("privkey: %d\n", privkey);
+      /* printf("privkey: %d\n", privkey); */
       decode(buf, privkey);
-      buf[numbytes] = '\0';
-      decode_fail = assert_decode(buf);
+      memcpy(&ip, buf, 4);
+      struct in_addr ip_addr;
+      ip_addr.s_addr = ip;
+      char coded_ip[16];
+      strcpy(coded_ip, inet_ntoa(ip_addr));
 
+      /* printf("decoded msg: %u,%s:%s\n", ip, inet_ntoa(ip_addr), &buf[4]); */
+      buf[numbytes] = '\0';
+      strcpy(buf, &buf[4]);
+
+      decode_fail = assert_decode(&buf[4], their_ip, coded_ip);
       if(decode_fail)
         fprintf(stderr, "Decoded message ended up in a bogus format, dropping request\n");
 
     }while(numbytes > MAXBUFLEN - 1 || decode_fail);
-    printf("Packet contains \"%s\"\n", buf);
+    /* printf("Packet contains \"%s\"\n", buf); */
 
     close(sockfd);
 
