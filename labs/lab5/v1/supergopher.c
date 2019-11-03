@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 
+
 #include "utils.h"
 
 #define MAXBUFLEN 50
@@ -64,8 +65,11 @@ int main(int argc, char *argv[]) {
   strcpy(realip, inet_ntoa(((struct sockaddr_in *)result->ai_addr)->sin_addr));
   printf("Running supergopher at %s %d\n", realip, myport);
 
+  pid_t this_pid, forkpid;
 
   while(1){
+    this_pid = getpid();
+    printf("this_pid: %d\n", this_pid);
     printf("Waiting to recvfrom...\n");
     request_t packet;
 
@@ -83,46 +87,48 @@ int main(int argc, char *argv[]) {
     printf("Packet is %d bytes long\n", numbytes);
     printf("It contains %s:%d\n", packet.server_ip, packet.server_port);
 
-    if(!fork()){
+    forkpid = fork();
+    if(forkpid == 0){
       // Open a new socket for the tunneling
       int tunnel_sockfd;
+      struct sockaddr_in naddr;
 
       tunnel_sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-      if(sockfd == -1){
+      if(tunnel_sockfd == -1){
         fprintf(stderr, "Failed to create socket\n");
         exit(1);
       }
 
-      addr.sin_family = AF_INET;
-      addr.sin_port =  0;
-      addr.sin_addr.s_addr = INADDR_ANY;
-      if (bind(tunnel_sockfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
+      naddr.sin_family = AF_INET;
+      naddr.sin_port =  0;
+      naddr.sin_addr.s_addr = INADDR_ANY;
+      if (bind(tunnel_sockfd, (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
         fprintf(stderr, "Failed to bind tunnel\n");
         exit(1);
       }
-      socklen_t addrLen = sizeof addr;
-      if (getsockname(sockfd, (struct sockaddr *)&addr, &addrLen) == -1) {
-        printf("getsockname() failed\n");
+      socklen_t addrLen = sizeof naddr;
+      if (getsockname(tunnel_sockfd, (struct sockaddr *)&naddr, &addrLen) == -1) {
+        printf("tunnel getsockname() failed\n");
         exit(1);
       }
 
-      printf("Tunnel created on port %d\n", htons(addr.sin_port));
+      printf("Tunnel created on port %d\n", htons(naddr.sin_port));
+      forkpid = getpid();
+      printf("forkpid: %d\n", forkpid);
       answer_t ans;
       ans.sig = 3;
-      ans.tunnel_port = addr.sin_port;
+      ans.tunnel_port = naddr.sin_port;
 
       if ((numbytes = sendto(sockfd, &ans, sizeof(answer_t), 0,
                              (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
-        perror("greet sendto");
+        perror("create tunnel sendto");
         exit(1);
       }
-      getchar();
+      exit(0);
 
 
       /* packet.sig = 3; */
       /* packet.server_port = addr.sin_port; */
-
-
     }
   }
 

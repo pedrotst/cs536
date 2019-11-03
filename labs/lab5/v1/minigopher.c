@@ -57,8 +57,9 @@ int main(int argc, char *argv[]) {
   strcpy(req.server_ip, argv[3]);
   req.server_port = server_port;
 
+  addr_len = sizeof *their_addr;
   if ((numbytes = sendto(sockfd, &req, sizeof(request_t), 0,
-                         their_addr, sizeof(*their_addr))) == -1) {
+                         their_addr, addr_len)) == -1) {
     perror("greet sendto");
     exit(1);
   }
@@ -71,9 +72,8 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  printf("Server answered with %u, %u\n", ans.sig, htons(ans.tunnel_port));
-  printf("minigopher was a success!\n");
-
+  /* printf("Server answered with %u, %u\n", ans.sig, htons(ans.tunnel_port)); */
+  printf("Tunnel creation was a success!\nPlease use %s %d\n", argv[1], htons(ans.tunnel_port));
 
   /* addr.sin_family = AF_INET; */
   /* addr.sin_port =  0; //htons(SERVERPORT); */
