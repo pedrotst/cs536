@@ -65,22 +65,66 @@ int main(int argc, char *argv[]) {
   printf("Running supergopher at %s %d\n", realip, myport);
 
 
-  printf("Waiting to recvfrom...\n");
-  request_t packet;
+  while(1){
+    printf("Waiting to recvfrom...\n");
+    request_t packet;
 
-  if((numbytes = recvfrom(sockfd, &packet, sizeof(request_t) , 0,
-                          (struct sockaddr *)&their_addr, &addr_len)) == -1){
-    perror("recvfrom");
-    exit(1);
+    if((numbytes = recvfrom(sockfd, &packet, sizeof(request_t) , 0,
+                            (struct sockaddr *)&their_addr, &addr_len)) == -1){
+      perror("recvfrom");
+      exit(1);
+    }
+
+    inet_ntop(their_addr.ss_family,
+              get_in_addr((struct sockaddr *)&their_addr),
+              their_ip, sizeof their_ip);
+
+    printf("Got packet from %s!\n", their_ip);
+    printf("Packet is %d bytes long\n", numbytes);
+    printf("It contains %s:%d\n", packet.server_ip, packet.server_port);
+
+    if(!fork()){
+      // Open a new socket for the tunneling
+      int tunnel_sockfd;
+
+      tunnel_sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+      if(sockfd == -1){
+        fprintf(stderr, "Failed to create socket\n");
+        exit(1);
+      }
+
+      addr.sin_family = AF_INET;
+      addr.sin_port =  0;
+      addr.sin_addr.s_addr = INADDR_ANY;
+      if (bind(tunnel_sockfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
+        fprintf(stderr, "Failed to bind tunnel\n");
+        exit(1);
+      }
+      socklen_t addrLen = sizeof addr;
+      if (getsockname(sockfd, (struct sockaddr *)&addr, &addrLen) == -1) {
+        printf("getsockname() failed\n");
+        exit(1);
+      }
+
+      printf("Tunnel created on port %d\n", htons(addr.sin_port));
+      answer_t ans;
+      ans.sig = 3;
+      ans.tunnel_port = addr.sin_port;
+
+      if ((numbytes = sendto(sockfd, &ans, sizeof(answer_t), 0,
+                             (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
+        perror("greet sendto");
+        exit(1);
+      }
+      getchar();
+
+
+      /* packet.sig = 3; */
+      /* packet.server_port = addr.sin_port; */
+
+
+    }
   }
-
-  inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
-            their_ip, sizeof their_ip);
-
-  printf("Got packet from %s!\n", their_ip);
-  printf("Packet is %d bytes long\n", numbytes);
-  printf("It contains sig:'%d', %s:%d\n", packet.sig, packet.server_ip, packet.server_port);
 
   return 0;
 }

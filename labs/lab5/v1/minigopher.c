@@ -51,17 +51,29 @@ int main(int argc, char *argv[]) {
   }
 
   their_addr = servinfo->ai_addr;
-  request_t packet;
+  request_t req;
 
-  packet.sig = 3;
-  strcpy(packet.server_ip, argv[3]);
-  packet.server_port = server_port;
+  /* packet.sig = 3; */
+  strcpy(req.server_ip, argv[3]);
+  req.server_port = server_port;
 
-  if ((numbytes = sendto(sockfd, &packet, sizeof(request_t), 0,
+  if ((numbytes = sendto(sockfd, &req, sizeof(request_t), 0,
                          their_addr, sizeof(*their_addr))) == -1) {
     perror("greet sendto");
     exit(1);
   }
+
+  printf("Waiting for a server answer\n");
+  answer_t ans;
+  if((numbytes = recvfrom(sockfd, &ans, sizeof(answer_t) , 0,
+                          (struct sockaddr *)&their_addr, &addr_len)) == -1){
+    perror("recvfrom");
+    exit(1);
+  }
+
+  printf("Server answered with %u, %u\n", ans.sig, htons(ans.tunnel_port));
+  printf("minigopher was a success!\n");
+
 
   /* addr.sin_family = AF_INET; */
   /* addr.sin_port =  0; //htons(SERVERPORT); */
