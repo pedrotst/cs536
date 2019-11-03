@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 
+#include "utils.h"
+
 #define MAXBUFLEN 50
 
 // get sockaddr, IPv4 or IPv6:
@@ -64,7 +66,9 @@ int main(int argc, char *argv[]) {
 
 
   printf("Waiting to recvfrom...\n");
-  if((numbytes = recvfrom(sockfd, buf, MAXBUFLEN , 0,
+  request_t packet;
+
+  if((numbytes = recvfrom(sockfd, &packet, sizeof(request_t) , 0,
                           (struct sockaddr *)&their_addr, &addr_len)) == -1){
     perror("recvfrom");
     exit(1);
@@ -76,6 +80,7 @@ int main(int argc, char *argv[]) {
 
   printf("Got packet from %s!\n", their_ip);
   printf("Packet is %d bytes long\n", numbytes);
+  printf("It contains sig:'%d', %s:%d\n", packet.sig, packet.server_ip, packet.server_port);
 
   return 0;
 }
