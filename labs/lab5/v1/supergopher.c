@@ -12,7 +12,7 @@
 
 #include "utils.h"
 
-#define MAXBUFLEN 50
+#define MAXBUFLEN 5000
 #define TRANSITSOCKIND 10
 
 int clisock_arr[TRANSITSOCKIND];
@@ -97,16 +97,21 @@ void create_table(){
   fclose(fp);
 }
 
-int setup_tunnel(struct sockaddr_storage their_addr, request_t packet){
+int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
   char their_ip[16];
   struct sockaddr_in naddr;
   socklen_t addrLen = sizeof naddr;
   answer_t ans;
   int numbytes;
+  request_t packet;
+
+  memcpy(&packet, buf, sizeof(request_t));
 
   if(sock_i > TRANSITSOCKIND){
     return 0;
   }
+
+  their_ip[0] = '\0';
 
   inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
@@ -173,12 +178,14 @@ int setup_tunnel(struct sockaddr_storage their_addr, request_t packet){
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
-
   struct sockaddr_storage their_addr;
+  struct addrinfo *result;
   socklen_t addr_len;
-  char buf[MAXBUFLEN], their_ip[20];
   int myport, numbytes;
   int setupsock;
+  char name[50];
+  char realip[20];
+  request_t packet;
 
   if(argc != 2){
     fprintf(stderr, "usage: supergopher vpn-port \n");
@@ -201,9 +208,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  char name[50];
-  struct addrinfo *result;
-
   if (gethostname(name, sizeof(name))) {
     perror("Invalid");
   }
@@ -211,20 +215,20 @@ int main(int argc, char *argv[]) {
     perror("Invalid");
   }
 
-  char realip[20];
   strcpy(realip, inet_ntoa(((struct sockaddr_in *)result->ai_addr)->sin_addr));
   printf("Running supergopher at %s %d\n", realip, myport);
+  uint8_t buf[MAXBUFLEN];
 
+  addr_len = sizeof(their_addr);
   while(1){
-    request_t packet;
-
-    if((numbytes = recvfrom(setupsock, &packet, sizeof(request_t) , 0,
+    if((numbytes = recvfrom(setupsock, &buf, MAXBUFLEN , 0,
                             (struct sockaddr *)&their_addr, &addr_len)) == -1){
       perror("recvfrom");
       exit(1);
     }
-    // If the same client asks for a tunnel twice the last connection will be dead
-    if(setup_tunnel(their_addr, packet)){
+
+    // Let's just hope the request came in the right format
+    if(!setup_tunnel(their_addr, buf)){
       printf("Could not create tunnel, max tunnel conections reached\n");
     }
 
