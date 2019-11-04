@@ -18,6 +18,8 @@
 int clisock_arr[TRANSITSOCKIND];
 int sersock_arr[TRANSITSOCKIND];
 int sock_i = 0;
+int fdmax;
+fd_set master;
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa) {
@@ -220,16 +222,35 @@ int main(int argc, char *argv[]) {
   uint8_t buf[MAXBUFLEN];
 
   addr_len = sizeof(their_addr);
+  fd_set readfds;
+
+  FD_ZERO(&readfds);
+  FD_ZERO(&master);
+  FD_SET(setupsock, &master);
+  fdmax = setupsock;
+
   while(1){
-    if((numbytes = recvfrom(setupsock, &buf, MAXBUFLEN , 0,
-                            (struct sockaddr *)&their_addr, &addr_len)) == -1){
-      perror("recvfrom");
+    readfds = master;
+    if (select(fdmax+1, &readfds, NULL, NULL, NULL) == -1){
+      perror("select");
       exit(1);
     }
 
-    // Let's just hope the request came in the right format
-    if(!setup_tunnel(their_addr, buf)){
-      printf("Could not create tunnel, max tunnel conections reached\n");
+    for(int fd_i = 0; fd_i <= fdmax; fd_i++){
+      if(FD_ISSET(fd_i, &readfds)){ // fd_i is ready to read!
+        /* if(fd_i == setupsock){ */
+        if((numbytes = recvfrom(fd_i, &buf, MAXBUFLEN , 0,
+                                (struct sockaddr *)&their_addr, &addr_len)) == -1){
+          perror("recvfrom");
+          exit(1);
+        }
+
+        // If it came through the setupsock we setup a new tunnel
+        if(fd_i == setupsock && !setup_tunnel(their_addr, buf)){
+          printf("Could not create tunnel, max tunnel conections reached\n");
+        }
+        /* } */
+      }
     }
 
   }
