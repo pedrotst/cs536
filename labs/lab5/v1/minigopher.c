@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* printf("Server answered with %u, %u\n", ans.sig, htons(ans.tunnel_port)); */
-  printf("Tunnel creation was a success!\nPlease use %s %d\n", argv[1], htons(ans.tunnel_port));
+  printf("Tunnel creation was a success!\nPlease use %s %d\n", argv[1], htons(ans.transit_port));
 
   /* addr.sin_family = AF_INET; */
   /* addr.sin_port =  0; //htons(SERVERPORT); */
