@@ -16,7 +16,7 @@
 #define TRANSITSOCKIND 10
 
 int clisock_arr[TRANSITSOCKIND];
-int sersock_arr[TRANSITSOCKIND];
+int servsock_arr[TRANSITSOCKIND];
 int sock_i = 0;
 int fdmax;
 fd_set master;
@@ -132,7 +132,7 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
     fprintf(stderr, "Failed to create socket\n");
   }
 
-  sersock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
+  servsock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
   if(clisock_arr[sock_i] == -1){
     fprintf(stderr, "Failed to create socket\n");
   }
@@ -154,14 +154,15 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
   naddr.sin_family = AF_INET;
   naddr.sin_port =  0;
   naddr.sin_addr.s_addr = INADDR_ANY;
-  if (bind(sersock_arr[sock_i], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
+  if (bind(servsock_arr[sock_i], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
     fprintf(stderr, "Failed to bind tunnel\n");
     exit(1);
   }
-  if (getsockname(sersock_arr[sock_i], (struct sockaddr *)&naddr, &addrLen) == -1) {
+  if (getsockname(servsock_arr[sock_i], (struct sockaddr *)&naddr, &addrLen) == -1) {
     printf("tunnel getsockname() failed\n");
     exit(1);
   }
+  fdmax = servsock_arr[sock_i];
 
   int tport2 = htons(naddr.sin_port);
   printf("Tunnel created for trans2:%d\n", tport2);
@@ -174,8 +175,43 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
     perror("create tunnel sendto");
   }
 
-  update_table(sock_i, htons(tport1), htons(tport2), their_ip, -1, packet.server_ip, packet.server_port);
+  update_table(sock_i, tport1, tport2, their_ip, -1, packet.server_ip, packet.server_port);
   sock_i++;
+}
+
+int forward(uint8_t *buf, struct sockaddr_storage their_addr, int numbytes){
+  FILE *fp, *_fp;
+  char _cli_ip[16], _server_ip[16], their_ip[16];
+  int _sock_i, _tport1, _tport2, _cli_port, _server_port;
+
+  inet_ntop(their_addr.ss_family,
+            get_in_addr((struct sockaddr *)&their_addr),
+            their_ip, sizeof their_ip);
+
+
+  fp = fopen("forward_table.txt", "r");
+  if(fp == NULL){
+    fprintf(stderr, "Something went wrong with forward table\n");
+    exit(1);
+  }
+
+
+  while(fscanf(fp, "%d %d %d %[^ ] %d %[^ ] %d\n", &_sock_i, &_tport1, &_tport2,
+               _cli_ip, &_cli_port, _server_ip, &_server_port) == 7){
+    if(strcmp(their_ip, _cli_ip) == 0){
+      printf("Got a packet from %s:%d\n", _cli_ip, _cli_port);
+      //forward to _server_ip
+      fclose(fp);
+      return 1;
+    }
+    else if(strcmp(their_ip, _server_ip) == 0){
+      // forward to _client_ip
+      fclose(fp);
+      return 1;
+    }
+  }
+  // Getting here means we could not find the upcomming conection so the packet was dropped
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -246,10 +282,23 @@ int main(int argc, char *argv[]) {
         }
 
         // If it came through the setupsock we setup a new tunnel
-        if(fd_i == setupsock && !setup_tunnel(their_addr, buf)){
-          printf("Could not create tunnel, max tunnel conections reached\n");
+        if(fd_i == setupsock){
+          // If tunnel is created we add the new sockets to the set that we are listening to
+          if(setup_tunnel(their_addr, buf)){
+            FD_SET(clisock_arr[sock_i - 1], &master);
+            FD_SET(servsock_arr[sock_i - 1], &master);
+            printf("clisockfd: %d\n", clisock_arr[sock_i - 1]);
+            printf("servsockfd: %d\n", servsock_arr[sock_i - 1]);
+            fdmax = servsock_arr[sock_i - 1];
+          }
+          else
+            printf("Could not create tunnel, max tunnel conections reached\n");
         }
-        /* } */
+        // Otherwise it's a forward packet
+        else{
+          printf("Got data!\n");
+          forward(buf, their_addr, numbytes);
+        }
       }
     }
 
