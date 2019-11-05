@@ -168,7 +168,7 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
   printf("Tunnel created for trans2:%d\n", tport2);
 
   ans.sig = 3;
-  ans.transit_port = tport1;
+  ans.transit_port = naddr.sin_port;
 
   if ((numbytes = sendto(clisock_arr[0], &ans, sizeof(answer_t), 0,
                          (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
@@ -179,15 +179,19 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
   sock_i++;
 }
 
-int forward(uint8_t *buf, struct sockaddr_storage their_addr, int numbytes){
+int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
+  struct sockaddr_in sendto_addr;
   FILE *fp, *_fp;
   char _cli_ip[16], _server_ip[16], their_ip[16];
   int _sock_i, _tport1, _tport2, _cli_port, _server_port;
+  int numbytes;
+  socklen_t sendtolen = sizeof(sendto_addr);
 
   inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             their_ip, sizeof their_ip);
 
+  int their_port = ntohs(get_in_port((struct sockaddr *)&their_addr));
 
   fp = fopen("forward_table.txt", "r");
   if(fp == NULL){
@@ -195,17 +199,34 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int numbytes){
     exit(1);
   }
 
-
+  sendto_addr.sin_family = AF_INET;
   while(fscanf(fp, "%d %d %d %[^ ] %d %[^ ] %d\n", &_sock_i, &_tport1, &_tport2,
                _cli_ip, &_cli_port, _server_ip, &_server_port) == 7){
     if(strcmp(their_ip, _cli_ip) == 0){
-      printf("Got a packet from %s:%d\n", _cli_ip, _cli_port);
+      printf("Got a packet from %s:%d\n",_cli_ip, their_port);
+      printf("Sending to %s:%d\n", _server_ip, _server_port);
       //forward to _server_ip
+      sendto_addr.sin_port = ntohs(_server_port);
+      inet_pton(AF_INET, _server_ip, &sendto_addr.sin_addr);
+      if ((numbytes = sendto(servsock_arr[_sock_i], buf, bufsize, 0,
+                             (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
+        perror("sendto forward");
+      }
+
       fclose(fp);
+      update_table(_sock_i, _tport1, _tport2, _cli_ip, their_port, _server_ip, _server_port);
       return 1;
     }
     else if(strcmp(their_ip, _server_ip) == 0){
       // forward to _client_ip
+      printf("Got a packet from %s:%d", _server_ip, their_port);
+      printf("Sending to %s:%d\n", _cli_ip, _cli_port);
+      sendto_addr.sin_port = ntohs(_cli_port);
+      inet_pton(AF_INET, _cli_ip, &sendto_addr.sin_addr);
+      if ((numbytes = sendto(clisock_arr[_sock_i], buf, bufsize, 0,
+                             (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
+        perror("sendto forward");
+      }
       fclose(fp);
       return 1;
     }
