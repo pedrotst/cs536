@@ -13,10 +13,13 @@
 #include "utils.h"
 
 #define MAXBUFLEN 5000
-#define TRANSITSOCKIND 10
+#define TRANSITSOCKIND 20
 
-int clisock_arr[TRANSITSOCKIND];
-int servsock_arr[TRANSITSOCKIND];
+/* #define TABLEUPDATE */
+
+// FIXME: Update these vectors to be a single one, to aggree with 1.4
+int sock_arr[TRANSITSOCKIND];
+int setupsock;
 int sock_i = 0;
 int fdmax;
 fd_set master;
@@ -57,8 +60,13 @@ int update_table(int sock_i, int transit_port_1, int transit_port_2,
   _cli_ip[0] = '\0';
   _server_ip[0] = '\0';
 
+#ifdef TABLEUPDATE
+  printf("\n ============ Table Update ============ \n");
   printf("%d %d %d %s %d %s %d\n", sock_i, transit_port_1, transit_port_2,
           cli_ip, cli_port, server_ip, server_port);
+  printf(" ====================================== \n");
+#endif
+
 
   int added = 0;
   while(fscanf(fp, "%d %d %d %[^ ] %d %[^ ] %d\n", &_sock_i, &_tport1, &_tport2,
@@ -127,56 +135,59 @@ int setup_tunnel(struct sockaddr_storage their_addr, uint8_t* buf){
 
   // Open a new socket for the tunneling
   // at position sock_i
-  clisock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
-  if(clisock_arr[sock_i] == -1){
+  sock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
+  if(sock_arr[sock_i] == -1){
     fprintf(stderr, "Failed to create socket\n");
   }
 
-  servsock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
-  if(clisock_arr[sock_i] == -1){
+  sock_arr[sock_i+1] = socket(AF_INET, SOCK_DGRAM, 0);
+  if(sock_arr[sock_i+1] == -1){
     fprintf(stderr, "Failed to create socket\n");
   }
 
+  // Bind the client
   naddr.sin_family = AF_INET;
   naddr.sin_port =  0;
   naddr.sin_addr.s_addr = INADDR_ANY;
-  if (bind(clisock_arr[sock_i], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
+  if (bind(sock_arr[sock_i], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
     fprintf(stderr, "Failed to bind tunnel\n");
     exit(1);
   }
-  if (getsockname(clisock_arr[sock_i], (struct sockaddr *)&naddr, &addrLen) == -1) {
+  if (getsockname(sock_arr[sock_i], (struct sockaddr *)&naddr, &addrLen) == -1) {
     printf("tunnel getsockname() failed\n");
     exit(1);
   }
   int tport1 = htons(naddr.sin_port);
   printf("Tunnel created for trans1:%d\n", tport1);
+  ans.sig = 3;
+  ans.transit_port = naddr.sin_port;
 
+  // Bind the server
   naddr.sin_family = AF_INET;
   naddr.sin_port =  0;
   naddr.sin_addr.s_addr = INADDR_ANY;
-  if (bind(servsock_arr[sock_i], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
+  if (bind(sock_arr[sock_i+1], (const struct sockaddr *) &naddr, sizeof(naddr)) == -1) {
     fprintf(stderr, "Failed to bind tunnel\n");
     exit(1);
   }
-  if (getsockname(servsock_arr[sock_i], (struct sockaddr *)&naddr, &addrLen) == -1) {
+  if (getsockname(sock_arr[sock_i+1], (struct sockaddr *)&naddr, &addrLen) == -1) {
     printf("tunnel getsockname() failed\n");
     exit(1);
   }
-  fdmax = servsock_arr[sock_i];
+  fdmax = sock_arr[sock_i+1];
 
   int tport2 = htons(naddr.sin_port);
   printf("Tunnel created for trans2:%d\n", tport2);
 
-  ans.sig = 3;
-  ans.transit_port = naddr.sin_port;
 
-  if ((numbytes = sendto(clisock_arr[0], &ans, sizeof(answer_t), 0,
+  if ((numbytes = sendto(setupsock, &ans, sizeof(answer_t), 0,
                          (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
     perror("create tunnel sendto");
   }
 
   update_table(sock_i, tport1, tport2, their_ip, -1, packet.server_ip, packet.server_port);
-  sock_i++;
+  sock_i += 2;
+  return 1;
 }
 
 int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
@@ -205,25 +216,26 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
     if(strcmp(their_ip, _cli_ip) == 0){
       printf("Got a packet from %s:%d\n",_cli_ip, their_port);
       printf("Sending to %s:%d\n", _server_ip, _server_port);
-      //forward to _server_ip
+      //forward to _server_ip:_server_port
       sendto_addr.sin_port = ntohs(_server_port);
       inet_pton(AF_INET, _server_ip, &sendto_addr.sin_addr);
-      if ((numbytes = sendto(servsock_arr[_sock_i], buf, bufsize, 0,
+      if ((numbytes = sendto(sock_arr[_sock_i + 1], buf, bufsize, 0,
                              (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
         perror("sendto forward");
       }
 
       fclose(fp);
-      update_table(_sock_i, _tport1, _tport2, _cli_ip, their_port, _server_ip, _server_port);
+      if(_cli_port == -1)
+        update_table(_sock_i, _tport1, _tport2, _cli_ip, their_port, _server_ip, _server_port);
       return 1;
     }
     else if(strcmp(their_ip, _server_ip) == 0){
-      // forward to _client_ip
-      printf("Got a packet from %s:%d", _server_ip, their_port);
+      // forward to _client_ip:_client_port
+      printf("Got a packet from %s:%d\n", _server_ip, their_port);
       printf("Sending to %s:%d\n", _cli_ip, _cli_port);
       sendto_addr.sin_port = ntohs(_cli_port);
       inet_pton(AF_INET, _cli_ip, &sendto_addr.sin_addr);
-      if ((numbytes = sendto(clisock_arr[_sock_i], buf, bufsize, 0,
+      if ((numbytes = sendto(sock_arr[_sock_i], buf, bufsize, 0,
                              (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
         perror("sendto forward");
       }
@@ -241,7 +253,6 @@ int main(int argc, char *argv[]) {
   struct addrinfo *result;
   socklen_t addr_len;
   int myport, numbytes;
-  int setupsock;
   char name[50];
   char realip[20];
   request_t packet;
@@ -306,11 +317,11 @@ int main(int argc, char *argv[]) {
         if(fd_i == setupsock){
           // If tunnel is created we add the new sockets to the set that we are listening to
           if(setup_tunnel(their_addr, buf)){
-            FD_SET(clisock_arr[sock_i - 1], &master);
-            FD_SET(servsock_arr[sock_i - 1], &master);
-            printf("clisockfd: %d\n", clisock_arr[sock_i - 1]);
-            printf("servsockfd: %d\n", servsock_arr[sock_i - 1]);
-            fdmax = servsock_arr[sock_i - 1];
+            FD_SET(sock_arr[sock_i - 2], &master);
+            FD_SET(sock_arr[sock_i - 1], &master);
+            printf("clisockfd: %d\n", sock_arr[sock_i - 2]);
+            printf("servsockfd: %d\n", sock_arr[sock_i - 1]);
+            fdmax = sock_arr[sock_i - 1];
           }
           else
             printf("Could not create tunnel, max tunnel conections reached\n");
