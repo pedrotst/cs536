@@ -20,16 +20,24 @@ int main(int argc, char *argv[]) {
   int vpn_port, server_port;
   int sockfd, numbytes;
   char buf[MAXBUFLEN];
+  struct in_addr ip;
 
   if(argc < 5 || (argc - 1) % 2 != 0){
     fprintf(stderr, "usage: createoverlay router_1-IP router_1-port ... router_k-IP router_k-port dst-IP dst-port \n");
     exit(1);
   }
   buf[0] = '\0';
-  sprintf(buf, "%u", (argc - 3) / 2);
-  for(int i = 1; i < argc; i++){
+  int j = 0;
+  sprintf(buf, "%u", (int) (argc - 3) / 2);
+  for(int i = 1; i < argc; i+=2){
     strcat(buf, "#");
-    strcat(buf, argv[i]);
+    j = strlen(buf);
+    inet_aton(argv[i], &ip);
+    printf("sizeofip: %lu\n", sizeof(ip));
+    memcpy(&buf[j], &ip, sizeof(ip));
+    strcat(buf, "#");
+    j = strlen(buf);
+    sprintf(&buf[j], "%hu", (unsigned short) atoi(argv[i+1]));
   }
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){

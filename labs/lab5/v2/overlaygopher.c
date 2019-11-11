@@ -127,26 +127,34 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   int numbytes;
   char my_ip[16], my_port[10];
   char post_ip[16], post_port[10];
-  int num_overlays;
+  char num_overlays[2];
   char buf[1000];
   int i;
+  struct in_addr ip;
+  int port;
 
   buf[0] = '\0';
   post_ip[0] = '\0';
   post_port[0] = '\0';
   i = 0;
 
-  i = copy_pound(buf, recbuf, i);
-  num_overlays = atoi(buf);
-  // Ignore the my IP
-  i = copy_pound(my_ip, recbuf,++i);
-  // Ignore the my port
-  i = copy_pound(my_port, recbuf, ++i);
-  sprintf(buf, "%u", num_overlays - 1);
-  strcat(buf, &recbuf[i]);
+  num_overlays[0] = recbuf[0];
+  num_overlays[1] = '\0';
+  memcpy(&ip, &recbuf[2], 4);
+  memcpy(&port, &recbuf[7], 2);
+  sprintf(buf, "%u", atoi(num_overlays - 1));
+  strcat(buf, &recbuf[10]);
+  /* i = copy_pound(buf, recbuf, i); */
+  /* num_overlays = atoi(buf); */
+  /* // Ignore the my IP */
+  /* i = copy_pound(my_ip, recbuf,++i); */
+  /* // Ignore the my port */
+  /* i = copy_pound(my_port, recbuf, ++i); */
+  /* sprintf(buf, "%u", num_overlays - 1); */
+  /* strcat(buf, &recbuf[i]); */
 
-  i = copy_pound(post_ip, recbuf, ++i);
-  i = copy_pound(post_port, recbuf, ++i);
+  /* i = copy_pound(post_ip, recbuf, ++i); */
+  /* i = copy_pound(post_port, recbuf, ++i); */
 
   if(sock_i > TRANSITSOCKIND){
     return 0;
@@ -162,13 +170,15 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
 
   #ifdef TABLEUPDATE
   printf("Overlay request received from %s:%d!\n", their_ip, their_port);
-  printf("Packet is %d bytes long\n", numbytes);
+  /* printf("Packet is %d bytes long\n", numbytes); */
   printf("It contains %s\n", recbuf);
-  printf("num_overlays: %d\n", num_overlays);
-  printf("my_ip: %s\n", my_ip);
-  printf("my_port: %s\n", my_port);
-  printf("post_ip: %s\n", post_ip);
-  printf("post_port: %s\n", post_port);
+  printf("num_overlays: %s\n", num_overlays);
+  printf("ip: %s\n", inet_ntoa(ip));
+  printf("port: %d\n", port);
+  /* printf("my_ip: %s\n", my_ip); */
+  /* printf("my_port: %s\n", my_port); */
+  /* printf("post_ip: %s\n", post_ip); */
+  /* printf("post_port: %s\n", post_port); */
   printf("buf: %s\n", buf);
   #endif
 
@@ -327,7 +337,7 @@ int main(int argc, char *argv[]) {
 
   strcpy(realip, inet_ntoa(((struct sockaddr_in *)result->ai_addr)->sin_addr));
   printf("Running supergopher at %s %d\n", realip, myport);
-  uint8_t buf[MAXBUFLEN];
+  char buf[MAXBUFLEN];
 
   addr_len = sizeof(their_addr);
   fd_set readfds;
