@@ -224,7 +224,16 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     perror("create tunnel sendto");
   }
 
-  update_table(sock_i, their_ip, tport1, inet_ntoa(post_ip), post_port);
+  printf("Setting up connection with the next guy");
+  struct sockaddr_in sendto_addr;
+  sendto_addr.sin_port = ntohs(post_port);
+  sendto_addr.sin_addr = post_ip;
+  if ((numbytes = sendto(setupsock, buf, strlen(buf), 0,
+                         (struct sockaddr *)&sendto_addr, sizeof(sendto_addr))) == -1) {
+    perror("create tunnel sendto");
+  }
+
+  update_table(sock_i, their_ip, tport1, inet_ntoa(post_ip), -1);
   sock_i += 2;
   return 1;
 }
@@ -252,7 +261,7 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
   sendto_addr.sin_family = AF_INET;
   while(fscanf(fp, "%d %d %d %[^ ] %d %[^ ] %d\n", &_sock_i, &_tport1, &_tport2,
                _cli_ip, &_cli_port, _server_ip, &_server_port) == 7){
-    if(strcmp(their_ip, _cli_ip) == 0){
+    else if(strcmp(their_ip, _cli_ip) == 0){
       printf("Got a packet from %s:%d\n",_cli_ip, their_port);
       printf("Sending to %s:%d\n", _server_ip, _server_port);
       //forward to _server_ip:_server_port
@@ -269,17 +278,26 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
       return 1;
     }
     else if(strcmp(their_ip, _server_ip) == 0){
-      // forward to _client_ip:_client_port
-      printf("Got a packet from %s:%d\n", _server_ip, their_port);
-      printf("Sending to %s:%d\n", _cli_ip, _cli_port);
-      sendto_addr.sin_port = ntohs(_cli_port);
-      inet_pton(AF_INET, _cli_ip, &sendto_addr.sin_addr);
-      if ((numbytes = sendto(sock_arr[_sock_i], buf, bufsize, 0,
-                             (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
-        perror("sendto forward");
+      // Check if we just got an ack, in which case update the table and be happy
+      if(buf[0] == 3 && _tport2 == -1){
+        printf("\nGot an ACK! Updating Table\n");
+        answer_s ans;
+        memcpy(buf, ans, sizeof(answer_s));
+        update_table(_sock_i, _cli_ip, _cli_port, _server_ip, ans.transit_port);
       }
-      fclose(fp);
-      return 1;
+      else {
+        // forward to _client_ip:_client_port
+        printf("Got a packet from %s:%d\n", _server_ip, their_port);
+        printf("Sending to %s:%d\n", _cli_ip, _cli_port);
+        sendto_addr.sin_port = ntohs(_cli_port);
+        inet_pton(AF_INET, _cli_ip, &sendto_addr.sin_addr);
+        if ((numbytes = sendto(sock_arr[_sock_i], buf, bufsize, 0,
+                               (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
+          perror("sendto forward");
+        }
+        fclose(fp);
+        return 1;
+      }
     }
   }
   // Getting here means we could not find the upcomming conection so the packet was dropped
@@ -354,6 +372,9 @@ int main(int argc, char *argv[]) {
 
         // If it came through the setupsock we setup a new tunnel
         if(fd_i == setupsock){
+          // If we are receiving an ack
+          if(buf[0] == 3 && receive_ack(buf)){
+          }
           // If tunnel is created we add the new sockets to the set that we are listening to
           if(setup_tunnel(their_addr, buf)){
             FD_SET(sock_arr[sock_i - 2], &master);
