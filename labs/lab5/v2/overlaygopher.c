@@ -126,35 +126,28 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   answer_t ans;
   int numbytes;
   char my_ip[16], my_port[10];
-  char post_ip[16], post_port[10];
+  /* char post_ip[16], post_port[10]; */
   char num_overlays[2];
   char buf[1000];
   int i;
-  struct in_addr ip;
-  int port;
+  struct in_addr pre_ip, post_ip;
+  unsigned short pre_port, post_port;
+  uint8_t ov;
 
   buf[0] = '\0';
-  post_ip[0] = '\0';
-  post_port[0] = '\0';
   i = 0;
 
   num_overlays[0] = recbuf[0];
   num_overlays[1] = '\0';
-  memcpy(&ip, &recbuf[2], 4);
-  memcpy(&port, &recbuf[7], 2);
-  sprintf(buf, "%u", atoi(num_overlays - 1));
-  strcat(buf, &recbuf[10]);
-  /* i = copy_pound(buf, recbuf, i); */
-  /* num_overlays = atoi(buf); */
-  /* // Ignore the my IP */
-  /* i = copy_pound(my_ip, recbuf,++i); */
-  /* // Ignore the my port */
-  /* i = copy_pound(my_port, recbuf, ++i); */
-  /* sprintf(buf, "%u", num_overlays - 1); */
-  /* strcat(buf, &recbuf[i]); */
+  memcpy(&pre_ip, &recbuf[2], 4);
+  memcpy(&pre_port, &recbuf[7], 2);
+  ov = atoi(num_overlays - 1);
+  buf[0] = ov + '0';
 
-  /* i = copy_pound(post_ip, recbuf, ++i); */
-  /* i = copy_pound(post_port, recbuf, ++i); */
+  memcpy(&post_ip, &recbuf[10], 4);
+  memcpy(&post_port, &recbuf[15], 2);
+
+  strcat(buf, &recbuf[16]);
 
   if(sock_i > TRANSITSOCKIND){
     return 0;
@@ -170,16 +163,12 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
 
   #ifdef TABLEUPDATE
   printf("Overlay request received from %s:%d!\n", their_ip, their_port);
-  /* printf("Packet is %d bytes long\n", numbytes); */
   printf("It contains %s\n", recbuf);
   printf("num_overlays: %s\n", num_overlays);
-  printf("ip: %s\n", inet_ntoa(ip));
-  printf("port: %d\n", port);
-  /* printf("my_ip: %s\n", my_ip); */
-  /* printf("my_port: %s\n", my_port); */
-  /* printf("post_ip: %s\n", post_ip); */
-  /* printf("post_port: %s\n", post_port); */
-  printf("buf: %s\n", buf);
+  printf("pre_ip: %s\n", inet_ntoa(pre_ip));
+  printf("pre_port: %d\n", pre_port);
+  printf("post_ip: %s\n", inet_ntoa(post_ip));
+  printf("post_port: %d\n", post_port);
   #endif
 
 
@@ -235,7 +224,7 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     perror("create tunnel sendto");
   }
 
-  update_table(sock_i, their_ip, their_port, post_ip, atoi(post_port));
+  update_table(sock_i, their_ip, their_port, inet_ntoa(post_ip), post_port);
   sock_i += 2;
   return 1;
 }

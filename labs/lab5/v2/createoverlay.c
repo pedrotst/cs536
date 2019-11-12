@@ -28,16 +28,17 @@ int main(int argc, char *argv[]) {
   }
   buf[0] = '\0';
   int j = 0;
+  unsigned short port;
   sprintf(buf, "%u", (int) (argc - 3) / 2);
   for(int i = 1; i < argc; i+=2){
     strcat(buf, "#");
     j = strlen(buf);
     inet_aton(argv[i], &ip);
-    printf("sizeofip: %lu\n", sizeof(ip));
     memcpy(&buf[j], &ip, sizeof(ip));
     strcat(buf, "#");
     j = strlen(buf);
-    sprintf(&buf[j], "%hu", (unsigned short) atoi(argv[i+1]));
+    port = atoi(argv[i+1]);
+    memcpy(&buf[j], &port, 2);
   }
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
