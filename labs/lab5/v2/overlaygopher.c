@@ -68,7 +68,7 @@ int update_table(int sock_i, char *pre_ip, int pre_port,
 
   int added = 0;
   while(fscanf(fp, "%d %[^ ] %d %[^ ] %d\n", &_sock_i, _pre_ip, &_pre_port,
-               _pre_ip, &_pre_port) == 5){
+               _post_ip, &_post_port) == 5){
 
     if(strcmp(_pre_ip, pre_ip) == 0){
       added++;
@@ -224,7 +224,7 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     perror("create tunnel sendto");
   }
 
-  update_table(sock_i, their_ip, their_port, inet_ntoa(post_ip), post_port);
+  update_table(sock_i, their_ip, tport1, inet_ntoa(post_ip), post_port);
   sock_i += 2;
   return 1;
 }
