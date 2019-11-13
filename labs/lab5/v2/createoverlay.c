@@ -39,12 +39,14 @@ int main(int argc, char *argv[]) {
     j = strlen(buf);
     port = atoi(argv[i+1]);
     memcpy(&buf[j], &port, 2);
+    buf[j+2] = '\0';
   }
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
     printf("Failed to create socket\n");
     exit(1);
   }
+  print_hex(buf);
 
   struct addrinfo *servinfo;
   struct addrinfo hints;
