@@ -244,7 +244,7 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     update_table(sock_i, their_ip, -1, inet_ntoa(post_ip), -1);
   }
   else
-    update_table(sock_i, their_ip, their_port, inet_ntoa(post_ip), post_port);
+    update_table(sock_i, their_ip, -1, inet_ntoa(post_ip), post_port);
 
   sock_i += 2;
   return 1;
