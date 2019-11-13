@@ -26,6 +26,10 @@ int sock_i = 0;
 int fdmax;
 fd_set master;
 
+// We need these two informations to send the ACK when everything went well
+struct sockaddr_storage ans_addr;
+int tport1;
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -198,12 +202,12 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     printf("tunnel getsockname() failed\n");
     exit(1);
   }
-  int tport1 = htons(naddr.sin_port);
+  tport1 = naddr.sin_port;
 #ifdef DEBUG
-  printf("Tunnel created for trans1:%d\n", tport1);
+  printf("Tunnel created for trans1:%d\n", htons(tport1));
 #endif
-  ans.sig = 3;
-  ans.transit_port = naddr.sin_port;
+  /* ans.sig = 3; */
+  /* ans.transit_port = naddr.sin_port; */
 
   // Bind the server
   naddr.sin_family = AF_INET;
@@ -224,10 +228,12 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   printf("Tunnel created for trans2:%d\n", tport2);
 #endif
 
-  if ((numbytes = sendto(setupsock, &ans, sizeof(answer_t), 0,
-                         (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
-    perror("create tunnel sendto");
-  }
+  // Setup the address to acknowledge to
+  ans_addr = their_addr;
+  /* if ((numbytes = sendto(setupsock, &ans, sizeof(answer_t), 0, */
+  /*                        (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) { */
+  /*   perror("create tunnel sendto"); */
+  /* } */
 
   if(ov > 0){
 #ifdef DEBUG
@@ -243,8 +249,16 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     }
     update_table(sock_i, their_ip, -1, inet_ntoa(post_ip), -1);
   }
-  else
+  else{
+    // This starts the ack chain
+    ans.sig = 3;
+    ans.transit_port = tport1;
+    if ((numbytes = sendto(sock_arr[sock_i+1], &ans, sizeof(answer_t), 0,
+                           (struct sockaddr *)&ans_addr, sizeof(ans_addr))) == -1) {
+      perror("create tunnel sendto");
+    }
     update_table(sock_i, their_ip, -1, inet_ntoa(post_ip), post_port);
+  }
 
   sock_i += 2;
   return 1;
@@ -296,6 +310,12 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
         answer_t ans;
         memcpy(&ans, buf, sizeof(answer_t));
         update_table(_sock_i, _cli_ip, _cli_port, _server_ip, htons(ans.transit_port));
+        // ACK the previous overlay
+        ans.transit_port = tport1;
+        if ((numbytes = sendto(sock_arr[_sock_i], &ans, sizeof(answer_t), 0,
+                               (struct sockaddr *)&ans_addr, sizeof(ans_addr))) == -1) {
+          perror("create tunnel sendto");
+        }
       }
       else {
         // forward to _client_ip:_client_port

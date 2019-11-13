@@ -2,18 +2,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <setjmp.h>
+#include <sys/time.h>
 
 #include "utils.h"
 
 #define MAXBUFLEN 1000
 
 /* #define DEBUG */
+
+static sigjmp_buf resend_alarm;
+
+// Handler for SIGALRM
+void resend_request(int sig){
+  static int timeout_count = 0;
+  timeout_count++;
+  printf("Server took too long to respond, resending request\n");
+  fflush(stdout);
+  siglongjmp(resend_alarm, timeout_count);
+}
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
@@ -55,6 +70,7 @@ int main(int argc, char *argv[]) {
   struct addrinfo *servinfo;
   struct addrinfo hints;
   struct sockaddr *their_addr;
+  struct itimerval itime;
   int rv;
 
   memset(&hints, 0, sizeof hints);
