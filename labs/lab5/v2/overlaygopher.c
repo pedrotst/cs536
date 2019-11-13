@@ -16,7 +16,8 @@
 #define MAXBUFLEN 5000
 #define TRANSITSOCKIND 20
 
-#define TABLEUPDATE 1
+/* #define TABLEUPDATE 1 */
+/* #define DEBUG */
 
 char forward_table_name[30], forward_table_name2[30];
 int sock_arr[TRANSITSOCKIND];
@@ -99,29 +100,19 @@ void create_table(){
   FILE *fp;
   srand(time(0));
   sprintf(forward_table_name, "%d.txt", rand());
-  printf("Creating file1 %s\n", forward_table_name);
   sprintf(forward_table_name2, "%d.txt", rand());
+
+#ifdef DEBUG
+  printf("Creating file1 %s\n", forward_table_name);
   printf("Creating file2 %s\n", forward_table_name2);
+#endif
+
   fp = fopen(forward_table_name, "w");
   if(fp == NULL){
     fprintf(stderr, "Failed to create forward table");
     exit(1);
   }
   fclose(fp);
-}
-
-// if src = foo#bar#x & start = 0, then dst = foo and return 3
-int copy_pound(char *dst, char *src, int start){
-  int j = start;
-  int i = 0;
-
-  while(src[j] != '\0' && src[j] != '#'){
-    dst[i] = src[j];
-    i++; j++;
-  }
-  dst[i] = '\0';
-
-  return j;
 }
 
 int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
@@ -142,25 +133,22 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   buf[0] = '\0';
   i = 0;
 
+  // Decode the message
   num_overlays[0] = recbuf[0];
   num_overlays[1] = '\0';
   memcpy(&pre_ip, &recbuf[2], 4);
   memcpy(&pre_port, &recbuf[7], 2);
   ov = atoi(num_overlays) - 1;
   sprintf(buf, "%u", ov);
-  /* buf[0] = ov + '0'; */
   buf[1] = '\0';
-
   memcpy(&post_ip, &recbuf[10], 4);
   memcpy(&post_port, &recbuf[15], 2);
 
   strcat(buf, &recbuf[9]);
-  /* int j = strlen(recbuf); */
-  /* memcpy(&buf[1], &recbuf[17], j); */
-  /* sprintf(&buf[1], "%s", &recbuf[17]); */
 
-
+#ifdef DEBUG
   printf("sendbuf: '%s'", buf);
+#endif
 
   if(sock_i > TRANSITSOCKIND){
     return 0;
@@ -174,25 +162,20 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
 
   int their_port = ntohs(get_in_port((struct sockaddr *)&their_addr));
 
-  #ifdef TABLEUPDATE
+#ifdef DEBUG
   printf("Overlay request received from %s:%d!\n", their_ip, their_port);
-  /* printf("It contains %s\n", recbuf); */
-  /* printf("it contains:"); */
   print_hex(recbuf);
   print_hex(buf);
-  /* for(int i = 0; i < strlen(recbuf); i++) */
-    /* printf("%x", recbuf[i]); */
-  /* printf("\n"); */
   printf("num_overlays: %s\n", num_overlays);
   printf("pre_ip: %s\n", inet_ntoa(pre_ip));
   printf("pre_port: %d\n", pre_port);
   printf("post_ip: %s\n", inet_ntoa(post_ip));
   printf("post_port: %d\n", post_port);
-  #endif
+#endif
 
 
   // Open a new socket for the tunneling
-  // at position sock_i
+  // at position sock_i and sock_i+1
   sock_arr[sock_i] = socket(AF_INET, SOCK_DGRAM, 0);
   if(sock_arr[sock_i] == -1){
     fprintf(stderr, "Failed to create socket\n");
@@ -216,7 +199,9 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
     exit(1);
   }
   int tport1 = htons(naddr.sin_port);
+#ifdef DEBUG
   printf("Tunnel created for trans1:%d\n", tport1);
+#endif
   ans.sig = 3;
   ans.transit_port = naddr.sin_port;
 
@@ -235,8 +220,9 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   fdmax = sock_arr[sock_i+1];
 
   int tport2 = htons(naddr.sin_port);
+#ifdef DEBUG
   printf("Tunnel created for trans2:%d\n", tport2);
-
+#endif
 
   if ((numbytes = sendto(setupsock, &ans, sizeof(answer_t), 0,
                          (struct sockaddr *)&their_addr, sizeof(their_addr))) == -1) {
@@ -244,7 +230,9 @@ int setup_tunnel(struct sockaddr_storage their_addr, char* recbuf){
   }
 
   if(ov > 0){
-    printf("Setting up connection with the next guy\n");
+#ifdef DEBUG
+    printf("Setting up connection with the next overlay\n");
+#endif
     struct sockaddr_in sendto_addr;
     sendto_addr.sin_family = AF_INET;
     sendto_addr.sin_port = ntohs(post_port);
@@ -296,19 +284,15 @@ int forward(uint8_t *buf, struct sockaddr_storage their_addr, int bufsize){
                              (struct sockaddr *) &sendto_addr, sendtolen)) == -1) {
         perror("sendto forward");
       }
-
       fclose(fp);
+      // We don't know what's the initial port of the client, now we know better
       if(_cli_port == -1)
         update_table(_sock_i, _cli_ip, their_port, _server_ip, _server_port);
       return 1;
     }
     else if(strcmp(their_ip, _server_ip) == 0){
-      /* printf("buf[0] == %hu\n", (uint8_t) buf[0]); */
       // Check if we just got an ack, in which case update the table and be happy
       if(buf[0] == 3 && _server_port == -1){
-        /* printf("got package from: %s:%d\n",_cli_ip, their_port); */
-        /* printf("Sending to %s:%d\n", _server_ip, _server_port); */
-        printf("\nGot an ACK! Updating Table\n");
         answer_t ans;
         memcpy(&ans, buf, sizeof(answer_t));
         update_table(_sock_i, _cli_ip, _cli_port, _server_ip, htons(ans.transit_port));
@@ -406,8 +390,6 @@ int main(int argc, char *argv[]) {
           if(setup_tunnel(their_addr, buf)){
             FD_SET(sock_arr[sock_i - 2], &master);
             FD_SET(sock_arr[sock_i - 1], &master);
-            printf("clisockfd: %d\n", sock_arr[sock_i - 2]);
-            printf("servsockfd: %d\n", sock_arr[sock_i - 1]);
             fdmax = sock_arr[sock_i - 1];
           }
           else
@@ -415,7 +397,6 @@ int main(int argc, char *argv[]) {
         }
         // Otherwise it's a forward packet
         else{
-          printf("Got data!\n");
           forward(buf, their_addr, numbytes);
         }
       }

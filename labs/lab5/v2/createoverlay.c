@@ -13,6 +13,8 @@
 
 #define MAXBUFLEN 1000
 
+/* #define DEBUG */
+
 int main(int argc, char *argv[]) {
   struct sockaddr_in addr;
   socklen_t addrLen, addr_len;
@@ -43,10 +45,12 @@ int main(int argc, char *argv[]) {
   }
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if(sockfd == -1){
-    printf("Failed to create socket\n");
+    fprintf(stderr, "Failed to create socket\n");
     exit(1);
   }
+#ifdef DEBUG
   print_hex(buf);
+#endif
 
   struct addrinfo *servinfo;
   struct addrinfo hints;
@@ -64,7 +68,6 @@ int main(int argc, char *argv[]) {
 
   their_addr = servinfo->ai_addr;
   addr_len = sizeof *their_addr;
-  printf("sending %s\n", buf);
 
   if ((numbytes = sendto(sockfd, buf, strlen(buf), 0,
                          their_addr, addr_len)) == -1) {
