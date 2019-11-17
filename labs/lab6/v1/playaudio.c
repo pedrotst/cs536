@@ -10,14 +10,62 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <signal.h>
 
-#define DEBUG
+#define DEBUG 1
+
+char *recbuf;
+int payload_size;
+int buf_size;
+int bytes_flushed = 0;
+int bytes_occupied = 0;
+FILE * audio_device;
+
+void flush_buffer(int sig) {
+    char * buf_cpy = malloc(buf_size);
+   
+
+    if (bytes_occupied >=  payload_size) {
+        fwrite(recbuf, 1, payload_size, audio_device);
+        bytes_occupied -= payload_size;
+        memcpy(buf_cpy, &recbuf[payload_size], bytes_occupied);
+        bytes_flushed += payload_size;
+        
+    } else {
+        fwrite(recbuf, 1, bytes_occupied, audio_device);
+        bytes_flushed += bytes_occupied;
+        bytes_occupied = 0;
+        
+    }
+    free(recbuf);
+    recbuf = buf_cpy;
+}
 
 int main(int argc, char** argv) {
+
+    struct sigaction sa;
+    sa.sa_handler = flush_buffer;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+
+    sigaction(SIGALRM, &sa, NULL);
+
+    //signal(SIGALRM, flush_buffer);
     if(argc != 9){
         printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
         exit(1);
     }
+
+    audio_device = fopen("./test.txt", "w");
+    if (audio_device == NULL) {
+        printf("/dev/audio\n");
+        return 1;
+    }
+    payload_size = atoi(argv[4]);
+    int gamma = atoi(argv[5]);
+    buf_size = atoi(argv[6]);
+    recbuf = malloc(buf_size);
+    int target_buf = atoi(argv[7]);
 
     int tcp_port = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -88,35 +136,39 @@ int main(int argc, char** argv) {
 
 	struct sockaddr_in src;
 	socklen_t src_len = sizeof(src);
-	char recbuf[1500];
-	char recv_content[1488];
+	
+	char recv_content[payload_size+4];
 	int seq_num = 0;
 	int completed = 0;
-	FILE *fp = fopen("received_file.txt", "w");
-
+	//FILE *fp = fopen("received_file.txt", "w");
+    ualarm( (useconds_t) ((1.0 / gamma) * 1000000),  (useconds_t) ((1.0 / gamma) * 1000000));
 	while (1) {
 #ifdef DEBUG
 		printf("Waiting to receive\n");
 #endif
-		if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, NULL) < 0) {
-            fprintf(stderr, "select\n" );
-            return 1;
-        }
-		bytes_read = recvfrom(child_sock, recbuf, 1492, 0, (struct sockaddr *) &src, &src_len);
+		// if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, NULL) < 0) {
+  //           continue;
+  //       }
+		bytes_read = recvfrom(child_sock, recv_content, payload_size+4, 0, (struct sockaddr *) &src, &src_len);
+        int actual_data_size = bytes_read - 4;
 
 #ifdef DEBUG
 		printf("Received %d bytes\n", bytes_read);
 #endif
 
-		if(bytes_read == 1 && recbuf[0] == '5'){
+		if(bytes_read == 1 && recv_content[0] == '5'){
 			break;
 		}
 
-		memcpy(&seq_num, recbuf, 4);
-		memcpy(recv_content, &recbuf[4], bytes_read - 4);
-		fwrite(recv_content, bytes_read - 4, 1, fp);
-    }
-	fclose(fp);
+		memcpy(&seq_num, recv_content, 4);
+        memcpy(&recbuf[seq_num*actual_data_size- bytes_flushed], &recv_content[4], actual_data_size);
+        bytes_occupied += actual_data_size;
 
+
+		//memcpy(recv_content, &recbuf[4], bytes_read - 4);
+		//fwrite(recv_content, bytes_read - 4, 1, fp);
+    }
+	fclose(audio_device);
+    free(recbuf);
 	return 1;
 }

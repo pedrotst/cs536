@@ -12,7 +12,7 @@
 #include <time.h>
 #include <signal.h>
 
-#define DEBUG
+#define DEBUG 1
 
 void feedback_control(int sig) {
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
 
                 char response[7];
-                response[0] = 2;
+                response[0] = '2';
                 int child_sock = socket(AF_INET, SOCK_DGRAM,0);
                 struct sockaddr_in stream_addr;
                 stream_addr.sin_family = AF_INET;
