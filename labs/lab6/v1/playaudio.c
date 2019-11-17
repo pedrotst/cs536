@@ -12,6 +12,11 @@
 #include <time.h>
 
 int main(int argc, char** argv) {
+	if(argc != 8){
+		printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
+        exit(1);
+	}
+
 	int tcp_port = socket(AF_INET, SOCK_STREAM, 0);
 
 	struct sockaddr_in dest;
@@ -79,9 +84,4 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 	}
-
-
-
-
-
 }
