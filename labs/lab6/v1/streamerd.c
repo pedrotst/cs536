@@ -160,7 +160,8 @@ int main(int argc, char** argv) {
                 }
                 buf[0] = '5';
 
-                sendto(child_sock, buf, 1, 0, (struct sockaddr*) &client_udp, socklen);
+                for(int i = 0; i < 5; i++)
+                    sendto(child_sock, buf, 1, 0, (struct sockaddr*) &client_udp, socklen);
                 close(child_sock);
             }
         }

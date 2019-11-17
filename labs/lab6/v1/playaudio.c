@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     short server_udp_port = 0;
     int file_size = 0;
 
-    if (response[0] != 2) {
+    if (response[0] != '2') {
         fprintf(stderr, "request rejected.\n");
         return 1;
     }
