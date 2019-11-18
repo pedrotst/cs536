@@ -12,13 +12,13 @@
 #include <time.h>
 #include <signal.h>
 
-#define DEBUG 1
 
 void feedback_control(int sig) {
 
 }
 
 int main(int argc, char** argv) {
+
     if(argc != 6){
         printf("usage: streamerd tcp-port payload-size init-lambda mode logfile1\n");
         exit(1);
@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     int tcp_port = atoi(argv[1]);
     int payload_size = atoi(argv[2]);
     unsigned long lambda = atoi(argv[3]);
+    int mode = atoi(argv[4]);
     int seq_num = 0;
 
     if(payload_size > 1488){
@@ -163,10 +164,12 @@ int main(int argc, char** argv) {
                 for(int i = 0; i < 5; i++)
                     sendto(child_sock, buf, 1, 0, (struct sockaddr*) &client_udp, socklen);
                 close(child_sock);
+                fclose(fp);
             }
         }
         // parent process
         close(client_sock);
+
 
 
     }

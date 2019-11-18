@@ -12,19 +12,24 @@
 #include <time.h>
 #include <signal.h>
 
-#define DEBUG 1
+
 
 char *recbuf;
 int payload_size;
 int buf_size;
 int bytes_flushed = 0;
 int bytes_occupied = 0;
+int file_size = 0;
 FILE * audio_device;
+int completed;
 
 void flush_buffer(int sig) {
     char * buf_cpy = malloc(buf_size);
-   
 
+    if (bytes_occupied == 0) {
+        return;
+    }
+   
     if (bytes_occupied >=  payload_size) {
         fwrite(recbuf, 1, payload_size, audio_device);
         bytes_occupied -= payload_size;
@@ -36,6 +41,10 @@ void flush_buffer(int sig) {
         bytes_flushed += bytes_occupied;
         bytes_occupied = 0;
         
+    }
+
+    if (bytes_flushed == file_size) {
+        completed = 1;
     }
     free(recbuf);
     recbuf = buf_cpy;
@@ -89,7 +98,6 @@ int main(int argc, char** argv) {
     int bytes_read = read(tcp_port, response, 7);
 
     short server_udp_port = 0;
-    int file_size = 0;
 
     if (response[0] != '2') {
         fprintf(stderr, "request rejected.\n");
@@ -134,41 +142,43 @@ int main(int argc, char** argv) {
     FD_ZERO(&active_fd_set);
     FD_SET(child_sock, &active_fd_set);
 
-	struct sockaddr_in src;
-	socklen_t src_len = sizeof(src);
-	
-	char recv_content[payload_size+4];
-	int seq_num = 0;
-	int completed = 0;
-	//FILE *fp = fopen("received_file.txt", "w");
+    struct sockaddr_in src;
+    socklen_t src_len = sizeof(src);
+    
+    char recv_content[payload_size+4];
+    int seq_num = 0;
+    completed = 0;
+    //FILE *fp = fopen("received_file.txt", "w");
     ualarm( (useconds_t) ((1.0 / gamma) * 1000000),  (useconds_t) ((1.0 / gamma) * 1000000));
-	while (1) {
+    while (1) {
 #ifdef DEBUG
-		printf("Waiting to receive\n");
+        printf("Waiting to receive\n");
 #endif
-		// if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, NULL) < 0) {
+        // if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, NULL) < 0) {
   //           continue;
   //       }
-		bytes_read = recvfrom(child_sock, recv_content, payload_size+4, 0, (struct sockaddr *) &src, &src_len);
+        bytes_read = recvfrom(child_sock, recv_content, payload_size+4, 0, (struct sockaddr *) &src, &src_len);
         int actual_data_size = bytes_read - 4;
 
 #ifdef DEBUG
-		printf("Received %d bytes\n", bytes_read);
+        printf("Received %d bytes\n", bytes_read);
 #endif
 
-		if(bytes_read == 1 && recv_content[0] == '5'){
-			break;
-		}
+        if(bytes_read == 1 && recv_content[0] == '5'){
+            break;
+        }
 
-		memcpy(&seq_num, recv_content, 4);
-        memcpy(&recbuf[seq_num*actual_data_size- bytes_flushed], &recv_content[4], actual_data_size);
+        memcpy(&seq_num, recv_content, 4);
+        memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size);
         bytes_occupied += actual_data_size;
 
 
-		//memcpy(recv_content, &recbuf[4], bytes_read - 4);
-		//fwrite(recv_content, bytes_read - 4, 1, fp);
+        //memcpy(recv_content, &recbuf[4], bytes_read - 4);
+        //fwrite(recv_content, bytes_read - 4, 1, fp);
     }
-	fclose(audio_device);
+
+    while (!completed) {}
+    fclose(audio_device);
     free(recbuf);
-	return 1;
+    return 1;
 }
