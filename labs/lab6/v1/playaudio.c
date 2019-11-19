@@ -18,31 +18,33 @@ char *recbuf;
 int payload_size;
 int buf_size;
 int bytes_flushed = 0;
-int bytes_occupied = 0;
 int file_size = 0;
-int writeptr = 0;
+int buf_writeptr = 0;
+int buf_readptr = 0;
 FILE * audio_device;
 int completed;
+int _gamma;
 
 void flush_buffer(int sig) {
-    char * buf_cpy = calloc(buf_size, sizeof(char));
-
-    /* printf("\n======= flush  =========\n"); */
-    /* fflush(stdout); */
-    if (bytes_occupied == 0) {
+    // Don't flush if there is nothing to flush
+    if (buf_writeptr == 0) {
         return;
     }
 
-    fwrite(recbuf, sizeof(char), 1, audio_device);
-    // FIXME: Easy performance gain: Set a threshold to read from before flushing
-    bytes_occupied--;
-    memcpy(buf_cpy, &recbuf[1], bytes_occupied);
-    bytes_flushed++;
-    writeptr--;
+    fwrite(&recbuf[buf_readptr], sizeof(char), 1, audio_device);
+    buf_readptr++;
 
-    if (bytes_flushed == file_size) {
-        completed = 1;
-    }
+    // For efficiency, let's memcpy only when
+    // I can make enough space for another packet
+    if(buf_readptr < payload_size)
+        return;
+
+    char * buf_cpy = calloc(buf_size, sizeof(char));
+    memcpy(buf_cpy, &recbuf[buf_readptr], buf_writeptr);
+    bytes_flushed += buf_readptr;
+    buf_writeptr -= buf_readptr;
+    buf_readptr = 0;
+
     free(recbuf);
     recbuf = buf_cpy;
 }
@@ -50,12 +52,11 @@ void flush_buffer(int sig) {
 /* A good set of parameters to see the buffer being filled: */
 /* ./playaudio 128.10.112.201 4445 /tmp/pdacost/pp.au 1100 500000 10000  400 log2.txt */
 /* ./streamerd 4445 1100 100 1 log.txt */
-
 int main(int argc, char** argv) {
     signal(SIGALRM, flush_buffer);
 
     if(argc != 9){
-        printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
+        printf("usage: playaudio tcp-ip tcp-port audiofile payload-size _gamma buf-size target-buf logfile2\n");
         exit(1);
     }
 
@@ -65,13 +66,13 @@ int main(int argc, char** argv) {
         exit(1);
     }
     payload_size = atoi(argv[4]);
-    int gamma = atoi(argv[5]);
+    _gamma = atoi(argv[5]);
     buf_size = atoi(argv[6]);
     recbuf = malloc(buf_size * sizeof(char));
     int target_buf = atoi(argv[7]);
 
 #ifdef DEBUG
-    printf("gamma:\t %0.3f us (%d pps)\n", (1.0/gamma) * 1000000, gamma);
+    printf("_gamma:\t %0.3f us (%d pps)\n", (1.0/_gamma) * 1000000, _gamma);
     printf("bufsize:\t %0.2f kb \n", buf_size / 1000.0);
     printf("targetbuf:\t %d\n", target_buf);
 #endif
@@ -147,7 +148,7 @@ int main(int argc, char** argv) {
     char recv_content[payload_size+4];
     int seq_num = 0;
     completed = 0;
-    ualarm((1.0 / gamma) * 1000000, (1.0 / gamma) * 1000000);
+    ualarm((1.0 / _gamma) * 1000000, (1.0 / _gamma) * 1000000);
 
     while (1) {
 #ifdef DEBUG
@@ -161,6 +162,8 @@ int main(int argc, char** argv) {
 #endif
 
         if(bytes_read == 1 && recv_content[0] == '5'){
+            completed = 1;
+            printf("Finished to download the data\n");
             break;
         }
 
@@ -171,20 +174,28 @@ int main(int argc, char** argv) {
         }
 
         // Populate buffer if it's not full
-        if(bytes_occupied + actual_data_size <= buf_size){
+        if(buf_writeptr + actual_data_size <= buf_size){
             /* memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size); */
-            memcpy(&recbuf[writeptr], &recv_content[4], actual_data_size);
-            writeptr += actual_data_size;
-            bytes_occupied += actual_data_size;
+            memcpy(&recbuf[buf_writeptr], &recv_content[4], actual_data_size);
+            buf_writeptr += actual_data_size;
         }
         else
             fprintf(stderr, "Buffer is full, the last package was dropped\n");
     }
 
-    while (!completed) {
+    printf("Waiting to end streaming\n");
+    fflush(stdout);
+    // Communication ended but there may still be data waiting
+    // to be streamed in the buffer.
+    // Let's wait until the transfer is completed
+    // and the buffer is zero
+    while (! (completed && (buf_readptr == buf_writeptr))) {
+        // sleep doesn't really matter since we're interrupting on SIGALARM
         sleep(1);
     }
 
+    printf("We are done streaming, thanks for being a valuable costumer\n");
+    fflush(stdout);
     fclose(audio_device);
     free(recbuf);
     return 1;
