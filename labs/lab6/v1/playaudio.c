@@ -12,7 +12,7 @@
 #include <time.h>
 #include <signal.h>
 
-
+#define DEBUG
 
 char *recbuf;
 int payload_size;
@@ -20,28 +20,25 @@ int buf_size;
 int bytes_flushed = 0;
 int bytes_occupied = 0;
 int file_size = 0;
+int writeptr = 0;
 FILE * audio_device;
 int completed;
 
 void flush_buffer(int sig) {
-    char * buf_cpy = malloc(buf_size);
+    char * buf_cpy = calloc(buf_size, sizeof(char));
 
+    /* printf("\n======= flush  =========\n"); */
+    /* fflush(stdout); */
     if (bytes_occupied == 0) {
         return;
     }
-   
-    if (bytes_occupied >=  payload_size) {
-        fwrite(recbuf, 1, payload_size, audio_device);
-        bytes_occupied -= payload_size;
-        memcpy(buf_cpy, &recbuf[payload_size], bytes_occupied);
-        bytes_flushed += payload_size;
-        
-    } else {
-        fwrite(recbuf, 1, bytes_occupied, audio_device);
-        bytes_flushed += bytes_occupied;
-        bytes_occupied = 0;
-        
-    }
+
+    fwrite(recbuf, sizeof(char), 1, audio_device);
+    // FIXME: Easy performance gain: Set a threshold to read from before flushing
+    bytes_occupied--;
+    memcpy(buf_cpy, &recbuf[1], bytes_occupied);
+    bytes_flushed++;
+    writeptr--;
 
     if (bytes_flushed == file_size) {
         completed = 1;
@@ -50,16 +47,13 @@ void flush_buffer(int sig) {
     recbuf = buf_cpy;
 }
 
+/* A good set of parameters to see the buffer being filled: */
+/* ./playaudio 128.10.112.201 4445 /tmp/pdacost/pp.au 1100 500000 10000  400 log2.txt */
+/* ./streamerd 4445 1100 100 1 log.txt */
+
 int main(int argc, char** argv) {
+    signal(SIGALRM, flush_buffer);
 
-    struct sigaction sa;
-    sa.sa_handler = flush_buffer;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-
-    sigaction(SIGALRM, &sa, NULL);
-
-    //signal(SIGALRM, flush_buffer);
     if(argc != 9){
         printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
         exit(1);
@@ -67,17 +61,22 @@ int main(int argc, char** argv) {
 
     audio_device = fopen("./test.txt", "w");
     if (audio_device == NULL) {
-        printf("/dev/audio\n");
-        return 1;
+        fprintf(stderr, "Audio device failed to open\n");
+        exit(1);
     }
     payload_size = atoi(argv[4]);
     int gamma = atoi(argv[5]);
     buf_size = atoi(argv[6]);
-    recbuf = malloc(buf_size);
+    recbuf = malloc(buf_size * sizeof(char));
     int target_buf = atoi(argv[7]);
 
-    int tcp_port = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef DEBUG
+    printf("gamma:\t %0.3f us (%d pps)\n", (1.0/gamma) * 1000000, gamma);
+    printf("bufsize:\t %0.2f kb \n", buf_size / 1000.0);
+    printf("targetbuf:\t %d\n", target_buf);
+#endif
 
+    int tcp_port = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in dest;
     dest.sin_family = AF_INET;
     dest.sin_addr.s_addr = inet_addr(argv[1]);
@@ -148,15 +147,12 @@ int main(int argc, char** argv) {
     char recv_content[payload_size+4];
     int seq_num = 0;
     completed = 0;
-    //FILE *fp = fopen("received_file.txt", "w");
-    ualarm( (useconds_t) ((1.0 / gamma) * 1000000),  (useconds_t) ((1.0 / gamma) * 1000000));
+    ualarm((1.0 / gamma) * 1000000, (1.0 / gamma) * 1000000);
+
     while (1) {
 #ifdef DEBUG
         printf("Waiting to receive\n");
 #endif
-        // if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, NULL) < 0) {
-  //           continue;
-  //       }
         bytes_read = recvfrom(child_sock, recv_content, payload_size+4, 0, (struct sockaddr *) &src, &src_len);
         int actual_data_size = bytes_read - 4;
 
@@ -169,15 +165,26 @@ int main(int argc, char** argv) {
         }
 
         memcpy(&seq_num, recv_content, 4);
-        memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size);
-        bytes_occupied += actual_data_size;
+        if(seq_num > buf_size){
+            fprintf(stderr, "Error with seq_num, dropping package\n");
+            continue;
+        }
 
-
-        //memcpy(recv_content, &recbuf[4], bytes_read - 4);
-        //fwrite(recv_content, bytes_read - 4, 1, fp);
+        // Populate buffer if it's not full
+        if(bytes_occupied + actual_data_size <= buf_size){
+            /* memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size); */
+            memcpy(&recbuf[writeptr], &recv_content[4], actual_data_size);
+            writeptr += actual_data_size;
+            bytes_occupied += actual_data_size;
+        }
+        else
+            fprintf(stderr, "Buffer is full, the last package was dropped\n");
     }
 
-    while (!completed) {}
+    while (!completed) {
+        sleep(1);
+    }
+
     fclose(audio_device);
     free(recbuf);
     return 1;
