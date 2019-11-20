@@ -82,7 +82,6 @@ int main(int argc, char** argv) {
     }
 
     sem_init(&mutex, 0, 1); 
-
     audio_device = fopen("./test.txt", "w");
     if (audio_device == NULL) {
         fprintf(stderr, "Audio device failed to open\n");

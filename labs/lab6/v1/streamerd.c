@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <sys/wait.h>
 #include <signal.h>
 
 int child_sock;
@@ -72,6 +73,8 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    
+
     FILE * para_file = fopen("control-param.dat", "r");
     if (para_file == NULL) {
         a = 1.0;
@@ -131,6 +134,7 @@ int main(int argc, char** argv) {
     listen(sockfd, 3);
 
     while (1) {
+        
         struct sockaddr_in client_tcp;
         socklen_t client_len = sizeof(client_tcp);
         int client_sock = accept(sockfd, (struct sockaddr *) &client_tcp, &client_len);
@@ -142,6 +146,7 @@ int main(int argc, char** argv) {
         pid_t k = fork();
 
         if (k == 0) {   //child process
+
             char filename[100];
             int bytes_read = read(client_sock, filename, 100);
             filename[bytes_read] = '\0';
@@ -245,8 +250,10 @@ int main(int argc, char** argv) {
                 fclose(fp);
             }
             printf("done\n");
+            return 0;
         }
         // parent process
+
         close(client_sock);
 
 
