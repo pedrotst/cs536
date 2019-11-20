@@ -23,16 +23,18 @@ int buf_writeptr = 0;
 int buf_readptr = 0;
 FILE * audio_device;
 int completed;
-int _gamma;
 
 void flush_buffer(int sig) {
+    int buf_used = buf_writeptr - buf_readptr;
     // Don't flush if there is nothing to flush
-    if (buf_writeptr == 0) {
+    if (buf_used <= 0) {
         return;
     }
 
-    fwrite(&recbuf[buf_readptr], sizeof(char), 1, audio_device);
-    buf_readptr++;
+    // Don't write more than we have on buffer
+    int writesize = (buf_used > payload_size) ? payload_size : buf_used;
+    fwrite(&recbuf[buf_readptr], sizeof(char), writesize, audio_device);
+    buf_readptr += writesize;
 
     // For efficiency, let's memcpy only when
     // I can make enough space for another packet
@@ -41,8 +43,10 @@ void flush_buffer(int sig) {
 
     char * buf_cpy = calloc(buf_size, sizeof(char));
     memcpy(buf_cpy, &recbuf[buf_readptr], buf_writeptr);
-    bytes_flushed += buf_readptr;
-    buf_writeptr -= buf_readptr;
+    /* bytes_flushed += buf_readptr; */
+    /* buf_writeptr -= buf_readptr; */
+    bytes_flushed += writesize;
+    buf_writeptr -= writesize;
     buf_readptr = 0;
 
     free(recbuf);
@@ -56,7 +60,7 @@ int main(int argc, char** argv) {
     signal(SIGALRM, flush_buffer);
 
     if(argc != 9){
-        printf("usage: playaudio tcp-ip tcp-port audiofile payload-size _gamma buf-size target-buf logfile2\n");
+        printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
         exit(1);
     }
 
@@ -66,13 +70,13 @@ int main(int argc, char** argv) {
         exit(1);
     }
     payload_size = atoi(argv[4]);
-    _gamma = atoi(argv[5]);
+    int gamma = atoi(argv[5]);
     buf_size = atoi(argv[6]);
     recbuf = malloc(buf_size * sizeof(char));
     int target_buf = atoi(argv[7]);
 
 #ifdef DEBUG
-    printf("_gamma:\t %0.3f us (%d pps)\n", (1.0/_gamma) * 1000000, _gamma);
+    printf("gamma:\t %0.3f us (%d pps)\n", (1.0/gamma) * 1000000, gamma);
     printf("bufsize:\t %0.2f kb \n", buf_size / 1000.0);
     printf("targetbuf:\t %d\n", target_buf);
 #endif
@@ -148,7 +152,7 @@ int main(int argc, char** argv) {
     char recv_content[payload_size+4];
     int seq_num = 0;
     completed = 0;
-    ualarm((1.0 / _gamma) * 1000000, (1.0 / _gamma) * 1000000);
+    ualarm((1.0 / gamma) * 1000000, (1.0 / gamma) * 1000000);
 
     while (1) {
 #ifdef DEBUG

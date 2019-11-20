@@ -12,6 +12,7 @@
 #include <time.h>
 #include <signal.h>
 
+#define DEBUG
 
 void feedback_control(int sig) {
 
@@ -166,6 +167,7 @@ int main(int argc, char** argv) {
                 close(child_sock);
                 fclose(fp);
             }
+            printf("done\n");
         }
         // parent process
         close(client_sock);
