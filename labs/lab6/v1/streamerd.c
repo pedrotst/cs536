@@ -12,9 +12,56 @@
 #include <time.h>
 #include <signal.h>
 
-#define DEBUG
+int child_sock;
+int payload_size;
+int mode;
+double lambda, a, delta, epi, beta;
+
 
 void feedback_control(int sig) {
+    struct sockaddr_in src;
+    socklen_t src_len = sizeof(src);
+    char feedback[12];
+    recvfrom(child_sock, feedback, 12 , 0, (struct sockaddr*) &src, &src_len);
+    int buffer_occupancy, target_buf, gamma;
+    memcpy(&buffer_occupancy, feedback, 4);
+    memcpy(&target_buf, &feedback[4], 4);
+    memcpy(&gamma, &feedback[8], 4);
+    
+
+    switch (mode) {
+        case 0:
+            if (buffer_occupancy > target_buf) {
+                lambda-=a;
+                if (lambda <= 0) {
+                    lambda += a;
+                }
+            }
+            else if (buffer_occupancy < target_buf)
+                lambda+=a;
+            break;
+        case 1:
+            if (buffer_occupancy > target_buf)
+                lambda *= delta;
+            else if (buffer_occupancy < target_buf)
+                lambda+=a;
+            break;
+
+        case 2:
+            lambda += epi*((target_buf - buffer_occupancy)/payload_size);
+            if (lambda <= 0) {
+                lambda -= epi*((target_buf - buffer_occupancy)/payload_size);
+            }
+            break;
+
+        case 3:
+            lambda += epi*((target_buf - buffer_occupancy)/payload_size) - beta*(lambda - gamma);
+            break;
+
+    }
+    printf("occu:%d, target:%d, gamma:%d\n", buffer_occupancy, target_buf, gamma);
+    printf("new lambda: %f\n", lambda);
+    fflush(stdout);
 
 }
 
@@ -25,10 +72,29 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    FILE * para_file = fopen("control-param.dat", "r");
+    if (para_file == NULL) {
+        a = 1.0;
+        delta = 0.5;
+        epi = 0.2;
+        beta = 0.5;
+    } else {
+        char * line;
+        size_t para_len = 0;
+        getline(&line, &para_len, para_file);
+        a = atof(strtok(line, ","));
+        delta = atof(strtok(NULL,","));
+        epi = atof(strtok(NULL,","));
+        beta = atof(strtok(NULL,","));
+        //printf("a:%f , delta:%f, epi:%f, beta:%f\n", a, delta, epi, beta);
+    }
+
+
+
     int tcp_port = atoi(argv[1]);
-    int payload_size = atoi(argv[2]);
-    unsigned long lambda = atoi(argv[3]);
-    int mode = atoi(argv[4]);
+    payload_size = atoi(argv[2]);
+    lambda = atof(argv[3]);
+    mode = atoi(argv[4]);
     int seq_num = 0;
 
     if(payload_size > 1488){
@@ -107,7 +173,7 @@ int main(int argc, char** argv) {
 
                 char response[7];
                 response[0] = '2';
-                int child_sock = socket(AF_INET, SOCK_DGRAM,0);
+                child_sock = socket(AF_INET, SOCK_DGRAM,0);
                 struct sockaddr_in stream_addr;
                 stream_addr.sin_family = AF_INET;
                 stream_addr.sin_addr.s_addr = INADDR_ANY;
@@ -142,9 +208,9 @@ int main(int argc, char** argv) {
                 client_udp.sin_port = htons(client_port);
                 int socklen = sizeof(client_udp);
 
-
                 fcntl(child_sock, F_SETOWN, getpid());
                 fcntl(child_sock, F_SETFL, O_ASYNC);
+                
 
                 char buf[payload_size + 4];
                 int size_read = 0;
@@ -158,7 +224,18 @@ int main(int argc, char** argv) {
                        
                     sendto(child_sock, buf, size_read + 4, 0, (struct sockaddr*) &client_udp, socklen);
                     seq_num++;
-                    usleep((useconds_t)(((1.0/lambda) * 1000000)));
+                    double inverse_lambda = 1.0/lambda;
+                    struct timespec req;
+                    req.tv_sec = 0;
+                    req.tv_nsec = (int) (inverse_lambda * 1000000000);
+                    struct timespec rem;
+                    int ret = nanosleep(&req, &rem);
+                    while (ret == -1) {
+                        req.tv_sec = rem.tv_sec;
+                        req.tv_nsec = rem.tv_nsec;
+                        ret = nanosleep(&req, &rem);
+                    }
+                    //usleep((useconds_t)(inverse_lambda * 1000000));
                 }
                 buf[0] = '5';
 

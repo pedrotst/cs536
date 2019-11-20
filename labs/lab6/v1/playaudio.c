@@ -13,23 +13,26 @@
 #include <signal.h>
 #include <semaphore.h> 
 
-#define DEBUG
+
 
 char *recbuf;
 int payload_size;
 int buf_size;
+int max_buf_packet_num;
 int bytes_flushed = 0;
 int file_size = 0;
 int buf_writeptr = 0;
 int buf_readptr = 0;
+int buf_occupied = 0;
 FILE * audio_device;
 int completed;
 sem_t mutex; 
 
 void flush_buffer(int sig) {
-    int buf_used = buf_writeptr - buf_readptr;
+
+    // int buf_used = buf_writeptr - buf_readptr;
     // Don't flush if there is nothing to flush
-    if (buf_used <= 0) {
+    if (buf_occupied <= 0) {
         return;
     }
 
@@ -40,25 +43,31 @@ void flush_buffer(int sig) {
     }
 
     // Don't write more than we have on buffer
-    int writesize = (buf_used > payload_size) ? payload_size : buf_used;
-    fwrite(&recbuf[buf_readptr], sizeof(char), writesize, audio_device);
-    buf_readptr += writesize;
+    int writesize = (buf_occupied > payload_size) ? payload_size : buf_occupied;
+    fwrite(&recbuf[buf_readptr * payload_size], sizeof(char), writesize, audio_device);
+    buf_readptr++;
+    if (buf_readptr >= max_buf_packet_num) {
+        buf_readptr = 0;
+    }
+
+    buf_occupied-=writesize; 
 
     // For efficiency, let's memcpy only when
     // I can make enough space for another packet
+
+    /* 
     if(buf_readptr < payload_size)
         return;
 
     char * buf_cpy = calloc(buf_size, sizeof(char));
     memcpy(buf_cpy, &recbuf[buf_readptr], buf_writeptr);
-    /* bytes_flushed += buf_readptr; */
-    /* buf_writeptr -= buf_readptr; */
+
     bytes_flushed += writesize;
     buf_writeptr -= writesize;
     buf_readptr = 0;
 
     free(recbuf);
-    recbuf = buf_cpy;
+    recbuf = buf_cpy; */
 }
 
 /* A good set of parameters to see the buffer being filled: */
@@ -84,6 +93,8 @@ int main(int argc, char** argv) {
     buf_size = atoi(argv[6]);
     recbuf = malloc(buf_size * sizeof(char));
     int target_buf = atoi(argv[7]);
+
+    max_buf_packet_num = buf_size / payload_size;
 
 #ifdef DEBUG
     printf("gamma:\t %0.3f us (%d pps)\n", (1.0/gamma) * 1000000, gamma);
@@ -162,7 +173,9 @@ int main(int argc, char** argv) {
     char recv_content[payload_size+4];
     int seq_num = 0;
     completed = 0;
-    ualarm((1.0 / gamma) * 1000000, (1.0 / gamma) * 1000000);
+
+    double inverse_gamma = 1.0 / gamma;
+    ualarm((useconds_t) (inverse_gamma * 1000000), (useconds_t) (inverse_gamma * 1000000));
 
     while (1) {
 #ifdef DEBUG
@@ -188,12 +201,25 @@ int main(int argc, char** argv) {
         }
 
         // Populate buffer if it's not full
-        if(buf_writeptr + actual_data_size <= buf_size){
+        if(buf_occupied + actual_data_size < buf_size){
             /* memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size); */
             sem_wait(&mutex); 
-            memcpy(&recbuf[buf_writeptr], &recv_content[4], actual_data_size);
+            memcpy(&recbuf[buf_writeptr * payload_size], &recv_content[4], actual_data_size);
             sem_post(&mutex); 
-            buf_writeptr += actual_data_size;
+
+            char feedback[12];
+            memcpy(feedback, &buf_occupied, 4);
+            memcpy(&feedback[4], &target_buf, 4);
+            memcpy(&feedback[8], &gamma,4);
+            sendto(child_sock, feedback,12,0, (struct sockaddr*) &server_udp, sizeof(server_udp));
+
+
+            buf_writeptr++;
+            if (buf_writeptr >= max_buf_packet_num) {
+                buf_writeptr = 0;
+            }
+            buf_occupied+= actual_data_size;
+
         }
         else
             fprintf(stderr, "Buffer is full, the last package was dropped\n");
@@ -207,7 +233,7 @@ int main(int argc, char** argv) {
     // and the buffer is zero
     while (! (completed && (buf_readptr == buf_writeptr))) {
         // sleep doesn't really matter since we're interrupting on SIGALARM
-        sleep(1);
+    
     }
 
     printf("We are done streaming, thanks for being a valuable costumer\n");
