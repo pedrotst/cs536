@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <signal.h>
+#include <semaphore.h> 
 
 #define DEBUG
 
@@ -23,11 +24,18 @@ int buf_writeptr = 0;
 int buf_readptr = 0;
 FILE * audio_device;
 int completed;
+sem_t mutex; 
 
 void flush_buffer(int sig) {
     int buf_used = buf_writeptr - buf_readptr;
     // Don't flush if there is nothing to flush
     if (buf_used <= 0) {
+        return;
+    }
+
+    int sem_val;
+    sem_getvalue(&mutex, &sem_val);
+    if (sem_val != 1) {
         return;
     }
 
@@ -63,6 +71,8 @@ int main(int argc, char** argv) {
         printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
         exit(1);
     }
+
+    sem_init(&mutex, 0, 1); 
 
     audio_device = fopen("./test.txt", "w");
     if (audio_device == NULL) {
@@ -180,7 +190,9 @@ int main(int argc, char** argv) {
         // Populate buffer if it's not full
         if(buf_writeptr + actual_data_size <= buf_size){
             /* memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size); */
+            sem_wait(&mutex); 
             memcpy(&recbuf[buf_writeptr], &recv_content[4], actual_data_size);
+            sem_post(&mutex); 
             buf_writeptr += actual_data_size;
         }
         else
