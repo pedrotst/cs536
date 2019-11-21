@@ -12,8 +12,13 @@
 #include <time.h>
 #include <signal.h>
 #include <semaphore.h> 
+#include <alsa/asoundlib.h>
+
+#define mulawwrite(x) snd_pcm_writei(mulawdev, x, mulawfrms)
 
 
+static snd_pcm_t *mulawdev;
+static snd_pcm_uframes_t mulawfrms;
 
 char *recbuf;
 int payload_size;
@@ -27,6 +32,34 @@ int buf_occupied = 0;
 FILE * audio_device;
 int completed;
 sem_t mutex; 
+
+char audio_device_buffer[4096];
+int audio_device_buffer_ptr = 0;
+
+int total_bytes_written = 0;
+int total_bytes_read = 0;
+
+void mulawopen(size_t *bufsiz) {
+    snd_pcm_hw_params_t *p;
+    unsigned int rate = 8000;
+
+    snd_pcm_open(&mulawdev, "default", SND_PCM_STREAM_PLAYBACK, 0);
+    snd_pcm_hw_params_alloca(&p);
+    snd_pcm_hw_params_any(mulawdev, p);
+    snd_pcm_hw_params_set_access(mulawdev, p, SND_PCM_ACCESS_RW_INTERLEAVED);
+    snd_pcm_hw_params_set_format(mulawdev, p, SND_PCM_FORMAT_MU_LAW);
+    snd_pcm_hw_params_set_channels(mulawdev, p, 1);
+    snd_pcm_hw_params_set_rate_near(mulawdev, p, &rate, 0);
+    snd_pcm_hw_params(mulawdev, p);
+    snd_pcm_hw_params_get_period_size(p, &mulawfrms, 0);
+    *bufsiz = (size_t)mulawfrms;
+    return;
+}
+
+void mulawclose(void) {
+    snd_pcm_drain(mulawdev);
+    snd_pcm_close(mulawdev);
+}
 
 void flush_buffer(int sig) {
 
@@ -44,13 +77,41 @@ void flush_buffer(int sig) {
 
     // Don't write more than we have on buffer
     int writesize = (buf_occupied > payload_size) ? payload_size : buf_occupied;
-    fwrite(&recbuf[buf_readptr * payload_size], sizeof(char), writesize, audio_device);
-    buf_readptr++;
-    if (buf_readptr >= max_buf_packet_num) {
-        buf_readptr = 0;
+    //fwrite(&recbuf[buf_readptr * payload_size], sizeof(char), writesize, audio_device);
+
+    if (audio_device_buffer_ptr + writesize > 4096) {
+        writesize = 4096 - audio_device_buffer_ptr;
     }
 
+    if (buf_readptr + writesize > buf_size) {
+        memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],buf_size - buf_readptr);
+        audio_device_buffer_ptr += buf_size - buf_readptr;
+        memcpy(&audio_device_buffer[audio_device_buffer_ptr], recbuf,writesize-(buf_size - buf_readptr));
+        audio_device_buffer_ptr += writesize-(buf_size - buf_readptr);
+        buf_readptr = writesize-(buf_size - buf_readptr);
+    } else {
+        memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],writesize);
+        buf_readptr+=writesize;
+        if (buf_readptr >= buf_size) {
+            buf_readptr = 0;
+        }
+        audio_device_buffer_ptr += writesize;
+    }
+    
+    
+
     buf_occupied-=writesize; 
+
+    
+
+    if (audio_device_buffer_ptr >= 4096) {
+        mulawwrite(audio_device_buffer);
+        //fwrite(audio_device_buffer, 1, 4096, audio_device);
+        audio_device_buffer_ptr = 0;
+
+        total_bytes_written += 4096;
+        printf("Writing: %d\n", total_bytes_written);
+    }
 
     // For efficiency, let's memcpy only when
     // I can make enough space for another packet
@@ -80,6 +141,9 @@ int main(int argc, char** argv) {
         printf("usage: playaudio tcp-ip tcp-port audiofile payload-size gamma buf-size target-buf logfile2\n");
         exit(1);
     }
+    size_t bufsiz;
+    mulawopen(&bufsiz);
+
 
     sem_init(&mutex, 0, 1); 
     audio_device = fopen("./test.txt", "w");
@@ -202,8 +266,19 @@ int main(int argc, char** argv) {
         // Populate buffer if it's not full
         if(buf_occupied + actual_data_size < buf_size){
             /* memcpy(&recbuf[seq_num*payload_size- bytes_flushed], &recv_content[4], actual_data_size); */
-            sem_wait(&mutex); 
-            memcpy(&recbuf[buf_writeptr * payload_size], &recv_content[4], actual_data_size);
+            sem_wait(&mutex);
+            if (buf_writeptr + actual_data_size > buf_size) {
+                memcpy(&recbuf[buf_writeptr], &recv_content[4], buf_size - buf_writeptr);
+                memcpy(recbuf, &recv_content[4+buf_size - buf_writeptr], actual_data_size-(buf_size - buf_writeptr));
+                buf_writeptr = actual_data_size-(buf_size - buf_writeptr);
+            }  else {
+                memcpy(&recbuf[buf_writeptr], &recv_content[4], actual_data_size);
+                buf_writeptr += actual_data_size;
+                if (buf_writeptr >= buf_size) {
+                    buf_writeptr = 0;
+                }
+            }
+            
             sem_post(&mutex); 
 
             char feedback[12];
@@ -212,12 +287,10 @@ int main(int argc, char** argv) {
             memcpy(&feedback[8], &gamma,4);
             sendto(child_sock, feedback,12,0, (struct sockaddr*) &server_udp, sizeof(server_udp));
 
-
-            buf_writeptr++;
-            if (buf_writeptr >= max_buf_packet_num) {
-                buf_writeptr = 0;
-            }
             buf_occupied+= actual_data_size;
+
+            total_bytes_read += actual_data_size;
+            printf("Reading: %d\n", total_bytes_read);
 
         }
         else
@@ -230,11 +303,14 @@ int main(int argc, char** argv) {
     // to be streamed in the buffer.
     // Let's wait until the transfer is completed
     // and the buffer is zero
-    while (! (completed && (buf_readptr == buf_writeptr))) {
+    while (! (completed && (buf_occupied <= 0))) {
         // sleep doesn't really matter since we're interrupting on SIGALARM
     
     }
-
+    mulawclose();
+    // if (audio_device_buffer_ptr != 0) {
+    //     fwrite(audio_device_buffer, 1, audio_device_buffer_ptr, audio_device);
+    // }
     printf("We are done streaming, thanks for being a valuable costumer\n");
     fflush(stdout);
     fclose(audio_device);
