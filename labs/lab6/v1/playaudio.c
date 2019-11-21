@@ -33,9 +33,6 @@ FILE * audio_device;
 int completed;
 sem_t mutex; 
 
-char audio_device_buffer[4096];
-int audio_device_buffer_ptr = 0;
-
 int total_bytes_written = 0;
 int total_bytes_read = 0;
 
@@ -65,7 +62,7 @@ void flush_buffer(int sig) {
 
     // int buf_used = buf_writeptr - buf_readptr;
     // Don't flush if there is nothing to flush
-    if (buf_occupied <= 0) {
+    if (buf_occupied < 4096) {
         return;
     }
 
@@ -76,42 +73,61 @@ void flush_buffer(int sig) {
     }
 
     // Don't write more than we have on buffer
-    int writesize = (buf_occupied > payload_size) ? payload_size : buf_occupied;
+    //int writesize = (buf_occupied > payload_size) ? payload_size : buf_occupied;
     //fwrite(&recbuf[buf_readptr * payload_size], sizeof(char), writesize, audio_device);
 
-    if (audio_device_buffer_ptr + writesize > 4096) {
-        writesize = 4096 - audio_device_buffer_ptr;
-    }
+    // if (audio_device_buffer_ptr + writesize > 4096) {
+    //     writesize = 4096 - audio_device_buffer_ptr;
+    // }
 
-    if (buf_readptr + writesize > buf_size) {
-        memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],buf_size - buf_readptr);
-        audio_device_buffer_ptr += buf_size - buf_readptr;
-        memcpy(&audio_device_buffer[audio_device_buffer_ptr], recbuf,writesize-(buf_size - buf_readptr));
-        audio_device_buffer_ptr += writesize-(buf_size - buf_readptr);
-        buf_readptr = writesize-(buf_size - buf_readptr);
+    // if (buf_readptr + writesize > buf_size) {
+    //     memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],buf_size - buf_readptr);
+    //     audio_device_buffer_ptr += buf_size - buf_readptr;
+    //     memcpy(&audio_device_buffer[audio_device_buffer_ptr], recbuf,writesize-(buf_size - buf_readptr));
+    //     audio_device_buffer_ptr += writesize-(buf_size - buf_readptr);
+    //     buf_readptr = writesize-(buf_size - buf_readptr);
+    // } else {
+    //     memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],writesize);
+    //     buf_readptr+=writesize;
+    //     if (buf_readptr >= buf_size) {
+    //         buf_readptr = 0;
+    //     }
+    //     audio_device_buffer_ptr += writesize;
+    // }
+
+
+    char to_be_sent[4096];
+    if (buf_readptr + 4096 > buf_size) {
+        memcpy(to_be_sent, &recbuf[buf_readptr], buf_size - buf_readptr);
+        buf_readptr = 0;
+        memcpy(&to_be_sent[buf_size - buf_readptr], &recbuf[buf_readptr], 4096-(buf_size - buf_readptr));
+        buf_readptr += 4096-(buf_size - buf_readptr);
     } else {
-        memcpy(&audio_device_buffer[audio_device_buffer_ptr], &recbuf[buf_readptr],writesize);
-        buf_readptr+=writesize;
+        memcpy(to_be_sent, &recbuf[buf_readptr], 4096);
+        buf_readptr+=4096;
         if (buf_readptr >= buf_size) {
             buf_readptr = 0;
         }
-        audio_device_buffer_ptr += writesize;
     }
-    
-    
-
-    buf_occupied-=writesize; 
 
     
+    buf_occupied-=4096; 
 
-    if (audio_device_buffer_ptr >= 4096) {
-        mulawwrite(audio_device_buffer);
-        //fwrite(audio_device_buffer, 1, 4096, audio_device);
-        audio_device_buffer_ptr = 0;
+    mulawwrite(to_be_sent);
 
-        total_bytes_written += 4096;
-        printf("Writing: %d\n", total_bytes_written);
-    }
+    total_bytes_written+=4096;
+    printf("Writing: %d\n", total_bytes_written);
+
+    
+
+    // if (audio_device_buffer_ptr >= 4096) {
+    //     mulawwrite(audio_device_buffer);
+    //     //fwrite(audio_device_buffer, 1, 4096, audio_device);
+    //     audio_device_buffer_ptr = 0;
+
+    //     total_bytes_written += 4096;
+    //     printf("Writing: %d\n", total_bytes_written);
+    // }
 
     // For efficiency, let's memcpy only when
     // I can make enough space for another packet
