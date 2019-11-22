@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <semaphore.h> 
 #include <alsa/asoundlib.h>
+#include <pthread.h>
 
 #define mulawwrite(x) snd_pcm_writei(mulawdev, x, mulawfrms)
 
@@ -30,11 +31,25 @@ int buf_writeptr = 0;
 int buf_readptr = 0;
 int buf_occupied = 0;
 FILE * audio_device;
+FILE * logfile_fp;
 int completed;
 sem_t mutex; 
 
 int total_bytes_written = 0;
 int total_bytes_read = 0;
+
+void *writelogfile(void* argvp){
+    static int counter = 0;
+
+    while(1){
+        sleep(1);
+        fprintf(logfile_fp, "%d %d\n", counter, buf_occupied);
+        fflush(logfile_fp);
+        counter++;
+    }
+
+    return argvp;
+}
 
 void mulawopen(size_t *bufsiz) {
     snd_pcm_hw_params_t *p;
@@ -257,6 +272,15 @@ int main(int argc, char** argv) {
     int seq_num = 0;
     completed = 0;
 
+    logfile_fp = fopen(argv[8], "w");
+    if(logfile_fp == NULL){
+        fprintf(stderr, "Could not open %s, exiting\n", argv[8]);
+        exit(1);
+    }
+
+    pthread_t ptid;
+    pthread_create(&ptid, NULL, writelogfile, (void*)&ptid);
+
     double inverse_gamma = 1.0 / gamma;
     ualarm((useconds_t) (inverse_gamma * 1000000), (useconds_t) (inverse_gamma * 1000000));
 
@@ -329,6 +353,7 @@ int main(int argc, char** argv) {
     //     fwrite(audio_device_buffer, 1, audio_device_buffer_ptr, audio_device);
     // }
     printf("We are done streaming, thanks for being a valuable costumer\n");
+    pthread_cancel(ptid);
     fflush(stdout);
     fclose(audio_device);
     free(recbuf);

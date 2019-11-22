@@ -17,7 +17,18 @@ int child_sock;
 int payload_size;
 int mode;
 double lambda, a, delta, epi, beta;
+FILE *fp;
+FILE *logfile_fp;
 
+void log_lambda(){
+  static int counter = 0;
+
+  fprintf(logfile_fp , "%d %f\n", counter, lambda);
+  fflush(logfile_fp);
+  counter++;
+  alarm(1);
+
+}
 
 void feedback_control(int sig) {
     struct sockaddr_in src;
@@ -92,7 +103,11 @@ int main(int argc, char** argv) {
         //printf("a:%f , delta:%f, epi:%f, beta:%f\n", a, delta, epi, beta);
     }
 
-
+    logfile_fp = fopen(argv[5], "w");
+    if(logfile_fp == NULL){
+        fprintf(stderr, "Could not open %s, exiting\n", argv[5]);
+        exit(1);
+    }
 
     int tcp_port = atoi(argv[1]);
     payload_size = atoi(argv[2]);
@@ -135,6 +150,7 @@ int main(int argc, char** argv) {
 
     while (1) {
         
+
         struct sockaddr_in client_tcp;
         socklen_t client_len = sizeof(client_tcp);
         int client_sock = accept(sockfd, (struct sockaddr *) &client_tcp, &client_len);
@@ -146,6 +162,7 @@ int main(int argc, char** argv) {
         pid_t k = fork();
 
         if (k == 0) {   //child process
+
 
             char filename[100];
             int bytes_read = read(client_sock, filename, 100);
@@ -216,6 +233,8 @@ int main(int argc, char** argv) {
                 fcntl(child_sock, F_SETOWN, getpid());
                 fcntl(child_sock, F_SETFL, O_ASYNC);
                 
+                signal(SIGALRM, log_lambda);
+                alarm(1);
 
                 char buf[payload_size + 4];
                 int size_read = 0;
@@ -250,6 +269,7 @@ int main(int argc, char** argv) {
                 fclose(fp);
             }
             printf("done\n");
+            fclose(logfile_fp);
             return 0;
         }
         // parent process
