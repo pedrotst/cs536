@@ -56,7 +56,7 @@ void feedback_control(int sig) {
             break;
 
         case 3:
-            lambda += epi*((target_buf - buffer_occupancy)/payload_size) - beta*(lambda - gamma);
+            lambda += epi*((target_buf - buffer_occupancy)/payload_size) - beta*(lambda - gamma * 4096.0/payload_size);
             break;
 
     }
