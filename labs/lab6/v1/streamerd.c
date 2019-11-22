@@ -19,9 +19,9 @@ int mode;
 double lambda, a, delta, epi, beta;
 FILE *fp;
 FILE *logfile_fp;
+int counter = 0;
 
 void log_lambda(){
-  static int counter = 0;
 
   fprintf(logfile_fp , "%d %f\n", counter, lambda);
   fflush(logfile_fp);
