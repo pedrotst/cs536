@@ -103,9 +103,8 @@ void flush_buffer(int sig) {
     char to_be_sent[4096];
     if (buf_readptr + 4096 > buf_size) {
         memcpy(to_be_sent, &recbuf[buf_readptr], buf_size - buf_readptr);
-        buf_readptr = 0;
-        memcpy(&to_be_sent[buf_size - buf_readptr], &recbuf[buf_readptr], 4096-(buf_size - buf_readptr));
-        buf_readptr += 4096-(buf_size - buf_readptr);
+        memcpy(&to_be_sent[buf_size - buf_readptr], &recbuf[0], 4096-(buf_size - buf_readptr));
+        buf_readptr = 4096-(buf_size - buf_readptr);
     } else {
         memcpy(to_be_sent, &recbuf[buf_readptr], 4096);
         buf_readptr+=4096;

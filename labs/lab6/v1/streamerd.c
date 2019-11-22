@@ -49,7 +49,10 @@ void feedback_control(int sig) {
             break;
 
         case 2:
-            lambda += epi*((target_buf - buffer_occupancy)/payload_size);
+            ;
+            int difference = target_buf - buffer_occupancy;
+            double rate = ((double) difference) / ((double) payload_size); 
+            lambda += epi*rate;
             if (lambda <= 0) {
                 lambda -= epi*((target_buf - buffer_occupancy)/payload_size);
             }
