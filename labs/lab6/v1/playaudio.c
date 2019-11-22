@@ -63,6 +63,10 @@ void flush_buffer(int sig) {
     // int buf_used = buf_writeptr - buf_readptr;
     // Don't flush if there is nothing to flush
     if (buf_occupied < 4096) {
+        if (completed) {
+            exit(0);
+        }
+        printf("less than 4096\n");
         return;
     }
 
@@ -319,10 +323,7 @@ int main(int argc, char** argv) {
     // to be streamed in the buffer.
     // Let's wait until the transfer is completed
     // and the buffer is zero
-    while (! (completed && (buf_occupied <= 0))) {
-        // sleep doesn't really matter since we're interrupting on SIGALARM
-    
-    }
+    while(1);
     mulawclose();
     // if (audio_device_buffer_ptr != 0) {
     //     fwrite(audio_device_buffer, 1, audio_device_buffer_ptr, audio_device);
