@@ -36,7 +36,13 @@
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
 \usepackage[pdftex]{graphicx}	
 \usepackage{titlesec}
-%% \usepackage{lstlisting}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+%% \usepackage{chngcntr}
+%% \counterwithin{figure}{section}
+
 
 %%% Custom headers/footers (fancyhdr package)
 \usepackage{fancyhdr}
@@ -79,10 +85,10 @@
 		\horrule{2pt} \\[0.5cm]
 }
 \author{
-		\normalfont\normalsize Pedro da Costa Abreu Júnior \& Hanjing Xu\\ [-5pt]
-    \normalsize Student ID 0030878383\\[-5pt]
+  \normalfont\normalsize Hanjing Xu (xu675)\\ [-5pt]
+    \normalfont\normalsize Pedro da Costa Abreu (pdacost)\\[-5pt]
     \normalsize \today
-}
+  }
 \date{}
 
 
@@ -90,81 +96,159 @@
 \begin{document}
 \maketitle
 
-\section*{Problem 1}
+\section[1]{Problem 1}
+
+During testing of our program we ran tests cases using the parameters: payload
+size 1488 bytes, initial lambda of 90msec, gamma of 313msec, buffer size of 48
+KB and target buffer occuppancy of 24 KB.
+
+We set the server on \texttt{data.cs.purdue.edu} and the client on
+\texttt{escher01.cs.purdue.edu}, more specifically running the following two
+commands:
+
+\begin{lstlisting}[language=bash, breaklines=true]
+./streamerd 3344 1488 11 $TMODE $FILE_sender_$TMODE.txt
+./playaudio 128.10.2.13 3344 /tmp/$USER/$FILE.au 1488 3 49152 24576 $FILE_receiver_$TMODE.txt
+\end{lstlisting}
+
+where \lstinline{$FILE} is the file being transfered, and \lstinline{$TMODE} is
+the transfer method A, B, C or D. All of these generated log files can be found
+in \texttt{lab6/v1/logs}.
+
+We then run each mode for the provided files \texttt{pp.au} and \texttt{klyne-jarrett.au},
+and plot all of these runs using gnuplot.
+
+The data plot for the transfer of the file pp on the sender side are
+for methods A, B, C, and D are, respectivelly, the following:
+\autoref{fig:ppsenderA},
+\autoref{fig:ppsenderB}
+\autoref{fig:ppsenderC}
+\autoref{fig:ppsenderD}
+Then we put them all together for a better visualization on
+\autoref{fig:ppsender}
+
+Simililarly, on the receiver side we have:
+\autoref{fig:ppreceiverA},
+\autoref{fig:ppreceiverB},
+\autoref{fig:ppreceiverC},
+\autoref{fig:ppreceiverD},
+\autoref{fig:ppreceiver}.
+
+For the big file \texttt{klyne-jarrett} we have the plots on the same style.
+\autoref{fig:jarretsenderA},
+\autoref{fig:jarretsenderB},
+\autoref{fig:jarretsenderC},
+\autoref{fig:jarretsenderD},
+\autoref{fig:jarretsender},
+\autoref{fig:jarretreceiverA},
+\autoref{fig:jarretreceiverB},
+\autoref{fig:jarretreceiverC},
+\autoref{fig:jarretreceiverD},
+\autoref{fig:jarretreceiver}.
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender_A}
 \centering
+\caption{Sending rate of pp.au for method A}
+\label{fig:ppsenderA}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender_B}
 \centering
+\caption{Sending rate of pp.au for method B}
+\label{fig:ppsenderB}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender_C}
 \centering
+\caption{Sending rate of pp.au for method B}
+\label{fig:ppsenderC}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender_D}
 \centering
+\caption{Sending rate of pp.au for method D}
+\label{fig:ppsenderD}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender}
 \centering
+\caption{Sending rate of pp.au for all methods}
+\label{fig:ppsender}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_receiver_A}
 \centering
+\caption{Buffer occupancy rate for method A}
+\label{fig:ppreceiverA}
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_receiver_B}
+\caption{Buffer occupancy rate for method B}
+\label{fig:ppreceiverB}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_receiver_C}
+\caption{Buffer occupancy rate for method C}
+\label{fig:ppreceiverC}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_receiver_D}
+\caption{Buffer occupancy rate for method D}
+\label{fig:ppreceiverD}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_receiver}
+\caption{Buffer occupancy rate for all methods}
+\label{fig:ppreceiver}
 \centering
 \end{figure}
 
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_sender_A}
+\caption{Sending rate for method A}
+\label{fig:jarretsenderA}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_sender_B}
+\caption{Sending rate for method B}
+\label{fig:jarretsenderB}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_sender_C}
+\caption{Sending rate for method C}
+\label{fig:jarretsenderC}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_sender_D}
+\caption{Sending rate for method D}
+\label{fig:jarretsenderD}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_sender}
+\caption{Sending rate for all methods}
+\label{fig:jarretsender}
 \centering
 \end{figure}
 
@@ -172,26 +256,36 @@
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_receiver_A}
+\caption{Buffer occupancy rate for method A}
+\label{fig:jarretreceiverA}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_receiver_B}
+\caption{Buffer occupancy rate for method B}
+\label{fig:jarretreceiverB}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_receiver_C}
+\caption{Buffer occupancy rate for method C}
+\label{fig:jarretreceiverC}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_receiver_D}
+\caption{Buffer occupancy rate for method D}
+\label{fig:jarretreceiverD}
 \centering
 \end{figure}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{jarret_receiver}
+\caption{Buffer occupancy rate for all methods}
+\label{fig:jarretreceiver}
 \centering
 \end{figure}
 
