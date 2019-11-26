@@ -108,7 +108,7 @@
 
 During testing of our program we ran tests cases using the parameters: payload
 size 1488 bytes, initial lambda of 90msec, gamma of 313msec, buffer size of 48
-KB and target buffer occuppancy of 24 KB.
+KB and target buffer occupancy of 24 KB.
 
 We set the server on \texttt{data.cs.purdue.edu} and the client on
 \texttt{escher01.cs.purdue.edu}, more specifically running the following two
@@ -119,7 +119,7 @@ commands:
 ./playaudio 128.10.2.13 3344 /tmp/$USER/$FILE.au 1488 3 49152 24576 $FILE_receiver_$TMODE.txt
 \end{lstlisting}
 
-where \lstinline{$FILE} is the file being transfered, and \lstinline{$TMODE} is
+where \lstinline{$FILE} is the file being transferred, and \lstinline{$TMODE} is
 the transfer method A, B, C or D. All of these generated log files can be found
 in \texttt{lab6/v1/logs}.
 
@@ -139,8 +139,17 @@ by setting $\varepsilon = 0.05$.
 Next, we run each mode for the provided files \texttt{pp.au} and \texttt{klyne-jarrett.au},
 and plot all of the runs using gnuplot.
 
+For each run we listen to check for the quality of the stream,
+and we conclude that the only that is entirely faithful is method D.
+Method A playback rate accelerates when lambda is too high, and then
+decelerate when lambda grows back down. Method B behaves similarly
+with the difference that it decelerate faster. Method C is the
+worse of them because the playback rate fluctuates too much,
+making the sound faster and slow all too often.
+
+
 The data plot for the transfer of the file \texttt{pp.au} on the sender side
-for methods A, B, C, and D are, respectivelly, the following:
+for methods A, B, C, and D are, respectfully, the following:
 \autoref{fig:ppsenderA},
 \autoref{fig:ppsenderB}
 \autoref{fig:ppsenderC}
