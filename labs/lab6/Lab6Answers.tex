@@ -40,6 +40,14 @@
 \usepackage{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
 
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
 %% \usepackage{chngcntr}
 %% \counterwithin{figure}{section}
 
@@ -115,10 +123,23 @@ where \lstinline{$FILE} is the file being transfered, and \lstinline{$TMODE} is
 the transfer method A, B, C or D. All of these generated log files can be found
 in \texttt{lab6/v1/logs}.
 
-We then run each mode for the provided files \texttt{pp.au} and \texttt{klyne-jarrett.au},
-and plot all of these runs using gnuplot.
+For each method we set the control parameters on the file
+\texttt{control-param.dat} with the following format:
 
-The data plot for the transfer of the file pp on the sender side are
+\begin{lstlisting}[mathescape=true]
+  $\alpha$, $\delta$, $\varepsilon$, $\beta$
+\end{lstlisting}
+
+We began the experiment with $\alpha = 0.1$, $\delta = 0.5$,
+$\varepsilon = 0.1$ and $\beta = 0.25$, but $\varepsilon$ was too
+high when running experiment C, causing the transmission to end
+too early due to a collapse on $\lambda$. We then fix the problem
+by setting $\varepsilon = 0.05$.
+
+Next, we run each mode for the provided files \texttt{pp.au} and \texttt{klyne-jarrett.au},
+and plot all of the runs using gnuplot.
+
+The data plot for the transfer of the file \texttt{pp.au} on the sender side
 for methods A, B, C, and D are, respectivelly, the following:
 \autoref{fig:ppsenderA},
 \autoref{fig:ppsenderB}
@@ -134,7 +155,7 @@ Simililarly, on the receiver side we have:
 \autoref{fig:ppreceiverD},
 \autoref{fig:ppreceiver}.
 
-For the big file \texttt{klyne-jarrett} we have the plots on the same style.
+For the big file \texttt{klyne-jarrett.au} we have the plots on the same style.
 \autoref{fig:jarretsenderA},
 \autoref{fig:jarretsenderB},
 \autoref{fig:jarretsenderC},
@@ -145,6 +166,9 @@ For the big file \texttt{klyne-jarrett} we have the plots on the same style.
 \autoref{fig:jarretreceiverC},
 \autoref{fig:jarretreceiverD},
 \autoref{fig:jarretreceiver}.
+
+As we can see all the programs runs as expected from the discussions
+in class.
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{pp_sender_A}
