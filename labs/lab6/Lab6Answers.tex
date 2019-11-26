@@ -116,7 +116,7 @@ commands:
 
 \begin{lstlisting}[language=bash, breaklines=true]
 ./streamerd 3344 1488 11 $TMODE $FILE_sender_$TMODE.txt
-./playaudio 128.10.2.13 3344 /tmp/$USER/$FILE.au 1488 3 49152 24576 $FILE_receiver_$TMODE.txt
+./playaudio 128.10.2.13 3344 /tmp/$USER/$FILE.au 4096 3 49152 24576 $FILE_receiver_$TMODE.txt
 \end{lstlisting}
 
 where \lstinline{$FILE} is the file being transferred, and \lstinline{$TMODE} is
