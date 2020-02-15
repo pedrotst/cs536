@@ -1,0 +1,172 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Example: Project Report
+%
+% Source: http://www.howtotex.com
+%
+% Feel free to distribute this example, but please keep the referral
+% to howtotex.com
+% Date: March 2011 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on the
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+% If you're new to LaTeX, the wikibook is a great place to start:
+% http://en.wikibooks.org/wiki/LaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the title below to update the display in My Documents
+%\title{Project Report}
+%
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{mathtools}
+%\usepackage{lstlisting}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot[L]{}											% Empty 
+\fancyfoot[C]{}											% Empty
+\fancyfoot[R]{\thepage}									% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+\usepackage[margin=0.5in]{geometry}
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+%% Section Format
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{University of Purdue\\
+      Data Communication and Computer Networks\\
+      CS 53600 Spring 2020} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge Assignment 2\\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont\normalsize Pedro da Costa Abreu Júnior\\ [-5pt]
+    \normalsize Student ID 0030878383\\[-5pt]
+    \normalsize \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+
+\section*{Problem 1}
+HTTP, SMT, and POP3 uses TCP because they need to ensure that the data sent is delivered consistently, i.e. without errors.
+DNS, on the other hand, prioritize performance and hence uses UDP.
+
+
+\section*{Problem 2}
+Let FTT be the file transmission time, and RTT be the roudtrip time, and D be the total delay time of the server
+\subsection*{a}
+
+$$FTT = \frac{\texttt{file size}}{R} = \frac{1 * 10^{3}b}{100 * 10^{6}b/s} = 10^{-5}s = 0.01ms$$
+$$D = k * (2 * RTT + FTT) + 2 RTT = 100 * (2 * 1 + 10^{-5}) + 2 \approx 202s$$
+
+\subsection*{b}
+$$D = 2 * RTT + k * (RTT + FTT) = 2 * 1 + 100 * (1+10^{-5}) \approx 102s$$
+
+\subsection*{c}
+$$D = \ceil[\Bigg]{\frac{2 * RTT + k * FTT}{10}} \approx 20s$$
+
+\subsection*{d}
+As we can see with the formulas given above, c does not affect persistent connection, but may severely reduce the delay time for non-persistent connection.
+
+Since R is very small it is dominated by the other variables and does not affect our calculations.
+
+Non-persistent connection has to open a connection for each request, therefore the number of requests k will incur two extras RTT for the response. On the other hand, persistent connection does not need these two extras RTTs, meaning the value k has a much smaller effect on the final delay.
+
+The bandwidth r will always have a direct effect on the communication, because it is the fundamental speed through which files will travel through the network.
+
+\section*{Problem 3}
+\subsection*{a}
+using the command \verb|nslookup cs.purdue.edu| we get the Address 128.10.19.120.
+
+\subsection*{b}
+Using the command \verb|nslookup -query=ns purdue.edu| we get the following Authoritative Name Servers:
+
+\begin{itemize}
+\item ns2.purdue.edu.
+\item pendragon.cs.purdue.edu.
+\item ns.purdue.edu.
+\item harbor.ecn.purdue.edu.
+\end{itemize}
+
+Using the command \verb|nslookup -query=ns cs.purdue.edu| we get the following Authoritative Name Servers:
+
+\begin{itemize}
+\item pendragon.cs.purdue.edu.
+\item ns2.purdue.edu.
+\item harbor.ecn.purdue.edu.
+\item ns.purdue.edu.
+\end{itemize}
+
+\subsection*{c}
+We can use the command \verb|nslookup -type=mx purdue.edu|
+which yields the following results:
+
+\begin{itemize}
+\item xppmailspam01.itap.purdue.edu.
+\item xppmailspam12.itap.purdue.edu.
+\item xppmailspam02.itap.purdue.edu.
+\item xppmailspam03.itap.purdue.edu.
+\item xppmailspam05.itap.purdue.edu.
+\item xppmailspam09.itap.purdue.edu.
+\item xppmailspam08.itap.purdue.edu.
+\item xppmailspam10.itap.purdue.edu.
+\item xppmailspam11.itap.purdue.edu.
+\item xppmailspam04.itap.purdue.edu.
+\item xppmailspam06.itap.purdue.edu.
+\item xppmailspam13.itap.purdue.edu.
+\end{itemize}
+
+\verb|nslookup -type=mx cs.purdue.edu| yields the following mail server mailslot.cs.purdue.edu.
+
+%%% End document
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
