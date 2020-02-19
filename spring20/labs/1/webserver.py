@@ -4,6 +4,9 @@ import sys
 import os
 import re
 import filetype
+import datetime
+
+today = datetime.datetime.now()
 
 def get_content(msg):
     lines = re.split("\r\n\r\n", msg)
@@ -37,7 +40,7 @@ def get_filetype(filename):
         return "text"
     return kind.mime
 
-forbiddenfiles = ['webserver.py', 'webclient.py']
+forbiddenfiles = ['webserver.py', 'Download/webclient.py', 'Upload', 'Download']
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -60,32 +63,50 @@ while(1):
         print "debug: ", request, headers_dict
         filename = get_filename(request)
 
+
+        date = "Date: " + today.ctime() + "\r\n"
+        server = "Server: pedroserver35.2 (Python 2.7)\r\n"
+        common_headers = date + server
+
         print "debug: requested file: ", get_filename(request)
         if(filename == None):
             print("Bad Request")
-            client.sendall("HTTP/1.1 400 Bad Request\r\n\r\n")
+            cont = "Bad Request"
+            client.sendall("HTTP/1.1 400 Bad Request\r\n" + common_headers + "content-type: html/text\r\ncontent-length: " + str(len(cont)) + "\r\n\r\n" + cont)
+            # client.close()
             break;
 
         if filename in forbiddenfiles:
             print("Forbidden File")
-            client.sendall("HTTP/1.1 403 Forbidden\r\n\r\n")
+            cont = "<header>Forbidden!!<\header>"
+            client.sendall("HTTP/1.1 403 Forbidden\r\n" + common_headers + "content-type: html/text\r\ncontent-length: " + str(len(cont)) + "\r\n\r\n" + cont)
+            # client.close()
             break;
 
-
         try:
-            f = open(filename, "r")
+            fname = "Upload/" + filename
+            print "Fname: ", fname
+            f = open(fname, "r")
             fcontent = f.read()
             body = "HTTP/1.1 200 OK\r\n"
             clen = "Content-Length: " + str(len(fcontent)) + "\r\n"
-            cty = "Content-Type: " + get_filetype(filename) + "\r\n"
-            ans = body + clen + cty + "\r\n" + fcontent
+            cty = "Content-Type: " + get_filetype(fname) + "\r\n"
+
+            if headers_dict["connection"] == None:
+                connection = ""
+            else:
+                connection = "Connection: " + headers_dict["connection"] + "\r\n"
+
+            ans = body + clen + cty + connection + common_headers + "\r\n" + fcontent
             print "Sending answer: \n", ans
             client.sendall(ans)
             break;
 
         except IOError:
             print("Could not open file")
-            client.sendall("HTTP/1.1 404 Not Found\r\n\r\n")
+            cont = "<header>File not found<\header>"
+            client.sendall("HTTP/1.1 404 Not Found\r\n" + "content-type: html/text\r\ncontent-length: " + str(len(cont)) + "\r\n\r\n" + cont)
+            # client.close()
             break;
 
 

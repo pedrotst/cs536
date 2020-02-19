@@ -31,7 +31,7 @@ sock.sendall(msg)
 ans = sock.recv(2147483647)
 content = get_content(ans)
 
-print content
+print "Answer:\n", content
 # Save file at the Downloads Folder
 
 filehandler = open(req_file, "w")
