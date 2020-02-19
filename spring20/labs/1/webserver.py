@@ -16,6 +16,11 @@ def get_content(msg):
 
     return headers[0], content_dict
 
+def get_filename(request):
+    filename = re.match("/(.*)", request)
+
+    return filename
+
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 hostname = socket.gethostname()
@@ -30,7 +35,9 @@ while(1):
     if child_pid == 0:
         print "got a connection from", address
         msg = client.recv(4096)
-        print "Received ", get_content(msg)
+        request, headers_dict = get_content(msg)
+
+        print "Received ", request, headers_dict
         break;
 
     else:
