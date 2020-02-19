@@ -33,9 +33,7 @@ content = get_content(ans)
 
 print content
 # Save file at the Downloads Folder
-if not os.path.exists("Downloads"):
-  os.mkdir("Downloads")
 
-filehandler = open("Downloads/"+req_file, "w")
+filehandler = open(req_file, "w")
 filehandler.write(content)
 
