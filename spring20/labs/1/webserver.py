@@ -37,6 +37,8 @@ def get_filetype(filename):
         return "text"
     return kind.mime
 
+forbiddenfiles = ['webserver.py', 'webclient.py']
+
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 hostname = socket.gethostname()
@@ -60,9 +62,15 @@ while(1):
 
         print "debug: requested file: ", get_filename(request)
         if(filename == None):
-            print("Get request Ill formed")
-            client.sendall("HTTP/1.1 404 Not Found\r\n\r\n")
+            print("Bad Request")
+            client.sendall("HTTP/1.1 400 Bad Request\r\n\r\n")
             break;
+
+        if filename in forbiddenfiles:
+            print("Forbidden File")
+            client.sendall("HTTP/1.1 403 Forbidden\r\n\r\n")
+            break;
+
 
         try:
             f = open(filename, "r")
