@@ -31,6 +31,7 @@ sock.sendall(msg)
 ans = sock.recv(2147483647)
 content = get_content(ans)
 
+print content
 # Save file at the Downloads Folder
 if not os.path.exists("Downloads"):
   os.mkdir("Downloads")

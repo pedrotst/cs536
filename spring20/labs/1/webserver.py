@@ -3,6 +3,7 @@ import socket
 import sys
 import os
 import re
+import filetype
 
 def get_content(msg):
     lines = re.split("\r\n\r\n", msg)
@@ -12,14 +13,29 @@ def get_content(msg):
 
     headers.append("body: " + lines[1])
 
-    content_dict = {re.split(":", l)[0].strip():re.split(":", l)[1].strip() for l in headers[1:] if l != ""}
+    content_dict = {re.split(":", l)[0].strip().lower():re.split(":", l)[1].strip() for l in headers[1:] if l != ""}
 
     return headers[0], content_dict
 
 def get_filename(request):
-    filename = re.match("/(.*)", request)
+    m = re.match("GET /(.*) ", request)
+
+    if len(m.groups()) < 1:
+        print "Get request ill formed"
+        return None
+
+    filename = m.group(1)
+
+    if filename == "":
+        return "index.html"
 
     return filename
+
+def get_filetype(filename):
+    kind = filetype.guess(filename)
+    if kind is None:
+        return "text"
+    return kind.mime
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -35,10 +51,35 @@ while(1):
     if child_pid == 0:
         print "got a connection from", address
         msg = client.recv(4096)
+
+        print "\nGot Request:\n", msg
         request, headers_dict = get_content(msg)
 
-        print "Received ", request, headers_dict
-        break;
+        print "debug: ", request, headers_dict
+        filename = get_filename(request)
+
+        print "debug: requested file: ", get_filename(request)
+        if(filename == None):
+            print("Get request Ill formed")
+            client.sendall("HTTP/1.1 404 Not Found\r\n\r\n")
+            break;
+
+        try:
+            f = open(filename, "r")
+            fcontent = f.read()
+            body = "HTTP/1.1 200 OK\r\n"
+            clen = "Content-Length: " + str(len(fcontent)) + "\r\n"
+            cty = "Content-Type: " + get_filetype(filename) + "\r\n"
+            ans = body + clen + cty + "\r\n" + fcontent
+            print "Sending answer: \n", ans
+            client.sendall(ans)
+            break;
+
+        except IOError:
+            print("Could not open file")
+            client.sendall("HTTP/1.1 404 Not Found\r\n\r\n")
+            break;
+
 
     else:
         continue;
