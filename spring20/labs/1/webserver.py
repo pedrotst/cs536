@@ -3,8 +3,9 @@ import socket
 import sys
 import os
 import re
-import filetype
+# import filetype
 import datetime
+import platform
 
 today = datetime.datetime.now()
 
@@ -29,16 +30,26 @@ def get_filename(request):
 
     filename = m.group(1)
 
-    if filename == "":
-        return "index.html"
+    if filename == "" or filename[-1] == "/":
+        return filename + "index.html"
 
     return filename
 
 def get_filetype(filename):
-    kind = filetype.guess(filename)
-    if kind is None:
+    m = re.match(".*\.(.*)", filename)
+
+    if len(m.groups()) < 1:
         return "text"
-    return kind.mime
+
+    name = m.group(1)
+    if name == "gif":
+        return "image/gif"
+    if name == "jpg" or name == "jpeg":
+        return "image/jpeg"
+    if name == "html":
+        return "text/html"
+
+    return "text"
 
 forbiddenfiles = ['webserver.py', 'Download/webclient.py', 'Upload', 'Download']
 
@@ -63,9 +74,8 @@ while(1):
         print "debug: ", request, headers_dict
         filename = get_filename(request)
 
-
         date = "Date: " + today.ctime() + "\r\n"
-        server = "Server: pedroserver35.2 (Python 2.7)\r\n"
+        server = "Server: " + platform.system() + " " + platform.machine() + " " + "(Python " + platform.python_version() + ")\r\n"
         common_headers = date + server
 
         print "debug: requested file: ", get_filename(request)
@@ -92,10 +102,11 @@ while(1):
             clen = "Content-Length: " + str(len(fcontent)) + "\r\n"
             cty = "Content-Type: " + get_filetype(fname) + "\r\n"
 
-            if headers_dict["connection"] == None:
-                connection = ""
-            else:
-                connection = "Connection: " + headers_dict["connection"] + "\r\n"
+            # if headers_dict["connection"] == None:
+                # connection = "Close"
+            # else:
+                # connection = "Connection: " + headers_dict["connection"] + "\r\n"
+            connection = "Connection: close\r\n"
 
             ans = body + clen + cty + connection + common_headers + "\r\n" + fcontent
             print "Sending answer: \n", ans
@@ -105,10 +116,7 @@ while(1):
         except IOError:
             print("Could not open file")
             cont = "<header>File not found<\header>"
-            client.sendall("HTTP/1.1 404 Not Found\r\n" + "content-type: html/text\r\ncontent-length: " + str(len(cont)) + "\r\n\r\n" + cont)
+            client.sendall("HTTP/1.1 404 Not Found\r\n" + common_headers + "content-type: html/text\r\ncontent-length: " + str(len(cont)) + "\r\n\r\n" + cont)
             # client.close()
             break;
 
-
-    else:
-        continue;

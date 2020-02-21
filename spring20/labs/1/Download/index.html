@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+  <title>Data Communication and Computer Networks</title>
+  <link rel="stylesheet" title="default" type="text/css" href="./layout.css"/>
+</head>
+<body alink="#000099" link="#000099" vlink="#990099">
+
+<h1 id="top" align="center">CS536: Data Communication and Computer Networks (Fall 2019)</h1>
+
+<div id="main" style="margin:0 auto; width:1004px;">
+  <div id="leftside">
+    <h3>Course Information</h3>
+    <p>
+      TR 10:30-11:45am<br/>
+      HAAS G066
+    </p>
+    <p> 
+      <b>Instructor:</b><br/> 
+      <a href="http://www.cs.purdue.edu/homes/park/">Kihong Park</a><br/>
+      park@cs.purdue.edu<br/>
+      +1-765-494-7821<br/>
+      office hours: T 1-2pm, R 9:15-10:15am, and by appointment (HAAS 220)<br/>
+    </p>
+    <p>
+      <b>Teaching Assistants:</b><br/>
+<i>Sruthi P C</i><br/>
+psruthi@purdue.edu</br> 
+office hours: WF 11-noon (HAAS G50)
+    </p>
+<i>Tinghan Yang</i><br/>
+yang1683@purdue.edu</br> 
+office hours: F 1-3
+(HAAS G50)
+    <p>
+     <b>PSO:</b> <br/>
+      M 9:30-11:20am (LWSN B148, Sruthi)<br/>
+      M 1:30-3:20pm (HAAS G056, Tinghan)
+    </p>
+    <p>
+      <b>Textbook:</b><br/>
+Computer Networks: A Systems Approach by Peterson and Davie (latest edition)
+    </p>
+  </div>
+
+  <div id="info">
+    <h2>Announcements</h2>
+    <ul>
+<li>
+Please check your final exam score in fin.rpt and pick up your exam in the second or third week
+of the spring semester.
+</li>
+<li>
+Lab6 has been graded. Please follow the same procedure as before to access
+your score (lab6.rpt). Due to time constraints there will be limited follow up.
+</li>
+<li>
+The final exam is scheduled on Dec. 10 (Tue), 2019, 10:30am-noon; BRNG 2290, closed note/book.
+The scope is comprehensive with focus on the material covered after the midterm. 
+Sample exam and solution:
+<a href="./fin-536-16f.pdf">fin1</a>
+(<a href="./fin-536-16f-sol.pdf">sol1</a>). Additional sample
+exams: <a href="./fin-536-04f.pdf">fin2</a> | <a href="./fin-536-02f.pdf">fin3</a> |
+<a href="./fin-536-01f.pdf">fin4</a>. 
+</li>
+<li>
+I have an additional office hour scheduled on Dec. 9, 3-4pm.
+</li>
+<li>
+For lab6, recent lab OS upgrade to Ubuntu make writing to /dev/audio infeasible without
+introducing CPU scheduling and IPC (inter-process communication) through hacks that impact 
+audio playback quality. Instead, please use the library functions mulawopen(), mulawwrite(), 
+mulawclose() provided in /homes/park/pub/testaudio.c to play audio data received at the 
+client from the server to the client's audio device. Utilize the example code main() provided 
+in testaudio.c which shows how to use the library functions that are wrappers to libasound.
+</li>
+<li>
+Lab5 has been graded. Please follow the same procedure as before to access
+your score (lab5.rpt) and follow up. 
+</li>
+<li>
+In lab6, you may use the same program structure involving 2 processes (parent forking child)
+at the client as at the server using nanosleep() and SIGIO/SIGPOLL handler to take care
+of events. If you used ualarm() to raise SIGALRM at the client, no need to change.
+</li>
+<li>
+Sruthi needs to reschedule her office hour Nov. 8, 11-noon, to Nov. 11, 4-5pm.
+</li>
+<li>
+Lab4 has been graded. Please follow the same procedure as before to access
+your score (lab4.rpt) and follow up. 
+</li>
+<li>
+Tinghan's Oct. 21 PSO has been rescheduled to, Oct. 25, 3:30-5:20pm.
+</li>
+<li>
+Lab3 has been graded. Please follow the same procedure as before to access
+your score (lab3.rpt) and follow up. 
+</li>
+<li>
+Tinghan needs to cancel his PSO, Oct. 21, 1:30-3:20pm. It will be rescheduled to a different date.
+</li>
+<li>
+The midterm has been graded. Please follow the same procedure as lab assignments to access
+your score (mid.rpt). If you have any questions, please come see me during office hours.
+Copy of <a href="./mid-536-19f.pdf">midterm</a> and
+<a href="./mid-536-19f-sol.pdf">solution</a>. 
+</li>
+<li>
+Sruthi's office hour 11-noon, Oct. 11, will move to noon-1pm, Oct. 11.
+</li>
+<li>
+Lab2 has been graded. Please follow the same procedure as lab1 to access
+your score (lab2.rpt). If you have any questions, please contact the TA(s) who graded the problem(s)
+in question. You have one week to follow up.
+</li>
+<li>
+The midterm is scheduled on Oct. 10 (Thu), 2019; in-class, closed note/book.
+Scope: material covered in class and assignments. 
+Sample exam and solution:
+<a href="./mid-536-16f.pdf">mid</a> |
+<a href="./mid-536-16f-sol.pdf">sol</a>. The sample exam is meant to convey
+the flavor of questions.
+</li>
+<li>
+I have an additional office hour scheduled on Oct. 9, 3-4pm.
+</li>
+<li>
+In Problem 2 of lab2, when the server decides to drop a client request,
+closing the server-side socket (full association socket returned by accept())
+can result in select() returning 1 at the client. To determine
+whether select() returned 1 due to server-side connection close or because data has been
+received, perform read(). If read() returns 0, this implies that the server has closed its
+end. The client then can close its side of the connection and start anew.
+</li>
+<li>
+In Problem 3 of lab2, please run the client, myftp, without the server's IP address (srv-ip) and
+port number (srv-port) as command-line arguments. Instead, run "% myftp cli-ip dropwhen"
+where cli-ip is the IP address to be used by myftp. The client
+finds out the server's IP address and port number upon receiving the first packet from the
+server using recvfrom(). myftp outputs its port number to stdout so that it can be used as
+part of the command-line arguments of myftpd. The lab description has been updated accordingly.
+</li>
+<li>
+Lab1 has been graded. Please follow the procedure discussed in class to access
+your score. If you have any questions, please contact the TA(s) who graded the problem(s)
+in question. You have one week to follow up.
+</li>
+<li>
+Sruthi's office hour 11-noon, Sep. 25, will move to 1-2pm, Sep. 25.
+</li>
+<li>
+Sruthi's office hour 11-noon, Sep. 18, will move to 1-2pm, Sep. 19.
+</li>
+<li>
+There are no PSOs in the first two weeks of class. Attendance in PSOs is not
+mandatory. PSOs are a resource where TA assistance with lab
+assignments is provided.
+</li>
+    </ul>
+
+    <h2>Labs/Assignments</h2>
+
+<ul>
+<li><a href="./lab6/lab6.html">Lab6</a></li>
+<li><a href="./lab5/lab5.html">Lab5</a></li>
+<li><a href="./lab4/lab4.html">Lab4</a></li>
+<li><a href="./lab3/lab3.html">Lab3</a></li>
+<li><a href="./lab2/lab2.html">Lab2</a></li>
+<li><a href="./lab1/lab1.html">Lab1</a></li>
+<li><a href="https://www.cs.purdue.edu/homes/yang1683/ta_notes.html">TA Notes</a></li>
+</ul>
+
+
+    <h2>Lecture Notes</h2>
+
+<p>
+The lecture notes will comprise of slides posted on the course web
+page and discussion of material during class.
+
+<ul>
+<li>
+Introduction
+(<a href="./intro-536-19f-a.pdf">lec1</a> |
+<a href="./intro-536-19f-b.pdf">lec2</a>)
+</li>
+<li>
+Fundamentals of data transmission
+(<a href="./data_trans-536-19f-a.pdf">lec1</a> |
+<a href="./data_trans-536-19f-b.pdf">lec2</a> |
+<a href="./data_trans-536-19f-c.pdf">lec3</a>)
+</li>
+<li>
+Link layer: basic techniques
+(<a href="./data_link-536-19f-a.pdf">lec1</a> |
+<a href="./data_link-536-19f-b.pdf">lec2</a>)
+</li>
+<li>
+Link layer technologies
+(<a href="./link-tech-536-19f-a.pdf">lec1</a> |
+<a href="./link-tech-536-19f-b.pdf">lec2</a> |
+<a href="./link-tech-536-19f-c.pdf">lec3</a>)
+</li>
+<li>
+Internetworking
+(<a href="./internet-536-19f-a.pdf">lec1</a> |
+<a href="./internet-536-19f-b.pdf">lec2</a>)
+<li>
+Transport layer protocols
+(<a href="./transport-536-19f-a.pdf">lec1</a> |
+<a href="./transport-536-19f-b.pdf">lec2</a>)
+<li>
+Congestion control and multimedia streaming
+(<a href="./congestion-536-19f-a.pdf">lec1</a> |
+<a href="./congestion-536-19f-b.pdf">lec2</a>)
+</li>
+<li>
+TCP congestion control for data traffic
+(<a href="./congestion-tcp-536-19f.pdf">lec1</a>)
+</li>
+<li>
+Intra- and inter-domain routing
+(<a href="./routing-536-19f-a.pdf">lec1</a> |
+<a href="./routing-536-19f-b.pdf">lec2</a>)
+<br>
+<a href="https://www.cidr-report.org/as2.0/autnums.html">AS adjacency</a>
+</li>
+<li>
+Internet traffic and quality of service
+(<a href="./traffic-qos-536-19f.pdf">lec1</a>)
+</li>
+<li>
+Application layer protocols (HTTP, DNS)
+</li>
+</ul>
+
+    <h2><span class='c25'>Prerequisites:</span></h2>
+
+    <p>
+Undergraduate-level exposure to operating systems; 
+solid background in C and Linux/UNIX (experience with projects and system 
+programming); sound CS undergraduate-level mathematical preparation.
+</p>
+
+    <h2>Grading Policy:</h2>
+
+    <p>
+The grade will be determined by a midterm, a final, and 6-7 lab/hw assignments. 
+Their relative weights are:</p>
+
+    <table border="1" cellpadding="0">
+      <tr>
+        <td>
+          Midterm
+        </td>
+        <td>
+          25%
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Final
+        </td>
+        <td>
+          30%
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Lab/HW assignments
+        </td>
+        <td>
+          45%
+        </td>
+      </tr>
+
+    </table>
+
+
+    <h2>Labs and Policies:</h2>
+    <p>
+We will use Linux PCs in LWSN B148 (pod machines) and HAAS G056 (escher machines) 
+as our development and
+evaluation environment. The lab machines are accessible via ssh remotely.
+</p>
+
+    <h3>Getting your CS account.</h3>
+    <p>
+    Students registered in the course should have an account
+automatically set up. Please check by going to LWSN B148 or HAAS G056 and 
+logging into one of the machines.
+If you have registered but don't have an account, please contact <a href=
+<a href="mailto:ScienceHelp@purdue.edu">ScienceHelp@purdue.edu</a>.
+    </p>
+
+    <h3>Late Policy</h3>
+
+    <p>
+To help manage unexpected scheduling demands, you are
+given a budget of 3 late days in total that may be used for
+late submissions of lab assignments.
+For example, you may submit 1 day late on three lab assignments,
+or 3 days late on one lab assignment. Any combination is valid
+as long as the total days delayed does not exceed 3.
+There will be a total of 6-7 lab assignments.
+Late days not utilized at the end of the semester will be
+converted to 20 bonus point each (maximum of 60).
+</p>
+
+    <h3>Academic Integrity</h3>
+
+    <p>We wish to foster an open and
+    collegial class environment. At the same time, we are
+    vigorously opposed to academic
+    dishonesty because it seriously detracts from the education of
+    honest students. Because of this, we have the following
+    standard policy on academic honesty, consistent with Purdue
+    University's official policy.</p>
+    <p>
+    CS536 lab assignments are individual efforts unless otherwise
+    specified.
+    It is permissible to discuss
+    general ideas with other students, or to make
+    use of reference materials in the library or online. If you do
+    this, you will be expected to clearly disclose with whom you
+    discussed the ideas, or to cite the references
+    used. Failure to do so will be considered cheating or
+    plagiarism.
+    If you have lab assignment related questions, please utilize the
+    PSOs and office hours to resolve them. 
+    </p>
+
+    <blockquote>
+      <h3>Any case of academic dishonesty will be
+      dealt with by a severe grade penalty in the overall class
+      grade and referral to the office of the Dean of
+      Students.</h3>
+    </blockquote>
+
+
+    <h2>Campus Emergencies:</h2>
+
+    <p>In the event of a major campus
+    emergency, course requirements, deadlines, and grading
+    percentages are subject to changes that may be necessitated by
+    a revised semester calendar. If such unusual circumstances
+    arise, students may determine any such changes by contacting
+    their instructors via email or phone, and checking the course
+    web page for updates.</p>
+
+    <p>Emergencies and campus
+    closings will be announced on local media and on the main
+    Purdue University WWW site <a href="http://www.purdue.edu"
+    title="Main Purdue WWW site">http://www.purdue.edu</a>.
+    Please consult the
+    <a href="https://www.purdue.edu/ehps/emergency_preparedness/"
+    title="Purdue Emergency Preparedness">Purdue emergency
+    preparedness resources web site</a> for detailed information
+    and relevant resources.</p>
+
+    <h2>Course Content:</h2>
+
+<p>
+This is a graduate-level introductory course to computer networks and
+data communication.
+Our goal is to understand fundamental
+networking concepts,
+their implementation and application in today's interconnected
+information technology world.
+Computer networks
+is a rapidly evolving field,
+with new technologies and standards in the works as we speak.
+This makes the field relevant and exciting. Without a firm grounding in
+its fundamentals, however, it can also be
+a confusing and overwhelming subject matter.
+This course aims to provide this grounding.
+</p>
+
+<p>
+This course is a modern introduction to computer networks,
+spanning the logical organization of four pertinent
+features: architecture, algorithms,
+implementation, and performance.
+The course will cover background and current issues
+facing modern communication networks,
+network architecture (hardware, software), fundamentals of data
+transmission (wired, wireless),
+LAN technology and data link protocols (switched
+Ethernet, wireless LAN CSMA/CA, personal area networks, 
+cellular network TDMA, FDMA, CDMA, MIMO, GPS, mobility),
+packet/circuit switching in wide-area networks,
+internetworking using TCP/UDP/IP (socket programming
+in Linux), routing (intra- and inter-domain),
+congestion control (TCP and m
