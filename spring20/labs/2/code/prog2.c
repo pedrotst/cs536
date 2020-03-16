@@ -7,12 +7,21 @@ int lastack;
 struct pkt lastpkt;
 
 void fill_checksum(struct pkt *packet){
-  uint32_t checksum = 0;
+  // Our checksum will be 64 bits for wraparound
+  uint64_t checksum = 0;
+
+  // First add all the numbes in the packet
   checksum += packet->seqnum + packet->acknum;
   for(int i = 0; i < 20; i++)
     checksum += packet->payload[i];
 
-  packet->checksum = ~checksum;
+  // Then check if we need to wraparound
+  if(checksum >> 32 != 0)
+    checksum++;
+  // Now erase the bits above position 32
+  checksum = (~checksum) & 0x00000000FFFFFFFF;
+
+  packet->checksum = checksum;
 }
 
 void debug_payload(char *data){
@@ -21,11 +30,12 @@ void debug_payload(char *data){
   printf("\n");
 }
 
-void debug_send(struct pkt packet){
+void debug_packet(struct pkt packet){
   printf("Sending Packet at A: \n");
+  printf("time: %f\n", time);
   printf("seqnum: %d\n", packet.seqnum);
   printf("acknum: %d\n", packet.acknum);
-  printf("checksum: %d\n", packet.checksum);
+  printf("checksum: %u\n", ~packet.checksum);
   printf("payload: ");
   debug_payload(packet.payload);
 }
@@ -33,7 +43,8 @@ void debug_send(struct pkt packet){
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
 {
-  printf("AOUT: Got a message with ");
+  printf("\n-------------- A output --------------\n");
+  printf("Got a message with ");
   debug_payload(message.data);
 
   lastpkt.seqnum = nextseqnum;
@@ -41,12 +52,13 @@ int A_output(struct msg message)
   lastpkt.acknum = (lastack + 1) % 2;
   lastack = (lastack + 1) % 2;
 
-  fill_checksum(&lastpkt);
 
   // Copy the payload
   strncpy(lastpkt.payload, message.data, 20);
 
-  debug_send(lastpkt);
+  fill_checksum(&lastpkt);
+  debug_packet(lastpkt);
+  tolayer3(0, lastpkt);
 
   return 0;
 }
@@ -55,6 +67,9 @@ int A_output(struct msg message)
 int A_input(struct pkt packet)
 {
   (void)packet;
+  printf("\n-------------- A input --------------\n");
+  debug_packet(packet);
+
   return 0;
 }
 
@@ -65,16 +80,43 @@ int A_timerinterrupt() {return 0;}
 /* entity A routines are called. You can use it to do any initialization */
 int A_init() {
   lastack = 1;
-  nextseqnum = 0;
+  nextseqnum = 10;
   return 0;
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 
+int is_corrupt(struct pkt packet){
+  uint64_t sum = 0;
+  for(int i = 0; i < 20; i++)
+    sum += packet.payload[i];
+
+  sum += packet.seqnum;
+  sum += packet.acknum;
+
+  // Then check if we need to wraparound
+  if(sum >> 32 != 0)
+    sum++;
+  // Now erase the bits above position 32
+  sum = (sum + packet.checksum) & 0x00000000FFFFFFFF;
+
+  /* printf("Calculated sum: %llu", sum); */
+  return ~sum;
+}
+
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
-  (void)packet;
+  printf("\n-------------- B output --------------\n");
+  printf("Got a packet with ");
+  debug_packet(packet);
+
+  if(is_corrupt(packet) != 0)
+    printf("PACKET IS CURRUUUUUUPT\n");
+
+  else
+    tolayer3(1, packet);
+
   return 0;
 }
 
