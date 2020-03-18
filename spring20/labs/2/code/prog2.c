@@ -1,5 +1,5 @@
 #include "prog2.h"
-#define MAX_BUFFER_SIZE (20)
+#define MAX_BUFFER_SIZE (100)
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
@@ -29,6 +29,23 @@ void fill_checksum(struct pkt *packet){
   packet->checksum = checksum;
 }
 
+int is_corrupt(struct pkt packet){
+  uint64_t sum = 0;
+  for(int i = 0; i < 20; i++)
+    sum += packet.payload[i];
+
+  sum += packet.seqnum;
+  sum += packet.acknum;
+
+  // Then check if we need to wraparound
+  if(sum >> 32 != 0)
+    sum++;
+  // Now erase the bits above position 32
+  sum = (sum + packet.checksum) & 0x00000000FFFFFFFF;
+
+  return ~sum;
+}
+
 void debug_payload(char *data){
   printf("payload: ");
   for(int i = 0; i < 20; i++)
@@ -41,9 +58,9 @@ void debug_packet(struct pkt packet){
   printf("seqnum      = %d\n", packet.seqnum);
   printf("acknum      = %d\n", packet.acknum);
   printf("checksum    = %u\n", ~packet.checksum);
-  printf("size_queue = %d\n", size_queue);
-  printf("tip_queue  = %d\n", tip_queue);
-  printf("tail_queue = %d\n", tail_queue);
+  printf("size_queue  = %d\n", size_queue);
+  printf("tip_queue   = %d\n", tip_queue);
+  printf("tail_queue  = %d\n", tail_queue);
   debug_payload(packet.payload);
 }
 
@@ -61,6 +78,14 @@ int queue_msg(struct msg message){
     fprintf(stderr, "Buffer is full, ABORT\n");
     exit(1);
   }
+
+  // In this part of the assignment we were not supposed to buffer
+  // any messages. Therefore instead of growing the queue we will just drop the message ;)
+  if(size_queue >= 1){
+    printf("There already is a packet inflight, dropping packet\n");
+    return 0;
+  }
+
   struct pkt *packet = &buffer_queue[tail_queue];
 
   circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
@@ -90,8 +115,7 @@ int send_next_packet(){
   expected_acknum = packet->acknum;
 
   tolayer3(0, *packet);
-  /* size_queue--; */
-  /* circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1); */
+  starttimer(0, 20.0);
 
   return 1;
 }
@@ -118,7 +142,6 @@ int A_output(struct msg message)
 
   if(expected_acknum == -1)
     send_next_packet();
-    /* tolayer3(0, lastpkt); */
 
   return 0;
 }
@@ -130,18 +153,26 @@ int A_input(struct pkt packet)
   printf("\n-------------- A input --------------\n");
   debug_packet(packet);
 
-  if(packet.acknum == expected_acknum){
+  stoptimer(0);
+
+  if(packet.acknum == expected_acknum && !is_corrupt(packet)){
     dequeue();
     send_next_packet();
   }
-  else
+  else{
+    printf("Packet is corrupt, resending\n");
     send_next_packet();
+  }
 
   return 0;
 }
 
 /* called when A's timer goes off */
-int A_timerinterrupt() {return 0;}
+int A_timerinterrupt() {
+  send_next_packet();
+
+  return 0;
+}
 
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
@@ -157,36 +188,24 @@ int A_init() {
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
-
-int is_corrupt(struct pkt packet){
-  uint64_t sum = 0;
-  for(int i = 0; i < 20; i++)
-    sum += packet.payload[i];
-
-  sum += packet.seqnum;
-  sum += packet.acknum;
-
-  // Then check if we need to wraparound
-  if(sum >> 32 != 0)
-    sum++;
-  // Now erase the bits above position 32
-  sum = (sum + packet.checksum) & 0x00000000FFFFFFFF;
-
-  /* printf("Calculated sum: %llu", sum); */
-  return ~sum;
-}
-
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
   printf("\n-------------- B output --------------\n");
-  printf("Got a packet with ");
+  printf("Got a packet with\n");
   debug_packet(packet);
 
-  if(is_corrupt(packet) != 0)
+  if(is_corrupt(packet)){
     printf("PACKET IS CURRUUUUUUPT\n");
-  else
-    tolayer3(1, packet);
+  }
+  else {
+    tolayer5(1, packet.payload);
+  }
+
+  // We will simply resend the same packet, its no problem
+  // if it is corrupted because we wish that the sender resends
+  // it anyways.
+  tolayer3(1, packet);
 
   return 0;
 }
@@ -291,6 +310,7 @@ int main()
   return 0;
 
 terminate:
+  printevlist();
   printf(
     " Simulator terminated at time %f\n after sending %d msgs from layer5\n",
     time, nsim);
