@@ -1,10 +1,15 @@
 #include "prog2.h"
+#define MAX_BUFFER_SIZE (100)
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
-int nextseqnum;
-int lastack;
-struct pkt lastpkt;
+struct pkt buffer_queue[50];
+int tip_queue;
+int tail_queue;
+int size_queue;
+int next_seqnum;
+int next_acknum;
+int expected_acknum;
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -25,40 +30,84 @@ void fill_checksum(struct pkt *packet){
 }
 
 void debug_payload(char *data){
+  printf("payload: ");
   for(int i = 0; i < 20; i++)
     printf("%c", data[i]);
   printf("\n");
 }
 
 void debug_packet(struct pkt packet){
-  printf("Sending Packet at A: \n");
-  printf("time: %f\n", time);
-  printf("seqnum: %d\n", packet.seqnum);
-  printf("acknum: %d\n", packet.acknum);
-  printf("checksum: %u\n", ~packet.checksum);
-  printf("payload: ");
+  printf("time       = %f\n", time);
+  printf("seqnum     = %d\n", packet.seqnum);
+  printf("acknum     = %d\n", packet.acknum);
+  printf("checksum   = %u\n", ~packet.checksum);
+  printf("size_buffer= %d\n", size_queue);
+  printf("tip_buffer = %d\n", tip_queue);
+  printf("tail_buffer= %d\n", tail_queue);
   debug_payload(packet.payload);
+}
+
+// Here we implement a circular queue
+void circular_increment(volatile int *x, int max){
+  if(*x != max)
+    *x += 1;
+  else
+    *x = 0;
+}
+
+// This function will
+int queue_msg(struct msg message){
+  if(size_queue == MAX_BUFFER_SIZE){
+    fprintf(stderr, "Buffer is full, ABORT\n");
+    exit(1);
+  }
+  struct pkt *packet = &buffer_queue[tail_queue];
+
+  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
+  size_queue++;
+
+  packet->seqnum = next_seqnum;
+  next_seqnum++;
+  packet->acknum = next_acknum;
+  next_acknum = (next_acknum + 1) % 2;
+
+  // Copy the payload
+  strncpy(packet->payload, message.data, 20);
+  fill_checksum(packet);
+
+  debug_packet(*packet);
+
+  return 1;
+}
+
+int dequeue(){
+  if(size_queue == 0){
+    fprintf(stderr, "Trying to read buffer when it is empty!!");
+    return 0;
+  }
+
+  struct pkt *packet = &buffer_queue[tip_queue];
+  expected_acknum = packet->acknum;
+
+  tolayer3(0, *packet);
+  size_queue--;
+  circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
+
+  return 1;
 }
 
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
 {
   printf("\n-------------- A output --------------\n");
-  printf("Got a message with ");
+  printf("Sending Packet at A: \n");
   debug_payload(message.data);
 
-  lastpkt.seqnum = nextseqnum;
-  nextseqnum += 1;
-  lastpkt.acknum = (lastack + 1) % 2;
-  lastack = (lastack + 1) % 2;
+  queue_msg(message);
 
-
-  // Copy the payload
-  strncpy(lastpkt.payload, message.data, 20);
-
-  fill_checksum(&lastpkt);
-  debug_packet(lastpkt);
-  tolayer3(0, lastpkt);
+  if(size_queue == 1)
+    dequeue();
+    /* tolayer3(0, lastpkt); */
 
   return 0;
 }
@@ -79,8 +128,13 @@ int A_timerinterrupt() {return 0;}
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
 int A_init() {
-  lastack = 1;
-  nextseqnum = 10;
+  tip_queue = 0;
+  tail_queue = 0;
+  size_queue = 0;
+  next_seqnum = 0;
+  next_acknum = 0;
+  expected_acknum = -1;
+
   return 0;
 }
 
@@ -113,7 +167,6 @@ int B_input(struct pkt packet)
 
   if(is_corrupt(packet) != 0)
     printf("PACKET IS CURRUUUUUUPT\n");
-
   else
     tolayer3(1, packet);
 
