@@ -1,12 +1,12 @@
 #include "prog2.h"
-#define MAX_BUFFER_SIZE (100)
+#define MAX_BUFFER_SIZE (20)
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 struct pkt buffer_queue[50];
-int tip_queue;
-int tail_queue;
-int size_queue;
+volatile int tip_queue;
+volatile int tail_queue;
+volatile int size_queue;
 int next_seqnum;
 int next_acknum;
 int expected_acknum;
@@ -37,13 +37,13 @@ void debug_payload(char *data){
 }
 
 void debug_packet(struct pkt packet){
-  printf("time       = %f\n", time);
-  printf("seqnum     = %d\n", packet.seqnum);
-  printf("acknum     = %d\n", packet.acknum);
-  printf("checksum   = %u\n", ~packet.checksum);
-  printf("size_buffer= %d\n", size_queue);
-  printf("tip_buffer = %d\n", tip_queue);
-  printf("tail_buffer= %d\n", tail_queue);
+  printf("time        = %f\n", time);
+  printf("seqnum      = %d\n", packet.seqnum);
+  printf("acknum      = %d\n", packet.acknum);
+  printf("checksum    = %u\n", ~packet.checksum);
+  printf("size_queue = %d\n", size_queue);
+  printf("tip_queue  = %d\n", tip_queue);
+  printf("tail_queue = %d\n", tail_queue);
   debug_payload(packet.payload);
 }
 
@@ -80,9 +80,9 @@ int queue_msg(struct msg message){
   return 1;
 }
 
-int dequeue(){
+int send_next_packet(){
   if(size_queue == 0){
-    fprintf(stderr, "Trying to read buffer when it is empty!!");
+    expected_acknum = -1;
     return 0;
   }
 
@@ -90,9 +90,20 @@ int dequeue(){
   expected_acknum = packet->acknum;
 
   tolayer3(0, *packet);
+  /* size_queue--; */
+  /* circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1); */
+
+  return 1;
+}
+
+int dequeue(){
+  if(size_queue == 0){
+    fprintf(stderr, "Trying to dequeue empty buffer!!");
+    return 0;
+  }
+
   size_queue--;
   circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
-
   return 1;
 }
 
@@ -101,12 +112,12 @@ int A_output(struct msg message)
 {
   printf("\n-------------- A output --------------\n");
   printf("Sending Packet at A: \n");
-  debug_payload(message.data);
+  /* debug_payload(message.data); */
 
   queue_msg(message);
 
-  if(size_queue == 1)
-    dequeue();
+  if(expected_acknum == -1)
+    send_next_packet();
     /* tolayer3(0, lastpkt); */
 
   return 0;
@@ -118,6 +129,13 @@ int A_input(struct pkt packet)
   (void)packet;
   printf("\n-------------- A input --------------\n");
   debug_packet(packet);
+
+  if(packet.acknum == expected_acknum){
+    dequeue();
+    send_next_packet();
+  }
+  else
+    send_next_packet();
 
   return 0;
 }
