@@ -3,13 +3,18 @@
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
+/* Private Variables for A */
 struct pkt buffer_queue[50];
 volatile int tip_queue;
 volatile int tail_queue;
 volatile int size_queue;
 int next_seqnum;
 int next_acknum;
-int expected_acknum;
+int A_expected_acknum;
+
+
+/* Private Variables for B */
+int B_expected_seqnum;
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -66,10 +71,11 @@ void debug_packet(struct pkt packet){
 
 // Here we implement a circular queue
 void circular_increment(volatile int *x, int max){
-  if(*x != max)
-    *x += 1;
-  else
-    *x = 0;
+  *x = (*x + 1) % (max + 1);
+  /* if(*x != max) */
+    /* *x += 1; */
+  /* else */
+    /* *x = 0; */
 }
 
 // This function will
@@ -88,31 +94,32 @@ int queue_msg(struct msg message){
 
   struct pkt *packet = &buffer_queue[tail_queue];
 
-  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
-  size_queue++;
-
   packet->seqnum = next_seqnum;
-  next_seqnum++;
+  circular_increment(&next_seqnum, 4);
+  /* next_seqnum = (next_seqnum + 1) % 2; */
   packet->acknum = next_acknum;
-  next_acknum = (next_acknum + 1) % 2;
+  circular_increment(&next_acknum, 2);
+  /* next_acknum = (next_acknum + 1) % 2; */
 
   // Copy the payload
   strncpy(packet->payload, message.data, 20);
   fill_checksum(packet);
 
-  debug_packet(*packet);
+  size_queue++;
+  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
 
+  debug_packet(*packet);
   return 1;
 }
 
 int send_next_packet(){
   if(size_queue == 0){
-    expected_acknum = -1;
+    A_expected_acknum = -1;
     return 0;
   }
 
   struct pkt *packet = &buffer_queue[tip_queue];
-  expected_acknum = packet->acknum;
+  A_expected_acknum = packet->acknum;
 
   tolayer3(0, *packet);
   starttimer(0, 20.0);
@@ -140,7 +147,7 @@ int A_output(struct msg message)
 
   queue_msg(message);
 
-  if(expected_acknum == -1)
+  if(A_expected_acknum == -1)
     send_next_packet();
 
   return 0;
@@ -155,7 +162,7 @@ int A_input(struct pkt packet)
 
   stoptimer(0);
 
-  if(packet.acknum == expected_acknum && !is_corrupt(packet)){
+  if(packet.acknum == A_expected_acknum && !is_corrupt(packet)){
     dequeue();
     send_next_packet();
   }
@@ -185,7 +192,7 @@ int A_init() {
   size_queue = 0;
   next_seqnum = 0;
   next_acknum = 0;
-  expected_acknum = -1;
+  A_expected_acknum = -1;
 
   return 0;
 }
@@ -201,7 +208,11 @@ int B_input(struct pkt packet)
   if(is_corrupt(packet)){
     printf("Packet was corrupted, sending NACK\n");
   }
+  else if(packet.seqnum != B_expected_seqnum){
+    printf("Packet out of order, sending NACK\n");
+  }
   else {
+    circular_increment(&B_expected_seqnum, 2);
     tolayer5(1, packet.payload);
   }
 
@@ -218,7 +229,11 @@ int B_timerinterrupt() {return 0;}
 
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
-int B_init() {return 0;}
+int B_init() {
+  B_expected_seqnum = 0;
+
+  return 0;
+}
 
 int TRACE = 1;   /* for my debugging */
 int nsim = 0;    /* number of messages from 5 to 4 so far */
