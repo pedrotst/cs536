@@ -4,7 +4,7 @@
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 /* Private Variables for A */
-struct pkt buffer_queue[50];
+struct pkt buffer_queue[MAX_BUFFER_SIZE];
 volatile int tip_queue;
 volatile int tail_queue;
 volatile int size_queue;
