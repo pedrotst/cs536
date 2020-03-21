@@ -135,9 +135,6 @@ int send_window(int resending){
   else
     startfrom = send_next;
 
-  // TODO: calculate timer properly
-  /* starttimer(0, 20.0); */
-
   printf("send next (before sending): %d\n", send_next);
   // Send the whole window
   for(int i = startfrom; i != endat; circular_increment(&i, MAX_BUFFER_SIZE)){
@@ -194,6 +191,9 @@ int A_output(struct msg message)
 
   queue_msg(message);
 
+  if(tip_queue == send_next)
+    starttimer(0, 20.0);
+
   send_window(0);
 
   return 0;
@@ -205,7 +205,7 @@ int A_input(struct pkt packet)
   printf("\n-------------- A input --------------\n");
   debug_packet(packet);
 
-  /* stoptimer(0); */
+  stoptimer(0);
 
   if(!is_corrupt(packet)){
     /* circular_increment1(&tip_queue, MAX_BUFFER_SIZE, packet.acknum); */
@@ -217,15 +217,20 @@ int A_input(struct pkt packet)
     send_window(1);
   }
 
+  if(tip_queue != send_next)
+    starttimer(0, 20.0);
+
   return 0;
 }
 
 /* called when A's timer goes off */
 int A_timerinterrupt() {
   printf("\n-------------- A timeout --------------\n");
-  printf("The packet was lost, resending\n");
+  printf("The packet was lost, resending the whole window\n");
 
-  /* send_window(); */
+  send_window(1);
+
+  starttimer(0, 20.0);
 
   return 0;
 }
