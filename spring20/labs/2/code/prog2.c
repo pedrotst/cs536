@@ -13,7 +13,7 @@ volatile int send_next;
 
 int next_seqnum;
 int next_acknum;
-/* int A_expected_acknum; */
+int A_expected_acknum;
 
 
 /* Private Variables for B */
@@ -111,7 +111,7 @@ int queue_msg(struct msg message){
 // If resending != 0 then it will send the whole window
 // Otherwise it will send starting from the first unsent packet
 int send_window(int resending){
-  if(size_queue == 0 || send_next == tail_queue){
+  if(size_queue == 0 || (!resending && send_next == tail_queue)){
     /* A_expected_acknum = -1; */
     return 0;
   }
@@ -146,7 +146,8 @@ int send_window(int resending){
 
     // dummy statement to keep compiler happy
     i = (int) i;
-    circular_increment(&send_next, MAX_BUFFER_SIZE);
+    if(!resending)
+      circular_increment(&send_next, MAX_BUFFER_SIZE);
   }
   /* circular_increment1(&send_next, MAX_BUFFER_SIZE, effective_size + 1); */
   /* printf("Effective_size: %d\n", effective_size); */
@@ -243,6 +244,15 @@ int A_init() {
   return 0;
 }
 
+int fill_ack(struct pkt *packet, int ack){
+  memset(&packet->payload, 0, sizeof(struct pkt));
+  strcpy(packet->payload, "xxXXXxxxXXXxxxXXXxx");
+  packet->acknum = ack;
+  fill_checksum(packet);
+
+  return 1;
+}
+
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
@@ -251,13 +261,15 @@ int B_input(struct pkt packet)
   printf("Got a packet with\n");
   debug_packet(packet);
 
-  if(is_corrupt(packet)){
-    printf("Packet was corrupted, sending NACK\n");
-    packet.acknum = B_last_ack;
+  if(packet.seqnum != B_expected_seqnum){
+    printf("Packet out of order, dropping packet\n");
+    /* packet.acknum = B_last_ack; */
+    return 0;
   }
-  else if(packet.seqnum != B_expected_seqnum){
-    printf("Packet out of order, sending last ack\n");
-    packet.acknum = B_last_ack;
+  else if(is_corrupt(packet)){
+    printf("Packet was corrupted, sending NACK\n");
+    /* packet.acknum = B_last_ack; */
+    /* fill_ack(&packet, B_last_ack); */
   }
   else {
     circular_increment(&B_expected_seqnum, WINDOW_SIZE * 2);
@@ -330,10 +342,10 @@ int main()
       printf(" entity: %d\n", eventptr->eventity);
     }
     time = eventptr->evtime; /* update time to next event time */
-    if (nsim == nsimmax) {
-      break; /* all done with simulation */
-    }
     if (eventptr->evtype == FROM_LAYER5) {
+      if (nsim == nsimmax) {
+        break; /* all done with simulation */
+      }
       generate_next_arrival(); /* set up future arrival */
       /* fill in msg to give with string of same letter */
       j = nsim % 26;
