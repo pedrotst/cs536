@@ -41,6 +41,7 @@ struct pkt
   char payload[20];
 };
 
+void starttimer(int AorB, float increment);
 int A_output(struct msg);
 int A_input(struct pkt);
 int A_timerinterrupt();
