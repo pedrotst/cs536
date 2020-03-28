@@ -1,15 +1,24 @@
 #include "prog2.h"
 #define MAX_BUFFER_SIZE (100)
+#define WINDOW_SIZE (8)
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
-struct pkt buffer_queue[50];
+/* Private Variables for A */
+struct pkt buffer_queue[MAX_BUFFER_SIZE];
 volatile int tip_queue;
 volatile int tail_queue;
 volatile int size_queue;
+volatile int send_next;
+
 int next_seqnum;
 int next_acknum;
-int expected_acknum;
+int A_expected_acknum;
+
+
+/* Private Variables for B */
+int B_expected_seqnum;
+int B_last_ack;
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -29,136 +38,6 @@ void fill_checksum(struct pkt *packet){
   packet->checksum = checksum;
 }
 
-void debug_payload(char *data){
-  printf("payload: ");
-  for(int i = 0; i < 20; i++)
-    printf("%c", data[i]);
-  printf("\n");
-}
-
-void debug_packet(struct pkt packet){
-  printf("time        = %f\n", time);
-  printf("seqnum      = %d\n", packet.seqnum);
-  printf("acknum      = %d\n", packet.acknum);
-  printf("checksum    = %u\n", ~packet.checksum);
-  printf("size_queue = %d\n", size_queue);
-  printf("tip_queue  = %d\n", tip_queue);
-  printf("tail_queue = %d\n", tail_queue);
-  debug_payload(packet.payload);
-}
-
-// Here we implement a circular queue
-void circular_increment(volatile int *x, int max){
-  if(*x != max)
-    *x += 1;
-  else
-    *x = 0;
-}
-
-// This function will
-int queue_msg(struct msg message){
-  if(size_queue == MAX_BUFFER_SIZE){
-    fprintf(stderr, "Buffer is full, ABORT\n");
-    exit(1);
-  }
-  struct pkt *packet = &buffer_queue[tail_queue];
-
-  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
-  size_queue++;
-
-  packet->seqnum = next_seqnum;
-  next_seqnum++;
-  packet->acknum = next_acknum;
-  next_acknum = (next_acknum + 1) % 2;
-
-  // Copy the payload
-  strncpy(packet->payload, message.data, 20);
-  fill_checksum(packet);
-
-  debug_packet(*packet);
-
-  return 1;
-}
-
-int send_next_packet(){
-  if(size_queue == 0){
-    expected_acknum = -1;
-    return 0;
-  }
-
-  struct pkt *packet = &buffer_queue[tip_queue];
-  expected_acknum = packet->acknum;
-
-  tolayer3(0, *packet);
-
-  return 1;
-}
-
-int dequeue(){
-  if(size_queue == 0){
-    fprintf(stderr, "Trying to dequeue empty buffer!!");
-    return 0;
-  }
-
-  size_queue--;
-  circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
-  return 1;
-}
-
-/* called from layer 5, passed the data to be sent to other side */
-int A_output(struct msg message)
-{
-  printf("\n-------------- A output --------------\n");
-  printf("Sending Packet at A: \n");
-  /* debug_payload(message.data); */
-
-  queue_msg(message);
-
-  if(expected_acknum == -1)
-    send_next_packet();
-
-  return 0;
-}
-
-/* called from layer 3, when a packet arrives for layer 4 */
-int A_input(struct pkt packet)
-{
-  (void)packet;
-  printf("\n-------------- A input --------------\n");
-  debug_packet(packet);
-
-  if(packet.acknum == expected_acknum){
-    dequeue();
-    send_next_packet();
-  }
-  else
-    send_next_packet();
-
-  return 0;
-}
-
-/* called when A's timer goes off */
-int A_timerinterrupt() {
-  send_next_packet();
-
-  return 0;
-}
-
-/* the following routine will be called once (only) before any other */
-/* entity A routines are called. You can use it to do any initialization */
-int A_init() {
-  tip_queue = 0;
-  tail_queue = 0;
-  size_queue = 0;
-  next_seqnum = 0;
-  next_acknum = 0;
-  expected_acknum = -1;
-
-  return 0;
-}
-
-/* Note that with simplex transfer from a-to-B, there is no B_output() */
-
 int is_corrupt(struct pkt packet){
   uint64_t sum = 0;
   for(int i = 0; i < 20; i++)
@@ -173,21 +52,240 @@ int is_corrupt(struct pkt packet){
   // Now erase the bits above position 32
   sum = (sum + packet.checksum) & 0x00000000FFFFFFFF;
 
-  /* printf("Calculated sum: %llu", sum); */
   return ~sum;
 }
 
+void debug_payload(char *data){
+  printf("payload: ");
+  for(int i = 0; i < 20; i++)
+    printf("%c", data[i]);
+  printf("\n");
+}
+
+void debug_packet(struct pkt packet){
+  printf("time        = %f\n", time);
+  printf("seqnum      = %d\n", packet.seqnum);
+  printf("acknum      = %d\n", packet.acknum);
+  printf("checksum    = %u\n", ~packet.checksum);
+  printf("size_queue  = %d\n", size_queue);
+  printf("tip_queue   = %d\n", tip_queue);
+  printf("tail_queue  = %d\n", tail_queue);
+  debug_payload(packet.payload);
+}
+
+// Here we implement a circular queue
+void circular_increment(volatile int *x, int max){
+  *x = (*x + 1) % max;
+}
+
+void circular_increment1(volatile int *x, int max, int incr){
+  *x = (*x + incr) % max;
+}
+
+// This function will
+int queue_msg(struct msg message){
+  if(size_queue == MAX_BUFFER_SIZE){
+    fprintf(stderr, "Buffer is full, ABORT\n");
+    exit(1);
+  }
+
+  struct pkt *packet = &buffer_queue[tail_queue];
+
+  packet->seqnum = next_seqnum;
+  circular_increment(&next_seqnum, WINDOW_SIZE * 2);
+  packet->acknum = next_acknum;
+  circular_increment(&next_acknum, WINDOW_SIZE);
+
+  // Copy the payload
+  strncpy(packet->payload, message.data, 20);
+  fill_checksum(packet);
+
+  size_queue++;
+  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
+
+  debug_packet(*packet);
+  return 1;
+}
+
+// This function sends all data buffered
+// If resending != 0 then it will send the whole window
+// Otherwise it will send starting from the first unsent packet
+int send_window(int resending){
+  if(size_queue == 0 || (!resending && send_next == tail_queue)){
+    /* A_expected_acknum = -1; */
+    return 0;
+  }
+
+  // effective_size = MAX(size_queue, WINDOW_SIZE)
+  int effective_size;
+  int startfrom, endat;
+  endat = tip_queue;
+
+  if(size_queue < WINDOW_SIZE)
+    effective_size = size_queue;
+  else
+    effective_size = WINDOW_SIZE;
+  printf("Effective_size: %d\n", effective_size);
+
+  circular_increment1(&endat, MAX_BUFFER_SIZE, effective_size);
+  printf("end at: %d\n", endat);
+
+  if(resending)
+    startfrom = tip_queue;
+  else
+    startfrom = send_next;
+
+  printf("send next (before sending): %d\n", send_next);
+  // Send the whole window
+  for(int i = startfrom; i != endat; circular_increment(&i, MAX_BUFFER_SIZE)){
+    printf("Sending i = %d\n", i);
+    tolayer3(0, buffer_queue[i]);
+
+    // dummy statement to keep compiler happy
+    i = (int) i;
+    if(!resending)
+      circular_increment(&send_next, MAX_BUFFER_SIZE);
+  }
+  /* circular_increment1(&send_next, MAX_BUFFER_SIZE, effective_size + 1); */
+  /* printf("Effective_size: %d\n", effective_size); */
+  /* printf("send next (before sending): %d\n", send_next); */
+  /* send_next = (send_next + effective_size) % MAX_BUFFER_SIZE; */
+  printf("send next (after sending): %d\n", send_next);
+
+  return effective_size;
+}
+
+int dequeue(){
+  if(size_queue == 0){
+    fprintf(stderr, "Trying to dequeue empty buffer!!");
+    return 0;
+  }
+
+  size_queue--;
+  circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
+  return 1;
+}
+
+int dequeue_until(int acknum){
+  if(size_queue == 0){
+    fprintf(stderr, "Trying to dequeue empty buffer!!");
+    return 0;
+  }
+
+  while(buffer_queue[tip_queue].acknum != acknum){
+    size_queue--;
+    circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
+  }
+  size_queue--;
+  circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
+
+  return 1;
+}
+
+/* called from layer 5, passed the data to be sent to other side */
+int A_output(struct msg message)
+{
+  printf("\n-------------- A output --------------\n");
+  printf("Sending Packet at A: \n");
+  /* debug_payload(message.data); */
+
+  queue_msg(message);
+
+  if(tip_queue == send_next)
+    starttimer(0, 20.0);
+
+  send_window(0);
+
+  return 0;
+}
+
+/* called from layer 3, when a packet arrives for layer 4 */
+int A_input(struct pkt packet)
+{
+  printf("\n-------------- A input --------------\n");
+  debug_packet(packet);
+
+  stoptimer(0);
+
+  if(!is_corrupt(packet)){
+    /* circular_increment1(&tip_queue, MAX_BUFFER_SIZE, packet.acknum); */
+    dequeue_until(packet.acknum);
+    send_window(0);
+  }
+  else{
+    printf("Packet was corrupted, resending the whole window\n");
+    send_window(1);
+  }
+
+  if(tip_queue != send_next)
+    starttimer(0, 20.0);
+
+  return 0;
+}
+
+/* called when A's timer goes off */
+int A_timerinterrupt() {
+  printf("\n-------------- A timeout --------------\n");
+  printf("The packet was lost, resending the whole window\n");
+
+  send_window(1);
+
+  starttimer(0, 20.0);
+
+  return 0;
+}
+
+/* the following routine will be called once (only) before any other */
+/* entity A routines are called. You can use it to do any initialization */
+int A_init() {
+  send_next = 0;
+  tip_queue = 0;
+  tail_queue = 0;
+  size_queue = 0;
+  next_seqnum = 0;
+  next_acknum = 0;
+  /* A_expected_acknum = -1; */
+
+  return 0;
+}
+
+int fill_ack(struct pkt *packet, int ack){
+  memset(&packet->payload, 0, sizeof(struct pkt));
+  strcpy(packet->payload, "xxXXXxxxXXXxxxXXXxx");
+  packet->acknum = ack;
+  fill_checksum(packet);
+
+  return 1;
+}
+
+/* Note that with simplex transfer from a-to-B, there is no B_output() */
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
   printf("\n-------------- B output --------------\n");
-  printf("Got a packet with ");
+  printf("Got a packet with\n");
   debug_packet(packet);
 
-  if(is_corrupt(packet) != 0)
-    printf("PACKET IS CURRUUUUUUPT\n");
-  else
-    tolayer3(1, packet);
+  if(packet.seqnum != B_expected_seqnum){
+    printf("Packet out of order, dropping packet\n");
+    /* packet.acknum = B_last_ack; */
+    return 0;
+  }
+  else if(is_corrupt(packet)){
+    printf("Packet was corrupted, sending NACK\n");
+    /* packet.acknum = B_last_ack; */
+    /* fill_ack(&packet, B_last_ack); */
+  }
+  else {
+    circular_increment(&B_expected_seqnum, WINDOW_SIZE * 2);
+    circular_increment(&B_last_ack, WINDOW_SIZE);
+    tolayer5(1, packet.payload);
+  }
+
+  // We will simply resend the same packet, its no problem
+  // if it is corrupted because we wish that the sender resends
+  // it anyways.
+  tolayer3(1, packet);
 
   return 0;
 }
@@ -197,7 +295,12 @@ int B_timerinterrupt() {return 0;}
 
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
-int B_init() {return 0;}
+int B_init() {
+  B_expected_seqnum = 0;
+  B_last_ack = 0;
+
+  return 0;
+}
 
 int TRACE = 1;   /* for my debugging */
 int nsim = 0;    /* number of messages from 5 to 4 so far */
@@ -244,10 +347,10 @@ int main()
       printf(" entity: %d\n", eventptr->eventity);
     }
     time = eventptr->evtime; /* update time to next event time */
-    if (nsim == nsimmax) {
-      break; /* all done with simulation */
-    }
     if (eventptr->evtype == FROM_LAYER5) {
+      if (nsim == nsimmax) {
+        break; /* all done with simulation */
+      }
       generate_next_arrival(); /* set up future arrival */
       /* fill in msg to give with string of same letter */
       j = nsim % 26;
