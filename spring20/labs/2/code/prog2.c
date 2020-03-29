@@ -45,11 +45,13 @@ void insert_timer(float begin_time, int seqnum){
     timers_tail = timers;
   }
   else{
-    timers_tail->next = malloc(sizeof(timeout_list));
-    timers_tail->next->next = NULL;
-    timers_tail->next->seqnum = seqnum;
-    timers_tail->next->begin_time = begin_time;
-    timers_tail = timers_tail->next;
+    timeout_list *tl = malloc(sizeof(timeout_list));
+    tl = malloc(sizeof(timeout_list));
+    tl->next = NULL;
+    tl->seqnum = seqnum;
+    tl->begin_time = begin_time;
+    timers_tail->next = tl;
+    timers_tail = tl;
   }
 
 }
@@ -141,8 +143,10 @@ void send_packet(int seqnum){
   if(last_sent <= seqnum)
     last_sent = seqnum + 1;
 
-  if(base==seqnum)
+  if(base==seqnum){
+    current_timer_seqnum = seqnum;
     starttimer(0, 40.0);
+  }
   else
     insert_timer(time, seqnum);
 }
@@ -207,8 +211,26 @@ int send_unsent(){
   return 0;
 }
 
+void debug_timer_list(){
+  printf("\n-------- Debug timer --------- \n");
+  printf("current timer on: %d\n", current_timer_seqnum);
+  timeout_list *tl = timers;
+  int i = 0;
+  while(tl != NULL){
+    printf("seqnum: %d\n", tl->seqnum);
+    printf("time:   %f\n", tl->begin_time);
+    tl = tl->next;
+    i++;
+  printf("\n");
+  }
+  printf("\n");
+
+}
+
 // Search for the seqnum in the timer list and erase it
 int erase_timer(int seqnum){
+  debug_timer_list();
+  printf("Trying to erase timer for %d\n", seqnum);
   if(seqnum == current_timer_seqnum){
     stoptimer(0);
     pop_timer();
@@ -216,7 +238,7 @@ int erase_timer(int seqnum){
   }
 
   timeout_list *tl = timers;
-  timeout_list *helper;
+  timeout_list *helper = tl;
 
   // Search for position of the seqnum
   while(tl != NULL && tl->seqnum != seqnum){
@@ -233,6 +255,7 @@ int erase_timer(int seqnum){
   free(tl);
 
   // Starts the next timer
+  debug_timer_list();
   pop_timer();
   return 1;
 }
