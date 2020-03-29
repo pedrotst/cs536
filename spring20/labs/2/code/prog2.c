@@ -307,8 +307,8 @@ int A_timerinterrupt() {
   printf("\n-------------- A timeout --------------\n");
   printf("The packet was lost, resending #%d\n", current_timer_seqnum);
 
-  erase_timer(current_timer_seqnum);
   send_packet(current_timer_seqnum);
+  pop_timer();
 
   return 0;
 }
