@@ -240,6 +240,12 @@ int erase_timer(int seqnum){
   timeout_list *tl = timers;
   timeout_list *helper = tl;
 
+  if(timers != NULL && timers->seqnum == seqnum){
+    timers = timers->next;
+    free(tl);
+    return 0;
+  }
+
   // Search for position of the seqnum
   while(tl != NULL && tl->seqnum != seqnum){
     helper = tl;
