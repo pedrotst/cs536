@@ -103,7 +103,7 @@ int queue_msg(struct msg message){
   // if it is within window, ship it
   if(nextseqnum < base + WINDOW_SIZE){
     tolayer3(0, *packet);
-    last_sent = nextseqnum;
+    last_sent = nextseqnum + 1;
     if(base==nextseqnum)
       starttimer(0, 40.0);
   }
@@ -162,7 +162,7 @@ int send_unsent(){
   for(int i = last_sent; i < effective_window; i++){
     /* rdtsend(buffer_queue[i]); */
     tolayer3(0, buffer_queue[i]);
-    last_sent = nextseqnum - 1;
+    last_sent = effective_window;
   }
 
   return 0;
@@ -177,15 +177,16 @@ int A_input(struct pkt packet)
   /* stoptimer(0); */
 
   if(!is_corrupt(packet)){
-    if(base < packet.acknum){
+    if(base <= packet.acknum){
       printf("Ack is new, stopping stimer\n");
       stoptimer(0);
       // If we still have packets in flight we turn on timer again
-      if(packet.acknum != nextseqnum)
+      if(packet.acknum + 1 != nextseqnum){
         printf("We still have packet in flight, starting timer\n");
         starttimer(0, 40.0);
+      }
     }
-    base = packet.acknum;
+    base = packet.acknum + 1;
     send_unsent();
   }
   else{
@@ -220,8 +221,9 @@ int A_init() {
 }
 
 int fill_ack(struct pkt *packet, int ack){
-  memset(packet, 0, sizeof(struct pkt));
-  strcpy(packet->payload, "this  is  ack  pack ");
+  /* memset(packet, 0, sizeof(struct pkt)); */
+  /* strcpy(packet->payload, "this  is  ack  pack "); */
+  packet->seqnum = 0;
   packet->acknum = ack;
   fill_checksum(packet);
 
@@ -236,20 +238,22 @@ int B_input(struct pkt packet)
   printf("Got a packet with\n");
   debug_packet(packet);
 
+  int ack = expected_seqnum - 1;
+
   if(packet.seqnum != expected_seqnum){
     printf("Packet out of order, dropping packet, expected #%d\n", expected_seqnum);
-    printf("Acknowledge %d\n", expected_seqnum);
-    fill_ack(&packet, expected_seqnum);
+    printf("Acknowledge %d\n", ack);
+    fill_ack(&packet, ack);
   }
   else if(is_corrupt(packet)){
     printf("Packet was corrupted dropping packet\n");
-    printf("Acknowledge %d\n", expected_seqnum);
-    fill_ack(&packet, expected_seqnum);
+    printf("Acknowledge %d\n", ack);
+    fill_ack(&packet, ack);
   }
   else {
+    fill_ack(&packet, expected_seqnum);
     expected_seqnum++;
     tolayer5(1, packet.payload);
-    fill_ack(&packet, expected_seqnum);
   }
 
     tolayer3(1, packet);
