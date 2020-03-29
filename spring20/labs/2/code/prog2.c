@@ -243,6 +243,7 @@ int erase_timer(int seqnum){
   if(timers != NULL && timers->seqnum == seqnum){
     timers = timers->next;
     free(tl);
+    debug_timer_list();
     return 0;
   }
 
@@ -255,14 +256,16 @@ int erase_timer(int seqnum){
   // If it exists
   if(tl == NULL)
     return 0;
+  if (tl->seqnum != seqnum){
+    printf("Couldnt find timer\n");
+    return 0;
+  }
 
   // Then erase it
   helper->next = tl->next;
   free(tl);
 
-  // Starts the next timer
   debug_timer_list();
-  pop_timer();
   return 1;
 }
 
