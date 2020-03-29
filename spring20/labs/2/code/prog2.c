@@ -143,7 +143,7 @@ void send_packet(int seqnum){
   if(last_sent <= seqnum)
     last_sent = seqnum + 1;
 
-  if(base==seqnum){
+  if(timers == NULL){
     current_timer_seqnum = seqnum;
     starttimer(0, 40.0);
   }
