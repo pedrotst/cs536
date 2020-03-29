@@ -9,12 +9,12 @@ volatile int tip_queue;
 volatile int tail_queue;
 volatile int size_queue;
 int next_seqnum;
-int next_acknum;
 int A_expected_acknum;
 
 
 /* Private Variables for B */
 int B_expected_seqnum;
+int B_lastseqnum;
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -71,7 +71,7 @@ void debug_packet(struct pkt packet){
 
 // Here we implement a circular queue
 void circular_increment(volatile int *x, int max){
-  *x = (*x + 1) % (max + 1);
+  *x = (*x + 1) % (max);
   /* if(*x != max) */
     /* *x += 1; */
   /* else */
@@ -88,17 +88,17 @@ int queue_msg(struct msg message){
   // In this part of the assignment we were not supposed to buffer
   // any messages. Therefore instead of growing the queue we will just drop the message ;)
   if(size_queue >= 1){
-    printf("There already is a packet inflight, dropping packet\n");
+    /* printf("There already is a packet inflight, dropping packet\n"); */
     return 0;
   }
 
   struct pkt *packet = &buffer_queue[tail_queue];
 
   packet->seqnum = next_seqnum;
-  circular_increment(&next_seqnum, 4);
+  circular_increment(&next_seqnum, 2);
   /* next_seqnum = (next_seqnum + 1) % 2; */
-  packet->acknum = next_acknum;
-  circular_increment(&next_acknum, 2);
+  packet->acknum = 0;
+  /* circular_increment(&next_acknum, 2); */
   /* next_acknum = (next_acknum + 1) % 2; */
 
   // Copy the payload
@@ -106,9 +106,9 @@ int queue_msg(struct msg message){
   fill_checksum(packet);
 
   size_queue++;
-  circular_increment(&tail_queue, MAX_BUFFER_SIZE - 1);
+  circular_increment(&tail_queue, MAX_BUFFER_SIZE);
 
-  debug_packet(*packet);
+  /* debug_packet(*packet); */
   return 1;
 }
 
@@ -134,15 +134,15 @@ int dequeue(){
   }
 
   size_queue--;
-  circular_increment(&tip_queue, MAX_BUFFER_SIZE - 1);
+  circular_increment(&tip_queue, MAX_BUFFER_SIZE);
   return 1;
 }
 
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
 {
-  printf("\n-------------- A output --------------\n");
-  printf("Sending Packet at A: \n");
+  /* printf("\n-------------- A output --------------\n"); */
+  /* printf("Sending Packet at A: \n"); */
   /* debug_payload(message.data); */
 
   queue_msg(message);
@@ -157,8 +157,8 @@ int A_output(struct msg message)
 int A_input(struct pkt packet)
 {
   (void)packet;
-  printf("\n-------------- A input --------------\n");
-  debug_packet(packet);
+  /* printf("\n-------------- A input --------------\n"); */
+  /* debug_packet(packet); */
 
   stoptimer(0);
 
@@ -167,7 +167,7 @@ int A_input(struct pkt packet)
     send_next_packet();
   }
   else{
-    printf("Packet was corrupted, resending\n");
+    /* printf("Packet was corrupted, resending\n"); */
     send_next_packet();
   }
 
@@ -176,8 +176,8 @@ int A_input(struct pkt packet)
 
 /* called when A's timer goes off */
 int A_timerinterrupt() {
-  printf("\n-------------- A timeout --------------\n");
-  printf("The packet was lost, resending\n");
+  /* printf("\n-------------- A timeout --------------\n"); */
+  /* printf("The packet was lost, resending\n"); */
 
   send_next_packet();
 
@@ -191,27 +191,37 @@ int A_init() {
   tail_queue = 0;
   size_queue = 0;
   next_seqnum = 0;
-  next_acknum = 0;
   A_expected_acknum = -1;
 
   return 0;
+}
+
+int fill_ack(struct pkt *packet, int ack){
+  packet->seqnum = 0;
+  packet->acknum = ack;
+  fill_checksum(packet);
+
+  return 1;
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
-  printf("\n-------------- B output --------------\n");
-  printf("Got a packet with\n");
-  debug_packet(packet);
+  /* printf("\n-------------- B output --------------\n"); */
+  /* printf("Got a packet with\n"); */
+  /* debug_packet(packet); */
 
   if(is_corrupt(packet)){
-    printf("Packet was corrupted, sending NACK\n");
+    /* printf("Packet was corrupted, sending NACK\n"); */
+    fill_ack(&packet, -2);
   }
   else if(packet.seqnum != B_expected_seqnum){
-    printf("Packet out of order, sending NACK\n");
+    /* fill_ack(&packet, -2); */
+    /* printf("Packet out of order, sending NACK\n"); */
   }
   else {
+    B_lastseqnum = B_expected_seqnum;
     circular_increment(&B_expected_seqnum, 2);
     tolayer5(1, packet.payload);
   }
@@ -231,6 +241,7 @@ int B_timerinterrupt() {return 0;}
 /* entity B routines are called. You can use it to do any initialization */
 int B_init() {
   B_expected_seqnum = 0;
+  B_lastseqnum = -1;
 
   return 0;
 }
