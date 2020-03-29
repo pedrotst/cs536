@@ -310,6 +310,10 @@ int A_timerinterrupt() {
   send_packet(current_timer_seqnum);
   pop_timer();
 
+  if(timers != NULL)
+    current_timer_seqnum = timers->seqnum;
+
+
   return 0;
 }
 
