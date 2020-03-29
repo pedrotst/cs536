@@ -59,7 +59,7 @@ void insert_timer(float begin_time, int seqnum){
 // Pops the timer and return the time elapsed since it was added to the list
 int pop_timer(){
   if(timers == NULL){
-    fprintf(stderr, "nothing to pop");
+    printf("nothing to pop\n");
     return 0.0;
   }
 
