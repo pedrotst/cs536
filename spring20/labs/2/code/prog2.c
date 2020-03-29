@@ -295,7 +295,7 @@ int A_timerinterrupt() {
   printf("The packet was lost, resending #%d\n", current_timer_seqnum);
 
   send_packet(current_timer_seqnum);
-  pop_timer();
+  /* pop_timer(); */
 
   return 0;
 }
