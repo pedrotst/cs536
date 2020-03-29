@@ -15,10 +15,62 @@ volatile int last_sent;
 
 int nextseqnum;
 int A_expected_acknum;
+int current_timer_seqnum;
+
+typedef struct timeout_list_t {
+  float begin_time;
+  int seqnum;
+  struct timeout_list_t *next;
+} timeout_list;
+
+timeout_list *timers, *timers_tail;
 
 
 /* B Private Variables */
 int expected_seqnum;
+
+typedef struct acked_packet_t{
+  int acked;
+  struct pkt packet;
+} acked_packet;
+
+acked_packet acked_buffer[MAX_BUFFER_SIZE];
+
+void insert_timer(float begin_time, int seqnum){
+  if(timers == NULL){
+    timers = malloc(sizeof(timeout_list));
+    timers->next = NULL;
+    timers->seqnum = seqnum;
+    timers->begin_time = begin_time;
+    timers_tail = timers;
+  }
+  else{
+    timers_tail->next = malloc(sizeof(timeout_list));
+    timers_tail->next->next = NULL;
+    timers_tail->next->seqnum = seqnum;
+    timers_tail->next->begin_time = begin_time;
+    timers_tail = timers_tail->next;
+  }
+
+}
+
+// Pops the timer and return the time elapsed since it was added to the list
+int pop_timer(){
+  if(timers == NULL){
+    fprintf(stderr, "nothing to pop");
+    return 0.0;
+  }
+
+  float ret = timers->begin_time;
+  timeout_list *l = timers;
+  timers = timers->next;
+  current_timer_seqnum = timers->seqnum;
+
+  free(l);
+  starttimer(0, 40.0 - (time-ret));
+
+  return 1;
+}
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -82,11 +134,24 @@ void debug_packet(struct pkt packet){
 /*   base = 0; */
 /* } */
 
+void send_packet(int seqnum){
+  struct pkt *packet = &buffer_queue[seqnum];
+  tolayer3(0, *packet);
+
+  if(last_sent <= seqnum)
+    last_sent = seqnum + 1;
+
+  if(base==seqnum)
+    starttimer(0, 40.0);
+  else
+    insert_timer(time, seqnum);
+}
+
 // This function will
 int queue_msg(struct msg message){
   if(tail_queue == MAX_BUFFER_SIZE - 1){
-    fprintf(stderr, "Buffer is full, ABORT\n");
-    exit(1);
+    fprintf(stderr, "Buffer is full, drop message\n");
+    /* exit(1); */
   }
 
   struct pkt *packet = &buffer_queue[tail_queue];
@@ -102,38 +167,13 @@ int queue_msg(struct msg message){
 
   // if it is within window, ship it
   if(nextseqnum < base + WINDOW_SIZE){
-    tolayer3(0, *packet);
-    last_sent = nextseqnum + 1;
-    if(base==nextseqnum)
-      starttimer(0, 40.0);
+    send_packet(nextseqnum);
   }
 
   tail_queue++;
   nextseqnum++;
 
   return 1;
-}
-
-// This function sends all data buffered
-// If resending != 0 then it will send the whole window
-// Otherwise it will send starting from the first unsent packet
-int send_window(){
-  if(base == tail_queue){
-    // Do nothing
-    return 0;
-  }
-
-  int effective_window = 0;
-  if(nextseqnum <= base + WINDOW_SIZE)
-    effective_window = nextseqnum;
-  else
-    effective_window = base + WINDOW_SIZE;
-
-  for(int i = base; i < effective_window; i++){
-    tolayer3(0, buffer_queue[i]);
-  }
-
-  return 0;
 }
 
 /* called from layer 5, passed the data to be sent to other side */
@@ -160,12 +200,41 @@ int send_unsent(){
     effective_window = base + WINDOW_SIZE;
 
   for(int i = last_sent; i < effective_window; i++){
-    /* rdtsend(buffer_queue[i]); */
     tolayer3(0, buffer_queue[i]);
     last_sent = effective_window;
   }
 
   return 0;
+}
+
+// Search for the seqnum in the timer list and erase it
+int erase_timer(int seqnum){
+  if(seqnum == current_timer_seqnum){
+    stoptimer(0);
+    pop_timer();
+    return 1;
+  }
+
+  timeout_list *tl = timers;
+  timeout_list *helper;
+
+  // Search for position of the seqnum
+  while(tl != NULL && tl->seqnum != seqnum){
+    helper = tl;
+    tl = tl->next;
+  }
+
+  // If it exists
+  if(tl == NULL)
+    return 0;
+
+  // Then erase it
+  helper->next = tl->next;
+  free(tl);
+
+  // Starts the next timer
+  pop_timer();
+  return 1;
 }
 
 /* called from layer 3, when a packet arrives for layer 4 */
@@ -177,21 +246,12 @@ int A_input(struct pkt packet)
   /* stoptimer(0); */
 
   if(!is_corrupt(packet)){
-    if(base <= packet.acknum){
-      printf("Ack is new, stopping stimer\n");
-      stoptimer(0);
-      // If we still have packets in flight we turn on timer again
-      if(packet.acknum + 1 != nextseqnum){
-        printf("We still have packet in flight, starting timer\n");
-        starttimer(0, 40.0);
-      }
-    }
+    erase_timer(packet.acknum);
     base = packet.acknum + 1;
     send_unsent();
   }
   else{
     printf("Packet was corrupted, do nothing\n");
-    /* send_window(); */
   }
 
   return 0;
@@ -200,10 +260,10 @@ int A_input(struct pkt packet)
 /* called when A's timer goes off */
 int A_timerinterrupt() {
   printf("\n-------------- A timeout --------------\n");
-  printf("The packet was lost, resending the whole window\n");
+  printf("The packet was lost, resending #%d\n", current_timer_seqnum);
 
-  starttimer(0, 40.0);
-  send_window();
+  send_packet(current_timer_seqnum);
+  pop_timer();
 
   return 0;
 }
@@ -216,6 +276,8 @@ int A_init() {
   nextseqnum = 0;
   last_sent = 0;
   /* A_expected_acknum = -1; */
+  timers = NULL;
+  timers_tail = NULL;
 
   return 0;
 }
@@ -230,6 +292,19 @@ int fill_ack(struct pkt *packet, int ack){
   return 1;
 }
 
+int sendtolayer5(int seqnum){
+  if(seqnum == expected_seqnum){
+    while(acked_buffer[seqnum].acked == 1){
+      tolayer5(1, acked_buffer[seqnum].packet.payload);
+      seqnum++;
+    }
+    expected_seqnum = seqnum;
+    return 1;
+  }
+
+  return 0;
+}
+
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
@@ -238,25 +313,22 @@ int B_input(struct pkt packet)
   printf("Got a packet with\n");
   debug_packet(packet);
 
-  int ack = expected_seqnum - 1;
+  /* int ack = packet.acknum; */
 
-  if(packet.seqnum != expected_seqnum){
-    printf("Packet out of order, dropping packet, expected #%d\n", expected_seqnum);
-    printf("Acknowledge %d\n", ack);
-    fill_ack(&packet, ack);
-  }
-  else if(is_corrupt(packet)){
+  if(is_corrupt(packet)){
     printf("Packet was corrupted dropping packet\n");
-    printf("Acknowledge %d\n", ack);
-    fill_ack(&packet, ack);
+    /* printf("Acknowledge %d\n", ack); */
+    /* fill_ack(&packet, ack); */
   }
   else {
-    fill_ack(&packet, expected_seqnum);
-    expected_seqnum++;
-    tolayer5(1, packet.payload);
-  }
+    acked_buffer[packet.seqnum].packet = packet;
+    acked_buffer[packet.seqnum].acked = 1;
 
+    fill_ack(&packet, packet.seqnum);
+    /* expected_seqnum++; */
+    /* tolayer5(1, packet.payload); */
     tolayer3(1, packet);
+  }
 
   return 1;
 }
@@ -268,6 +340,7 @@ int B_timerinterrupt() {return 0;}
 /* entity B routines are called. You can use it to do any initialization */
 int B_init() {
   expected_seqnum = 0;
+  memset(acked_buffer, 0, sizeof(acked_packet) * MAX_BUFFER_SIZE);
 
   return 0;
 }
