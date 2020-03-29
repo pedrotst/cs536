@@ -11,15 +11,14 @@
 struct pkt buffer_queue[MAX_BUFFER_SIZE];
 volatile int base;
 volatile int tail_queue;
-volatile int send_next;
+volatile int last_sent;
 
 int nextseqnum;
 int A_expected_acknum;
 
 
 /* B Private Variables */
-int B_expected_seqnum;
-int B_last_ack;
+int expected_seqnum;
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
@@ -68,7 +67,7 @@ void debug_packet(struct pkt packet){
   printf("seqnum      = %d\n", packet.seqnum);
   printf("acknum      = %d\n", packet.acknum);
   printf("checksum    = %u\n", ~packet.checksum);
-  printf("base   = %d\n", base);
+  printf("base        = %d\n", base);
   printf("tail_queue  = %d\n", tail_queue);
   debug_payload(packet.payload);
 }
@@ -90,11 +89,6 @@ int queue_msg(struct msg message){
     exit(1);
   }
 
-  /* if(tail_queue == MAX_BUFFER_SIZE - 1){ */
-    /* defrag_queue(); */
-  /* } */
-
-
   struct pkt *packet = &buffer_queue[tail_queue];
 
   packet->seqnum = nextseqnum;
@@ -107,8 +101,12 @@ int queue_msg(struct msg message){
   debug_packet(*packet);
 
   // if it is within window, ship it
-  if(nextseqnum < base + WINDOW_SIZE)
+  if(nextseqnum < base + WINDOW_SIZE){
     tolayer3(0, *packet);
+    last_sent = nextseqnum;
+    if(base==nextseqnum)
+      starttimer(0, 40.0);
+  }
 
   tail_queue++;
   nextseqnum++;
@@ -125,28 +123,18 @@ int send_window(){
     return 0;
   }
 
-  for(int i = base; i < nextseqnum; i++){
+  int effective_window = 0;
+  if(nextseqnum <= base + WINDOW_SIZE)
+    effective_window = nextseqnum;
+  else
+    effective_window = base + WINDOW_SIZE;
+
+  for(int i = base; i < effective_window; i++){
     tolayer3(0, buffer_queue[i]);
   }
 
   return 0;
 }
-
-int dequeue(){
-  if(base == tail_queue){
-    fprintf(stderr, "Trying to dequeue empty buffer!!");
-    return 0;
-  }
-
-  base++;
-  return 1;
-}
-
-int dequeue_until(int x){
-  int i = nextseqnum;
-  base = x;
-}
-
 
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
@@ -160,7 +148,24 @@ int A_output(struct msg message)
   return 0;
 }
 
-void debug_queue(){
+int send_unsent(){
+  if(base == tail_queue){
+    // Do nothing
+    return 0;
+  }
+  int effective_window = 0;
+  if(nextseqnum <= base + WINDOW_SIZE)
+    effective_window = nextseqnum;
+  else
+    effective_window = base + WINDOW_SIZE;
+
+  for(int i = last_sent; i < effective_window; i++){
+    /* rdtsend(buffer_queue[i]); */
+    tolayer3(0, buffer_queue[i]);
+    last_sent = nextseqnum - 1;
+  }
+
+  return 0;
 }
 
 /* called from layer 3, when a packet arrives for layer 4 */
@@ -172,15 +177,21 @@ int A_input(struct pkt packet)
   /* stoptimer(0); */
 
   if(!is_corrupt(packet)){
-    dequeue_until(packet.acknum);
+    if(base < packet.acknum){
+      printf("Ack is new, stopping stimer\n");
+      stoptimer(0);
+      // If we still have packets in flight we turn on timer again
+      if(packet.acknum != nextseqnum)
+        printf("We still have packet in flight, starting timer\n");
+        starttimer(0, 40.0);
+    }
+    base = packet.acknum;
+    send_unsent();
   }
   else{
-    printf("Packet was corrupted, resending the whole window\n");
-    send_window();
+    printf("Packet was corrupted, do nothing\n");
+    /* send_window(); */
   }
-
-  if(base != send_next)
-    /* starttimer(0, 20.0); */
 
   return 0;
 }
@@ -190,9 +201,8 @@ int A_timerinterrupt() {
   printf("\n-------------- A timeout --------------\n");
   printf("The packet was lost, resending the whole window\n");
 
-  send_window(1);
-
-  /* starttimer(0, 20.0); */
+  starttimer(0, 40.0);
+  send_window();
 
   return 0;
 }
@@ -200,17 +210,17 @@ int A_timerinterrupt() {
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
 int A_init() {
-  send_next = 0;
   base = 0;
   tail_queue = 0;
   nextseqnum = 0;
+  last_sent = 0;
   /* A_expected_acknum = -1; */
 
   return 0;
 }
 
 int fill_ack(struct pkt *packet, int ack){
-  memset(&packet->payload, 0, sizeof(struct pkt));
+  memset(packet, 0, sizeof(struct pkt));
   strcpy(packet->payload, "this  is  ack  pack ");
   packet->acknum = ack;
   fill_checksum(packet);
@@ -226,23 +236,20 @@ int B_input(struct pkt packet)
   printf("Got a packet with\n");
   debug_packet(packet);
 
-  if(packet.seqnum != B_expected_seqnum){
-    printf("Packet out of order, dropping packet, expected #%d\n", B_expected_seqnum);
-    printf("Acknowledge %d\n", B_last_ack);
-    packet.acknum = B_last_ack;
-    fill_ack(&packet, B_last_ack);
+  if(packet.seqnum != expected_seqnum){
+    printf("Packet out of order, dropping packet, expected #%d\n", expected_seqnum);
+    printf("Acknowledge %d\n", expected_seqnum);
+    fill_ack(&packet, expected_seqnum);
   }
   else if(is_corrupt(packet)){
     printf("Packet was corrupted dropping packet\n");
-    printf("Acknowledge %d\n", B_last_ack);
-    packet.acknum = B_last_ack;
-    fill_ack(&packet, B_last_ack);
+    printf("Acknowledge %d\n", expected_seqnum);
+    fill_ack(&packet, expected_seqnum);
   }
   else {
-    B_last_ack = B_expected_seqnum;
-    circular_increment(&B_expected_seqnum, WINDOW_SIZE);
-    /* circular_increment(&B_last_ack, WINDOW_SIZE); */
+    expected_seqnum++;
     tolayer5(1, packet.payload);
+    fill_ack(&packet, expected_seqnum);
   }
 
     tolayer3(1, packet);
@@ -256,8 +263,7 @@ int B_timerinterrupt() {return 0;}
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
 int B_init() {
-  B_expected_seqnum = 0;
-  B_last_ack = 0;
+  expected_seqnum = 0;
 
   return 0;
 }

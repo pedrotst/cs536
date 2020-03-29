@@ -123,7 +123,13 @@ int send_window(){
     return 0;
   }
 
-  for(int i = base; i < nextseqnum; i++){
+  int effective_window = 0;
+  if(nextseqnum <= base + WINDOW_SIZE)
+    effective_window = nextseqnum;
+  else
+    effective_window = base + WINDOW_SIZE;
+
+  for(int i = base; i < effective_window; i++){
     tolayer3(0, buffer_queue[i]);
   }
 
@@ -147,8 +153,13 @@ int send_unsent(){
     // Do nothing
     return 0;
   }
+  int effective_window = 0;
+  if(nextseqnum <= base + WINDOW_SIZE)
+    effective_window = nextseqnum;
+  else
+    effective_window = base + WINDOW_SIZE;
 
-  for(int i = last_sent; i < nextseqnum - 1; i++){
+  for(int i = last_sent; i < effective_window; i++){
     /* rdtsend(buffer_queue[i]); */
     tolayer3(0, buffer_queue[i]);
     last_sent = nextseqnum - 1;
@@ -166,10 +177,12 @@ int A_input(struct pkt packet)
   /* stoptimer(0); */
 
   if(!is_corrupt(packet)){
-    if(base != packet.acknum){
+    if(base < packet.acknum){
+      printf("Ack is new, stopping stimer\n");
       stoptimer(0);
       // If we still have packets in flight we turn on timer again
       if(packet.acknum != nextseqnum)
+        printf("We still have packet in flight, starting timer\n");
         starttimer(0, 40.0);
     }
     base = packet.acknum;
@@ -207,7 +220,7 @@ int A_init() {
 }
 
 int fill_ack(struct pkt *packet, int ack){
-  memset(&packet->payload, 0, sizeof(struct pkt));
+  memset(packet, 0, sizeof(struct pkt));
   strcpy(packet->payload, "this  is  ack  pack ");
   packet->acknum = ack;
   fill_checksum(packet);
@@ -236,6 +249,7 @@ int B_input(struct pkt packet)
   else {
     expected_seqnum++;
     tolayer5(1, packet.payload);
+    fill_ack(&packet, expected_seqnum);
   }
 
     tolayer3(1, packet);
