@@ -7,8 +7,14 @@
 #define RETRANSMIT 1
 #define TRANSMIT 0
 
+
+typedef struct acked_packet_t{
+  int acked;
+  struct pkt packet;
+} acked_packet;
+
 /* A Private Variables */
-struct pkt buffer_queue[MAX_BUFFER_SIZE];
+acked_packet buffer_queue[MAX_BUFFER_SIZE];
 volatile int base;
 volatile int tail_queue;
 volatile int last_sent;
@@ -28,11 +34,6 @@ timeout_list *timers, *timers_tail;
 
 /* B Private Variables */
 int expected_seqnum;
-
-typedef struct acked_packet_t{
-  int acked;
-  struct pkt packet;
-} acked_packet;
 
 acked_packet acked_buffer[MAX_BUFFER_SIZE];
 
@@ -155,7 +156,7 @@ void debug_packet(struct pkt packet){
 /* } */
 
 void send_packet(int seqnum){
-  struct pkt *packet = &buffer_queue[seqnum];
+  struct pkt *packet = &buffer_queue[seqnum].packet;
   tolayer3(0, *packet);
 
   if(last_sent <= seqnum)
@@ -178,7 +179,8 @@ int queue_msg(struct msg message){
     /* exit(1); */
   }
 
-  struct pkt *packet = &buffer_queue[tail_queue];
+  buffer_queue[tail_queue].acked = 0;
+  struct pkt *packet = &buffer_queue[tail_queue].packet;
 
   packet->seqnum = nextseqnum;
   packet->acknum = 0;
@@ -224,7 +226,7 @@ int send_unsent(){
     effective_window = base + WINDOW_SIZE;
 
   for(int i = last_sent; i < effective_window; i++){
-    tolayer3(0, buffer_queue[i]);
+    tolayer3(0, buffer_queue[i].packet);
     last_sent = effective_window;
   }
 
@@ -273,6 +275,13 @@ int erase_timer(int seqnum){
   return 1;
 }
 
+void ack_buffer(int acknum){
+  buffer_queue[acknum].acked = 1;
+
+  while(buffer_queue[base].acked == 1)
+    base++;
+}
+
 /* called from layer 3, when a packet arrives for layer 4 */
 int A_input(struct pkt packet)
 {
@@ -283,7 +292,7 @@ int A_input(struct pkt packet)
 
   if(!is_corrupt(packet)){
     erase_timer(packet.acknum);
-    base = packet.acknum + 1;
+    ack_buffer(packet.acknum);
     send_unsent();
   }
   else{
