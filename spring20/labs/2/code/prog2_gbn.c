@@ -85,8 +85,8 @@ void debug_packet(struct pkt packet){
 // This function will
 int queue_msg(struct msg message){
   if(tail_queue == MAX_BUFFER_SIZE - 1){
-    fprintf(stderr, "Buffer is full, ABORT\n");
-    exit(1);
+    fprintf(stderr, "Buffer is full, drop message\n");
+    /* exit(1); */
   }
 
   struct pkt *packet = &buffer_queue[tail_queue];
@@ -98,7 +98,7 @@ int queue_msg(struct msg message){
   strncpy(packet->payload, message.data, 20);
   fill_checksum(packet);
 
-  debug_packet(*packet);
+  /* debug_packet(*packet); */
 
   // if it is within window, ship it
   if(nextseqnum < base + WINDOW_SIZE){
@@ -139,8 +139,8 @@ int send_window(){
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
 {
-  printf("\n-------------- A output --------------\n");
-  printf("Sending Packet at A: \n");
+  /* printf("\n-------------- A output --------------\n"); */
+  /* printf("Sending Packet at A: \n"); */
   /* debug_payload(message.data); */
 
   queue_msg(message);
@@ -171,18 +171,18 @@ int send_unsent(){
 /* called from layer 3, when a packet arrives for layer 4 */
 int A_input(struct pkt packet)
 {
-  printf("\n-------------- A input --------------\n");
-  debug_packet(packet);
+  /* printf("\n-------------- A input --------------\n"); */
+  /* debug_packet(packet); */
 
   /* stoptimer(0); */
 
   if(!is_corrupt(packet)){
     if(base <= packet.acknum){
-      printf("Ack is new, stopping stimer\n");
+      /* printf("Ack is new, stopping stimer\n"); */
       stoptimer(0);
       // If we still have packets in flight we turn on timer again
       if(packet.acknum + 1 != nextseqnum){
-        printf("We still have packet in flight, starting timer\n");
+        /* printf("We still have packet in flight, starting timer\n"); */
         starttimer(0, 40.0);
       }
     }
@@ -190,7 +190,7 @@ int A_input(struct pkt packet)
     send_unsent();
   }
   else{
-    printf("Packet was corrupted, do nothing\n");
+    /* printf("Packet was corrupted, do nothing\n"); */
     /* send_window(); */
   }
 
@@ -199,8 +199,8 @@ int A_input(struct pkt packet)
 
 /* called when A's timer goes off */
 int A_timerinterrupt() {
-  printf("\n-------------- A timeout --------------\n");
-  printf("The packet was lost, resending the whole window\n");
+  /* printf("\n-------------- A timeout --------------\n"); */
+  /* printf("The packet was lost, resending the whole window\n"); */
 
   starttimer(0, 40.0);
   send_window();
@@ -234,20 +234,20 @@ int fill_ack(struct pkt *packet, int ack){
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
-  printf("\n-------------- B output --------------\n");
-  printf("Got a packet with\n");
-  debug_packet(packet);
+  /* printf("\n-------------- B output --------------\n"); */
+  /* printf("Got a packet with\n"); */
+  /* debug_packet(packet); */
 
   int ack = expected_seqnum - 1;
 
   if(packet.seqnum != expected_seqnum){
-    printf("Packet out of order, dropping packet, expected #%d\n", expected_seqnum);
-    printf("Acknowledge %d\n", ack);
+    /* printf("Packet out of order, dropping packet, expected #%d\n", expected_seqnum); */
+    /* printf("Acknowledge %d\n", ack); */
     fill_ack(&packet, ack);
   }
   else if(is_corrupt(packet)){
-    printf("Packet was corrupted dropping packet\n");
-    printf("Acknowledge %d\n", ack);
+    /* printf("Packet was corrupted dropping packet\n"); */
+    /* printf("Acknowledge %d\n", ack); */
     fill_ack(&packet, ack);
   }
   else {
