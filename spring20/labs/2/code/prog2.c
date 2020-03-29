@@ -60,6 +60,7 @@ void insert_timer(float begin_time, int seqnum){
 int pop_timer(){
   if(timers == NULL){
     printf("nothing to pop\n");
+    current_timer_seqnum = -1;
     return 0.0;
   }
 
@@ -143,7 +144,7 @@ void send_packet(int seqnum){
   if(last_sent <= seqnum)
     last_sent = seqnum + 1;
 
-  if(timers == NULL){
+  if(current_timer_seqnum < 0){
     current_timer_seqnum = seqnum;
     starttimer(0, 40.0);
   }
@@ -310,6 +311,8 @@ int A_init() {
   /* A_expected_acknum = -1; */
   timers = NULL;
   timers_tail = NULL;
+
+  current_timer_seqnum = -1;
 
   return 0;
 }
