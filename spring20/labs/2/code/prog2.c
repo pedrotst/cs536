@@ -76,7 +76,7 @@ int pop_timer(){
 
 void fill_checksum(struct pkt *packet){
   // Our checksum will be 64 bits for wraparound
-  uint64_t checksum = 0;
+  u_int64_t checksum = 0;
 
   // First add all the numbes in the packet
   checksum += packet->seqnum + packet->acknum;
@@ -93,7 +93,7 @@ void fill_checksum(struct pkt *packet){
 }
 
 int is_corrupt(struct pkt packet){
-  uint64_t sum = 0;
+  u_int64_t sum = 0;
   for(int i = 0; i < 20; i++)
     sum += packet.payload[i];
 
