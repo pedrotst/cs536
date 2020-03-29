@@ -88,7 +88,8 @@ int pop_timer(){
   current_timer_seqnum = timers->seqnum;
 
   free(l);
-  starttimer(0, 40.0 - (time-ret));
+  /* starttimer(0, 40.0 - (time-ret)); */
+  starttimer(0, 40.0);
 
   return 1;
 }
