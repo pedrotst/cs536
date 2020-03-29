@@ -36,6 +36,23 @@ typedef struct acked_packet_t{
 
 acked_packet acked_buffer[MAX_BUFFER_SIZE];
 
+void debug_timer_list(){
+  printf("\n-------- Debug timer --------- \n");
+  printf("current timer on: %d\n", current_timer_seqnum);
+  timeout_list *tl = timers;
+  int i = 0;
+  while(tl != NULL){
+    printf("seqnum: %d\n", tl->seqnum);
+    printf("time:   %f\n", tl->begin_time);
+    tl = tl->next;
+    i++;
+  printf("\n");
+  }
+  printf("\n");
+
+}
+
+
 void insert_timer(float begin_time, int seqnum){
   if(timers == NULL){
     timers = malloc(sizeof(timeout_list));
@@ -150,6 +167,8 @@ void send_packet(int seqnum){
   }
   else
     insert_timer(time, seqnum);
+
+  debug_timer_list();
 }
 
 // This function will
@@ -210,22 +229,6 @@ int send_unsent(){
   }
 
   return 0;
-}
-
-void debug_timer_list(){
-  printf("\n-------- Debug timer --------- \n");
-  printf("current timer on: %d\n", current_timer_seqnum);
-  timeout_list *tl = timers;
-  int i = 0;
-  while(tl != NULL){
-    printf("seqnum: %d\n", tl->seqnum);
-    printf("time:   %f\n", tl->begin_time);
-    tl = tl->next;
-    i++;
-  printf("\n");
-  }
-  printf("\n");
-
 }
 
 // Search for the seqnum in the timer list and erase it
