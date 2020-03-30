@@ -1,0 +1,2447 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Example: Project Report
+%
+% Source: http://www.howtotex.com
+%
+% Feel free to distribute this example, but please keep the referral
+% to howtotex.com
+% Date: March 2011 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on the
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+% If you're new to LaTeX, the wikibook is a great place to start:
+% http://en.wikibooks.org/wiki/LaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the title below to update the display in My Documents
+%\title{Project Report}
+%
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{xcolor}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot[L]{}											% Empty 
+\fancyfoot[C]{}											% Empty
+\fancyfoot[R]{\thepage}									% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+\usepackage[margin=0.5in]{geometry}
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+%% Section Format
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{University of Purdue\\
+      Data Communication and Computer Networks\\
+      CS 53600 Spring 2020} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge Lab 2 - Selective Repeat\\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont\normalsize Pedro da Costa Abreu Júnior\\ [-5pt]
+    \normalsize Student ID 0030878383\\[-5pt]
+    \normalsize \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+
+Here we dump the output of the simulator as specified by the handout. We color in {\color{red}red} the packets being lost or corrupted, and in {\color{blue}blue} the recovery.
+
+As a plus we also color the 20th package in {\color{green}{green}}
+
+
+\begin{lstlisting}[escapeinside={<@}{@>}]
+-----  Stop and Wait Network Simulator Version 1.1 --------
+
+Enter the number of messages to simulate: 200
+Enter  packet loss probability [enter 0.0 for no loss]:.2
+Enter packet corruption probability [0.0 for no corruption]:.2
+Enter average time between messages from sender's layer5 [ > 0.0]:10
+Enter TRACE:3
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 0.000000
+            INSERTEVENT: future time will be 6.965711
+
+EVENT time: 6.965711,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 6.965711
+            INSERTEVENT: future time will be 19.661861
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 6.965711
+            INSERTEVENT: future time will be 12.374607
+          START TIMER: starting timer at 6.965711
+            INSERTEVENT: time is 6.965711
+            INSERTEVENT: future time will be 46.965710
+
+EVENT time: 12.374607,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: aaaaaaaaaaaaaaaaaaaa
+          <@\color{red}TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa@>
+          <@\color{red}TOLAYER3: packet being corrupted@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 12.374607
+            INSERTEVENT: future time will be 17.132755
+
+<@\color{blue}EVENT time: 17.132755,  type: 2, fromlayer3  entity: 0 (notice that SR Ignores packet \#0)@>
+
+EVENT time: 19.661861,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 19.661861
+            INSERTEVENT: future time will be 35.720585
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+          <@\color{red}TOLAYER3: seq: 1, ack 0, check: -1962 bbbbbbbbbbbbbbbbbbbb@>
+          <@\color{red}TOLAYER3: packet being corrupted@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 19.661861
+            INSERTEVENT: future time will be 27.956409
+
+EVENT time: 27.956409,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 35.720585,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 35.720585
+            INSERTEVENT: future time will be 51.947098
+          MAINLOOP: data given to student: cccccccccccccccccccc
+          TOLAYER3: seq: 2, ack 0, check: -1983 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 35.720585
+            INSERTEVENT: future time will be 40.340492
+
+EVENT time: 40.340492,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 2, check: -1983 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 40.340492
+            INSERTEVENT: future time will be 41.495186
+
+EVENT time: 41.495186,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 46.965710,  type: 0, timerinterrupt   entity: 0
+          <@\color{blue}TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 46.965710
+            INSERTEVENT: future time will be 53.135326
+          START TIMER: starting timer at 46.965710
+            INSERTEVENT: time is 46.965710
+            INSERTEVENT: future time will be 86.965714
+
+EVENT time: 51.947098,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 51.947098
+            INSERTEVENT: future time will be 51.977551
+          MAINLOOP: data given to student: dddddddddddddddddddd
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 51.947098
+            INSERTEVENT: future time will be 60.652542
+
+EVENT time: 51.977551,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 51.977551
+            INSERTEVENT: future time will be 70.757408
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 51.977551
+            INSERTEVENT: future time will be 68.801361
+
+EVENT time: 53.135326,  type: 2, fromlayer3  entity: 1
+          <@\color{blue}TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 53.135326
+            INSERTEVENT: future time will be 55.956532
+
+<@\color{blue}EVENT time: 55.956532,  type: 2, fromlayer3  entity: 0 (and finally the receiver receives the ack)@>
+
+EVENT time: 60.652542,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 68.801361,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 70.757408,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 70.757408
+            INSERTEVENT: future time will be 83.256523
+          MAINLOOP: data given to student: ffffffffffffffffffff
+          TOLAYER3: seq: 5, ack 0, check: -2046 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 70.757408
+            INSERTEVENT: future time will be 79.224480
+
+EVENT time: 79.224480,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 5, check: -2046 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 79.224480
+            INSERTEVENT: future time will be 82.507484
+
+EVENT time: 82.507484,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 83.256523,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 83.256523
+            INSERTEVENT: future time will be 97.674515
+          <@\color{red}MAINLOOP: data given to student: gggggggggggggggggggg@>
+          <@\color{red}TOLAYER3: packet being lost@>
+
+EVENT time: 86.965714,  type: 0, timerinterrupt   entity: 0
+          <@\color{blue}TOLAYER3: seq: 1, ack 0, check: -1962 bbbbbbbbbbbbbbbbbbbb@>
+          <@\color{blue}TOLAYER3: scheduling arrival on other side@>
+            INSERTEVENT: time is 86.965714
+            INSERTEVENT: future time will be 94.783943
+          START TIMER: starting timer at 86.965714
+            INSERTEVENT: time is 86.965714
+            INSERTEVENT: future time will be 126.965714
+
+EVENT time: 94.783943,  type: 2, fromlayer3  entity: 1
+          <@\color{blue}TOLAYER5: data received: bbbbbbbbbbbbbbbbbbbb@>
+          TOLAYER5: data received: cccccccccccccccccccc
+          TOLAYER5: data received: dddddddddddddddddddd
+          <@\color{red}TOLAYER3: packet being lost (ack for packet \#2 is lost)@>
+
+EVENT time: 97.674515,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 97.674515
+            INSERTEVENT: future time will be 112.654465
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: seq: 7, ack 0, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 97.674515
+            INSERTEVENT: future time will be 104.981468
+
+EVENT time: 104.981468,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 112.654465,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 112.654465
+            INSERTEVENT: future time will be 131.922485
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: seq: 8, ack 0, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 112.654465
+            INSERTEVENT: future time will be 118.947845
+
+EVENT time: 118.947845,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 126.965714,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 126.965714
+            INSERTEVENT: future time will be 130.668579
+          START TIMER: starting timer at 126.965714
+            INSERTEVENT: time is 126.965714
+            INSERTEVENT: future time will be 166.965714
+
+EVENT time: 130.668579,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 131.922485,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 131.922485
+            INSERTEVENT: future time will be 136.350510
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 136.350510,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 136.350510
+            INSERTEVENT: future time will be 138.047440
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 138.047440,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 138.047440
+            INSERTEVENT: future time will be 138.389984
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 138.389984,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 138.389984
+            INSERTEVENT: future time will be 155.477692
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 155.477692,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 155.477692
+            INSERTEVENT: future time will be 168.696442
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 166.965714,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 166.965714
+            INSERTEVENT: future time will be 173.201050
+          START TIMER: starting timer at 166.965714
+            INSERTEVENT: time is 166.965714
+            INSERTEVENT: future time will be 206.965714
+
+EVENT time: 168.696442,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 168.696442
+            INSERTEVENT: future time will be 179.564697
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 173.201050,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: eeeeeeeeeeeeeeeeeeee
+          TOLAYER5: data received: ffffffffffffffffffff
+          TOLAYER3: packet being lost
+
+EVENT time: 179.564697,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 179.564697
+            INSERTEVENT: future time will be 194.971756
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 194.971756,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 194.971756
+            INSERTEVENT: future time will be 201.362350
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 201.362350,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 201.362350
+            INSERTEVENT: future time will be 208.104904
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 206.965714,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 206.965714
+            INSERTEVENT: time is 206.965714
+            INSERTEVENT: future time will be 246.965714
+
+EVENT time: 208.104904,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 208.104904
+            INSERTEVENT: future time will be 227.416031
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 227.416031,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 227.416031
+            INSERTEVENT: future time will be 229.509857
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 229.509857,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 229.509857
+            INSERTEVENT: future time will be 240.340485
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 240.340485,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 240.340485
+            INSERTEVENT: future time will be 250.717834
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 246.965714,  type: 0, timerinterrupt   entity: 0
+          <@\color{blue}TOLAYER3: seq: 1, ack 0, check: -1962 bbbbbbbbbbbbbbbbbbbb@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 246.965714
+            INSERTEVENT: future time will be 250.786041
+          START TIMER: starting timer at 246.965714
+            INSERTEVENT: time is 246.965714
+            INSERTEVENT: future time will be 286.965698
+
+EVENT time: 250.717834,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 250.717834
+            INSERTEVENT: future time will be 257.190094
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 250.786041,  type: 2, fromlayer3  entity: 1
+          <@\color{blue}TOLAYER3: seq: 0, ack 1, check: -1962 bbbbbbbbbbbbbbbbbbbb@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 250.786041
+            INSERTEVENT: future time will be 252.795105
+
+EVENT time: 252.795105,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 9, ack 0, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 252.795105
+            INSERTEVENT: future time will be 259.333130
+          TOLAYER3: seq: 10, ack 0, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 252.795105
+            INSERTEVENT: future time will be 267.926514
+
+EVENT time: 257.190094,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 257.190094
+            INSERTEVENT: future time will be 261.528809
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 259.333130,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 261.528809,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 261.528809
+            INSERTEVENT: future time will be 264.266907
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 264.266907,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 264.266907
+            INSERTEVENT: future time will be 283.604919
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 267.926514,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 10, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 267.926514
+            INSERTEVENT: future time will be 277.875122
+
+EVENT time: 277.875122,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 283.604919,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 283.604919
+            INSERTEVENT: future time will be 301.878662
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 286.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 7, ack 0, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 286.965698
+            INSERTEVENT: future time will be 291.920715
+          START TIMER: starting timer at 286.965698
+            INSERTEVENT: time is 286.965698
+            INSERTEVENT: future time will be 326.965698
+
+EVENT time: 291.920715,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 7, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 291.920715
+            INSERTEVENT: future time will be 296.141144
+
+EVENT time: 296.141144,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 301.878662,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 301.878662
+            INSERTEVENT: future time will be 303.589661
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 303.589661,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 303.589661
+            INSERTEVENT: future time will be 320.213257
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 320.213257,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 320.213257
+            INSERTEVENT: future time will be 333.109375
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 326.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 8, ack 0, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 326.965698
+            INSERTEVENT: future time will be 332.145111
+          START TIMER: starting timer at 326.965698
+            INSERTEVENT: time is 326.965698
+            INSERTEVENT: future time will be 366.965698
+
+EVENT time: 332.145111,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 8, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 332.145111
+            INSERTEVENT: future time will be 335.714050
+
+EVENT time: 333.109375,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 333.109375
+            INSERTEVENT: future time will be 345.141266
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 335.714050,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 345.141266,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 345.141266
+            INSERTEVENT: future time will be 345.243622
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 345.243622,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 345.243622
+            INSERTEVENT: future time will be 345.436371
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 345.436371,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 345.436371
+            INSERTEVENT: future time will be 365.181641
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 365.181641,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 365.181641
+            INSERTEVENT: future time will be 384.058716
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 366.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 366.965698
+            INSERTEVENT: future time will be 376.024323
+          START TIMER: starting timer at 366.965698
+            INSERTEVENT: time is 366.965698
+            INSERTEVENT: future time will be 406.965698
+
+EVENT time: 376.024323,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 384.058716,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 384.058716
+            INSERTEVENT: future time will be 401.493134
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 401.493134,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 401.493134
+            INSERTEVENT: future time will be 401.779846
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 401.779846,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 401.779846
+            INSERTEVENT: future time will be 420.802856
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 406.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 406.965698
+            INSERTEVENT: future time will be 413.096680
+          START TIMER: starting timer at 406.965698
+            INSERTEVENT: time is 406.965698
+            INSERTEVENT: future time will be 446.965698
+
+EVENT time: 413.096680,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 4, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 413.096680
+            INSERTEVENT: future time will be 419.620239
+
+EVENT time: 419.620239,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 420.802856,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 420.802856
+            INSERTEVENT: future time will be 430.678436
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 430.678436,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 430.678436
+            INSERTEVENT: future time will be 449.513672
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 446.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 446.965698
+            INSERTEVENT: time is 446.965698
+            INSERTEVENT: future time will be 486.965698
+
+EVENT time: 449.513672,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 449.513672
+            INSERTEVENT: future time will be 464.351105
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 464.351105,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 464.351105
+            INSERTEVENT: future time will be 477.014343
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 477.014343,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 477.014343
+            INSERTEVENT: future time will be 488.205811
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 486.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 9, ack 0, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 486.965698
+            INSERTEVENT: future time will be 490.454987
+          START TIMER: starting timer at 486.965698
+            INSERTEVENT: time is 486.965698
+            INSERTEVENT: future time will be 526.965698
+
+EVENT time: 488.205811,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 488.205811
+            INSERTEVENT: future time will be 504.872406
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 490.454987,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 9, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 490.454987
+            INSERTEVENT: future time will be 499.681274
+
+EVENT time: 499.681274,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 504.872406,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 504.872406
+            INSERTEVENT: future time will be 518.443054
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 518.443054,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 518.443054
+            INSERTEVENT: future time will be 520.232727
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 520.232727,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 520.232727
+            INSERTEVENT: future time will be 539.499573
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 526.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 10, ack 0, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 526.965698
+            INSERTEVENT: future time will be 534.742615
+          START TIMER: starting timer at 526.965698
+            INSERTEVENT: time is 526.965698
+            INSERTEVENT: future time will be 566.965698
+
+EVENT time: 534.742615,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 10, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 534.742615
+            INSERTEVENT: future time will be 539.984436
+
+EVENT time: 539.499573,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 539.499573
+            INSERTEVENT: future time will be 542.655579
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 539.984436,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 542.655579,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 542.655579
+            INSERTEVENT: future time will be 546.055908
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 546.055908,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 546.055908
+            INSERTEVENT: future time will be 555.288208
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 555.288208,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 555.288208
+            INSERTEVENT: future time will be 562.293274
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 562.293274,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 562.293274
+            INSERTEVENT: future time will be 576.298523
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 566.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 566.965698
+            INSERTEVENT: future time will be 575.096436
+          START TIMER: starting timer at 566.965698
+            INSERTEVENT: time is 566.965698
+            INSERTEVENT: future time will be 606.965698
+
+EVENT time: 575.096436,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 576.298523,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 576.298523
+            INSERTEVENT: future time will be 581.634277
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 581.634277,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 581.634277
+            INSERTEVENT: future time will be 599.605408
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 599.605408,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 599.605408
+            INSERTEVENT: future time will be 600.731445
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 600.731445,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 600.731445
+            INSERTEVENT: future time will be 605.600159
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 605.600159,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 605.600159
+            INSERTEVENT: future time will be 613.607910
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 606.965698,  type: 0, timerinterrupt   entity: 0
+          <@\color{blue}TOLAYER3: seq: 6, ack 0, check: -2067 gggggggggggggggggggg@>
+          <@\color{blue}TOLAYER3: packet being corrupted@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 606.965698
+            INSERTEVENT: future time will be 616.654663
+          START TIMER: starting timer at 606.965698
+            INSERTEVENT: time is 606.965698
+            INSERTEVENT: future time will be 646.965698
+
+EVENT time: 613.607910,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 613.607910
+            INSERTEVENT: future time will be 630.329651
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 616.654663,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 630.329651,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 630.329651
+            INSERTEVENT: future time will be 632.242249
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 632.242249,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 632.242249
+            INSERTEVENT: future time will be 637.122131
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 637.122131,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 637.122131
+            INSERTEVENT: future time will be 653.132568
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 646.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 9, ack 0, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 646.965698
+            INSERTEVENT: future time will be 649.620361
+          START TIMER: starting timer at 646.965698
+            INSERTEVENT: time is 646.965698
+            INSERTEVENT: future time will be 686.965698
+
+EVENT time: 649.620361,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 9, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 649.620361
+            INSERTEVENT: future time will be 654.493958
+
+EVENT time: 653.132568,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 653.132568
+            INSERTEVENT: future time will be 662.581665
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 654.493958,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 662.581665,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 662.581665
+            INSERTEVENT: future time will be 673.064209
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 673.064209,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 673.064209
+            INSERTEVENT: future time will be 692.700989
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 686.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 686.965698
+            INSERTEVENT: future time will be 689.617432
+          START TIMER: starting timer at 686.965698
+            INSERTEVENT: time is 686.965698
+            INSERTEVENT: future time will be 726.965698
+
+EVENT time: 689.617432,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 3, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 689.617432
+            INSERTEVENT: future time will be 696.435242
+
+EVENT time: 692.700989,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 692.700989
+            INSERTEVENT: future time will be 712.343018
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 696.435242,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: packet being lost
+          TOLAYER3: seq: 12, ack 0, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 696.435242
+            INSERTEVENT: future time will be 700.966614
+          TOLAYER3: seq: 13, ack 0, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 696.435242
+            INSERTEVENT: future time will be 707.884216
+
+EVENT time: 700.966614,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 12, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 700.966614
+            INSERTEVENT: future time will be 705.644470
+
+EVENT time: 705.644470,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 707.884216,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 13, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 707.884216
+            INSERTEVENT: future time will be 711.041931
+
+EVENT time: 711.041931,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 712.343018,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 712.343018
+            INSERTEVENT: future time will be 719.386963
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 719.386963,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 719.386963
+            INSERTEVENT: future time will be 726.965576
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 726.965576,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 726.965576
+            INSERTEVENT: future time will be 740.879211
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 726.965698,  type: 0, timerinterrupt   entity: 0
+          <@\color{blue}TOLAYER3: seq: 6, ack 0, check: -2067 gggggggggggggggggggg@>
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 726.965698
+            INSERTEVENT: future time will be 729.087463
+          START TIMER: starting timer at 726.965698
+            INSERTEVENT: time is 726.965698
+            INSERTEVENT: future time will be 766.965698
+
+EVENT time: 729.087463,  type: 2, fromlayer3  entity: 1
+          <@\color{blue}TOLAYER5: data received: gggggggggggggggggggg@>
+          TOLAYER5: data received: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER5: data received: iiiiiiiiiiiiiiiiiiii
+          TOLAYER5: data received: jjjjjjjjjjjjjjjjjjjj
+          TOLAYER5: data received: kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: seq: 0, ack 6, check: -2067 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 729.087463
+            INSERTEVENT: future time will be 736.123230
+
+EVENT time: 736.123230,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: packet being lost
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 736.123230
+            INSERTEVENT: future time will be 743.734802
+          TOLAYER3: seq: 16, ack 0, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 736.123230
+            INSERTEVENT: future time will be 745.827515
+          TOLAYER3: seq: 17, ack 0, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 736.123230
+            INSERTEVENT: future time will be 752.567566
+          TOLAYER3: seq: 18, ack 0, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 736.123230
+            INSERTEVENT: future time will be 754.219116
+
+EVENT time: 740.879211,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 740.879211
+            INSERTEVENT: future time will be 749.420959
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 743.734802,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 745.827515,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 16, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 745.827515
+            INSERTEVENT: future time will be 755.274902
+
+EVENT time: 749.420959,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 749.420959
+            INSERTEVENT: future time will be 757.995117
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 752.567566,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 17, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 752.567566
+            INSERTEVENT: future time will be 761.765686
+
+EVENT time: 754.219116,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 18, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 754.219116
+            INSERTEVENT: future time will be 769.845215
+
+EVENT time: 755.274902,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 757.995117,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 757.995117
+            INSERTEVENT: future time will be 758.357361
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 758.357361,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 758.357361
+            INSERTEVENT: future time will be 766.665161
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 761.765686,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 766.665161,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 766.665161
+            INSERTEVENT: future time will be 775.877441
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 766.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 11, ack 0, check: -2172 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 766.965698
+            INSERTEVENT: future time will be 768.961670
+          START TIMER: starting timer at 766.965698
+            INSERTEVENT: time is 766.965698
+            INSERTEVENT: future time will be 806.965698
+
+EVENT time: 768.961670,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: llllllllllllllllllll
+          TOLAYER5: data received: mmmmmmmmmmmmmmmmmmmm
+          TOLAYER5: data received: nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: seq: 0, ack 11, check: -2172 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 768.961670
+            INSERTEVENT: future time will be 779.760498
+
+EVENT time: 769.845215,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 775.877441,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 775.877441
+            INSERTEVENT: future time will be 792.631287
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 779.760498,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: packet being lost
+          TOLAYER3: seq: 20, ack 0, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 779.760498
+            INSERTEVENT: future time will be 780.927002
+          TOLAYER3: seq: 21, ack 0, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 779.760498
+            INSERTEVENT: future time will be 782.994629
+
+EVENT time: 780.927002,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 20, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 780.927002
+            INSERTEVENT: future time will be 787.029602
+
+EVENT time: 782.994629,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 21, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 782.994629
+            INSERTEVENT: future time will be 789.319702
+
+EVENT time: 787.029602,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 789.319702,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 792.631287,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 792.631287
+            INSERTEVENT: future time will be 805.048828
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 805.048828,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 805.048828
+            INSERTEVENT: future time will be 806.390442
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 806.390442,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 806.390442
+            INSERTEVENT: future time will be 815.140747
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 806.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 806.965698
+            INSERTEVENT: future time will be 814.931091
+          START TIMER: starting timer at 806.965698
+            INSERTEVENT: time is 806.965698
+            INSERTEVENT: future time will be 846.965698
+
+EVENT time: 814.931091,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: oooooooooooooooooooo
+          TOLAYER5: data received: pppppppppppppppppppp
+          TOLAYER5: data received: qqqqqqqqqqqqqqqqqqqq
+          TOLAYER5: data received: rrrrrrrrrrrrrrrrrrrr
+          TOLAYER5: data received: ssssssssssssssssssss
+          TOLAYER3: seq: 0, ack 14, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 814.931091
+            INSERTEVENT: future time will be 819.089233
+
+EVENT time: 815.140747,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 815.140747
+            INSERTEVENT: future time will be 832.610107
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 819.089233,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 22, ack 0, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 819.089233
+            INSERTEVENT: future time will be 825.278442
+
+EVENT time: 825.278442,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 832.610107,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 832.610107
+            INSERTEVENT: future time will be 838.098389
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 838.098389,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 838.098389
+            INSERTEVENT: future time will be 839.721985
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 839.721985,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 839.721985
+            INSERTEVENT: future time will be 847.958923
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 846.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 846.965698
+            INSERTEVENT: future time will be 855.670288
+          START TIMER: starting timer at 846.965698
+            INSERTEVENT: time is 846.965698
+            INSERTEVENT: future time will be 886.965698
+
+EVENT time: 847.958923,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 847.958923
+            INSERTEVENT: future time will be 852.096497
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 852.096497,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 852.096497
+            INSERTEVENT: future time will be 852.382996
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 852.382996,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 852.382996
+            INSERTEVENT: future time will be 867.438843
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 855.670288,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 867.438843,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 867.438843
+            INSERTEVENT: future time will be 882.503174
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 882.503174,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 882.503174
+            INSERTEVENT: future time will be 888.898071
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 886.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 19, ack 0, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 886.965698
+            INSERTEVENT: future time will be 888.804077
+          START TIMER: starting timer at 886.965698
+            INSERTEVENT: time is 886.965698
+            INSERTEVENT: future time will be 926.965698
+
+EVENT time: 888.804077,  type: 2, fromlayer3  entity: 1
+          <@\color{green}TOLAYER5: data received: tttttttttttttttttttt@>
+          TOLAYER5: data received: uuuuuuuuuuuuuuuuuuuu
+          TOLAYER5: data received: vvvvvvvvvvvvvvvvvvvv
+          TOLAYER5: data received: wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: seq: 0, ack 19, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 888.804077
+            INSERTEVENT: future time will be 891.373291
+
+EVENT time: 888.898071,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 888.898071
+            INSERTEVENT: future time will be 906.532410
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 891.373291,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 906.532410,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 906.532410
+            INSERTEVENT: future time will be 907.036682
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 907.036682,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 907.036682
+            INSERTEVENT: future time will be 921.894226
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 921.894226,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 921.894226
+            INSERTEVENT: future time will be 932.240234
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 926.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 21, ack 0, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 926.965698
+            INSERTEVENT: future time will be 930.964722
+          START TIMER: starting timer at 926.965698
+            INSERTEVENT: time is 926.965698
+            INSERTEVENT: future time will be 966.965698
+
+EVENT time: 930.964722,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 21, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 930.964722
+            INSERTEVENT: future time will be 934.164001
+
+EVENT time: 932.240234,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 932.240234
+            INSERTEVENT: future time will be 950.686646
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 934.164001,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 950.686646,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 950.686646
+            INSERTEVENT: future time will be 959.169373
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 959.169373,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 959.169373
+            INSERTEVENT: future time will be 968.698792
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 966.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 966.965698
+            INSERTEVENT: time is 966.965698
+            INSERTEVENT: future time will be 1006.965698
+
+EVENT time: 968.698792,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 968.698792
+            INSERTEVENT: future time will be 984.810791
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 984.810791,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 984.810791
+            INSERTEVENT: future time will be 999.673279
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 999.673279,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 999.673279
+            INSERTEVENT: future time will be 1013.720581
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 1006.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1006.965698
+            INSERTEVENT: future time will be 1016.674194
+          START TIMER: starting timer at 1006.965698
+            INSERTEVENT: time is 1006.965698
+            INSERTEVENT: future time will be 1046.965698
+
+EVENT time: 1013.720581,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1013.720581
+            INSERTEVENT: future time will be 1015.247620
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 1015.247620,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1015.247620
+            INSERTEVENT: future time will be 1020.461609
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 1016.674194,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 15, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1016.674194
+            INSERTEVENT: future time will be 1020.933594
+
+EVENT time: 1020.461609,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1020.461609
+            INSERTEVENT: future time will be 1024.880737
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 1020.933594,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 23, ack 0, check: -2424 xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1030.906494
+          TOLAYER3: seq: 24, ack 0, check: -2445 yyyyyyyyyyyyyyyyyyyy
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1038.188477
+          TOLAYER3: seq: 25, ack 0, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1044.559204
+          TOLAYER3: seq: 26, ack 0, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1049.111084
+          TOLAYER3: packet being lost
+          TOLAYER3: seq: 28, ack 0, check: -2009 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1054.015747
+          TOLAYER3: seq: 29, ack 0, check: -2030 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1020.933594
+            INSERTEVENT: future time will be 1061.045532
+
+EVENT time: 1024.880737,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1024.880737
+            INSERTEVENT: future time will be 1032.337891
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 1030.906494,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: seq: 0, ack 23, check: -2424 xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1030.906494
+            INSERTEVENT: future time will be 1037.125732
+
+EVENT time: 1032.337891,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1032.337891
+            INSERTEVENT: future time will be 1042.762817
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 1037.125732,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1038.188477,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: yyyyyyyyyyyyyyyyyyyy
+          TOLAYER3: seq: 0, ack 24, check: -2445 yyyyyyyyyyyyyyyyyyyy
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1038.188477
+            INSERTEVENT: future time will be 1044.982910
+
+EVENT time: 1042.762817,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1042.762817
+            INSERTEVENT: future time will be 1055.176758
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 1044.559204,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: packet being lost
+
+EVENT time: 1044.982910,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1046.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 22, ack 0, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1046.965698
+            INSERTEVENT: future time will be 1071.015259
+          START TIMER: starting timer at 1046.965698
+            INSERTEVENT: time is 1046.965698
+            INSERTEVENT: future time will be 1086.965698
+
+EVENT time: 1049.111084,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: packet being lost
+
+EVENT time: 1054.015747,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 28, check: -2009 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1054.015747
+            INSERTEVENT: future time will be 1063.755249
+
+EVENT time: 1055.176758,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1055.176758
+            INSERTEVENT: future time will be 1059.952148
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 1059.952148,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1059.952148
+            INSERTEVENT: future time will be 1079.041016
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 1061.045532,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 29, check: -2030 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1061.045532
+            INSERTEVENT: future time will be 1073.416382
+
+EVENT time: 1063.755249,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1071.015259,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 22, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1071.015259
+            INSERTEVENT: future time will be 1075.048462
+
+EVENT time: 1073.416382,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1075.048462,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 30, ack 0, check: -2051 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1075.048462
+            INSERTEVENT: future time will be 1084.749268
+          TOLAYER3: seq: 31, ack 0, check: -2072 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1075.048462
+            INSERTEVENT: future time will be 1091.154175
+          TOLAYER3: seq: 32, ack 0, check: -2093 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1075.048462
+            INSERTEVENT: future time will be 1095.456787
+
+EVENT time: 1079.041016,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1079.041016
+            INSERTEVENT: future time will be 1091.593994
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 1084.749268,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 30, check: -2051 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1084.749268
+            INSERTEVENT: future time will be 1091.768311
+
+EVENT time: 1086.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 25, ack 0, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1086.965698
+            INSERTEVENT: future time will be 1100.722900
+          START TIMER: starting timer at 1086.965698
+            INSERTEVENT: time is 1086.965698
+            INSERTEVENT: future time will be 1126.965698
+
+EVENT time: 1091.154175,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 31, check: -2072 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1091.154175
+            INSERTEVENT: future time will be 1096.265991
+
+EVENT time: 1091.593994,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1091.593994
+            INSERTEVENT: future time will be 1092.983887
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1091.768311,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1092.983887,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1092.983887
+            INSERTEVENT: future time will be 1112.154175
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 1095.456787,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 32, check: -2093 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1095.456787
+            INSERTEVENT: future time will be 1100.030518
+
+EVENT time: 1096.265991,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1100.030518,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1100.722900,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 1112.154175,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1112.154175
+            INSERTEVENT: future time will be 1125.399780
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 1125.399780,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1125.399780
+            INSERTEVENT: future time will be 1144.708618
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 1126.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 26, ack 0, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1126.965698
+            INSERTEVENT: future time will be 1135.143066
+          START TIMER: starting timer at 1126.965698
+            INSERTEVENT: time is 1126.965698
+            INSERTEVENT: future time will be 1166.965698
+
+EVENT time: 1135.143066,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 26, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1135.143066
+            INSERTEVENT: future time will be 1138.026367
+
+EVENT time: 1138.026367,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1144.708618,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1144.708618
+            INSERTEVENT: future time will be 1160.977417
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 1160.977417,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1160.977417
+            INSERTEVENT: future time will be 1171.460083
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 1166.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1166.965698
+            INSERTEVENT: time is 1166.965698
+            INSERTEVENT: future time will be 1206.965698
+
+EVENT time: 1171.460083,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1171.460083
+            INSERTEVENT: future time will be 1176.929443
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 1176.929443,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1176.929443
+            INSERTEVENT: future time will be 1181.029419
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 1181.029419,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1181.029419
+            INSERTEVENT: future time will be 1189.663574
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 1189.663574,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1189.663574
+            INSERTEVENT: future time will be 1203.975586
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 1203.975586,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1203.975586
+            INSERTEVENT: future time will be 1206.594727
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 1206.594727,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1206.594727
+            INSERTEVENT: future time will be 1225.908813
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1206.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 25, ack 0, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1206.965698
+            INSERTEVENT: future time will be 1213.888672
+          START TIMER: starting timer at 1206.965698
+            INSERTEVENT: time is 1206.965698
+            INSERTEVENT: future time will be 1246.965698
+
+EVENT time: 1213.888672,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 25, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1213.888672
+            INSERTEVENT: future time will be 1219.201050
+
+EVENT time: 1219.201050,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1225.908813,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1225.908813
+            INSERTEVENT: future time will be 1232.714722
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 1232.714722,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1232.714722
+            INSERTEVENT: future time will be 1239.252563
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 1239.252563,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1239.252563
+            INSERTEVENT: future time will be 1240.607788
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 1240.607788,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1240.607788
+            INSERTEVENT: future time will be 1257.551147
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 1246.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 26, ack 0, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1246.965698
+            INSERTEVENT: future time will be 1254.500366
+          START TIMER: starting timer at 1246.965698
+            INSERTEVENT: time is 1246.965698
+            INSERTEVENT: future time will be 1286.965698
+
+EVENT time: 1254.500366,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 26, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1254.500366
+            INSERTEVENT: future time will be 1258.594727
+
+EVENT time: 1257.551147,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1257.551147
+            INSERTEVENT: future time will be 1272.838379
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 1258.594727,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1272.838379,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1272.838379
+            INSERTEVENT: future time will be 1284.854614
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 1284.854614,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1284.854614
+            INSERTEVENT: future time will be 1301.071533
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 1286.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 27, ack 0, check: -1988 bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1286.965698
+            INSERTEVENT: future time will be 1293.548462
+          START TIMER: starting timer at 1286.965698
+            INSERTEVENT: time is 1286.965698
+            INSERTEVENT: future time will be 1326.965698
+
+EVENT time: 1293.548462,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: bbbbbbbbbbbbbbbbbbbb
+          TOLAYER5: data received: cccccccccccccccccccc
+          TOLAYER5: data received: dddddddddddddddddddd
+          TOLAYER5: data received: eeeeeeeeeeeeeeeeeeee
+          TOLAYER5: data received: ffffffffffffffffffff
+          TOLAYER5: data received: gggggggggggggggggggg
+          TOLAYER3: seq: 0, ack 27, check: -1988 bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1293.548462
+            INSERTEVENT: future time will be 1297.213501
+
+EVENT time: 1297.213501,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1301.071533,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1301.071533
+            INSERTEVENT: future time will be 1320.515503
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 1320.515503,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1320.515503
+            INSERTEVENT: future time will be 1334.972046
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 1326.965698,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 25, ack 0, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1326.965698
+            INSERTEVENT: future time will be 1334.893555
+          START TIMER: starting timer at 1326.965698
+            INSERTEVENT: time is 1326.965698
+            INSERTEVENT: future time will be 1366.965698
+
+EVENT time: 1334.893555,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 25, check: -2466 zzzzzzzzzzzzzzzzzzzz
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1334.893555
+            INSERTEVENT: future time will be 1341.159180
+
+EVENT time: 1334.972046,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1334.972046
+            INSERTEVENT: future time will be 1351.571777
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 1341.159180,  type: 2, fromlayer3  entity: 0
+          STOP TIMER: stopping timer at 1341.159180
+          TOLAYER3: seq: 33, ack 0, check: -2114 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1345.055420
+          START TIMER: starting timer at 1341.159180
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1381.159180
+          TOLAYER3: seq: 34, ack 0, check: -2135 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1354.984985
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: seq: 37, ack 0, check: -2198 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1356.512817
+          TOLAYER3: seq: 38, ack 0, check: -2219 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1361.241455
+          TOLAYER3: seq: 39, ack 0, check: -2240 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1365.942627
+          TOLAYER3: seq: 40, ack 0, check: -2261 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1341.159180
+            INSERTEVENT: future time will be 1368.789917
+
+EVENT time: 1345.055420,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: seq: 0, ack 33, check: -2114 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1345.055420
+            INSERTEVENT: future time will be 1348.845581
+
+EVENT time: 1348.845581,  type: 2, fromlayer3  entity: 0
+          STOP TIMER: stopping timer at 1348.845581
+          START TIMER: starting timer at 1348.845581
+            INSERTEVENT: time is 1348.845581
+            INSERTEVENT: future time will be 1388.845581
+          TOLAYER3: seq: 41, ack 0, check: -2282 pppppppppppppppppppp
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1348.845581
+            INSERTEVENT: future time will be 1371.489014
+
+EVENT time: 1351.571777,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1351.571777
+            INSERTEVENT: future time will be 1361.063110
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 1354.984985,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: packet being lost
+
+EVENT time: 1356.512817,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 37, check: -2198 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1356.512817
+            INSERTEVENT: future time will be 1361.788452
+
+EVENT time: 1361.063110,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1361.063110
+            INSERTEVENT: future time will be 1373.557007
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 1361.241455,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1361.788452,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1365.942627,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 39, check: -2240 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1365.942627
+            INSERTEVENT: future time will be 1371.395020
+
+EVENT time: 1368.789917,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 1371.395020,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1371.489014,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1373.557007,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1373.557007
+            INSERTEVENT: future time will be 1389.815430
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 1388.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 34, ack 0, check: -2135 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1388.845581
+            INSERTEVENT: future time will be 1391.375732
+          START TIMER: starting timer at 1388.845581
+            INSERTEVENT: time is 1388.845581
+            INSERTEVENT: future time will be 1428.845581
+
+EVENT time: 1389.815430,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1389.815430
+            INSERTEVENT: future time will be 1400.554077
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 1391.375732,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 34, check: -2135 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1391.375732
+            INSERTEVENT: future time will be 1393.425171
+
+EVENT time: 1393.425171,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: packet being lost
+
+EVENT time: 1400.554077,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1400.554077
+            INSERTEVENT: future time will be 1417.418091
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1417.418091,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1417.418091
+            INSERTEVENT: future time will be 1431.144531
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 1428.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1428.845581
+            INSERTEVENT: time is 1428.845581
+            INSERTEVENT: future time will be 1468.845581
+
+EVENT time: 1431.144531,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1431.144531
+            INSERTEVENT: future time will be 1437.653076
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 1437.653076,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1437.653076
+            INSERTEVENT: future time will be 1446.654541
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 1446.654541,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1446.654541
+            INSERTEVENT: future time will be 1453.960815
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 1453.960815,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1453.960815
+            INSERTEVENT: future time will be 1471.474854
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 1468.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 36, ack 0, check: -2177 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1468.845581
+            INSERTEVENT: future time will be 1474.498047
+          START TIMER: starting timer at 1468.845581
+            INSERTEVENT: time is 1468.845581
+            INSERTEVENT: future time will be 1508.845581
+
+EVENT time: 1471.474854,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1471.474854
+            INSERTEVENT: future time will be 1473.798340
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 1473.798340,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1473.798340
+            INSERTEVENT: future time will be 1483.912964
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 1474.498047,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1483.912964,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1483.912964
+            INSERTEVENT: future time will be 1499.722656
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 1499.722656,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1499.722656
+            INSERTEVENT: future time will be 1513.645508
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 1508.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1508.845581
+            INSERTEVENT: time is 1508.845581
+            INSERTEVENT: future time will be 1548.845581
+
+EVENT time: 1513.645508,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1513.645508
+            INSERTEVENT: future time will be 1528.514038
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 1528.514038,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1528.514038
+            INSERTEVENT: future time will be 1543.096558
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1543.096558,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1543.096558
+            INSERTEVENT: future time will be 1551.596558
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 1548.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 40, ack 0, check: -2261 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1548.845581
+            INSERTEVENT: future time will be 1556.731201
+          START TIMER: starting timer at 1548.845581
+            INSERTEVENT: time is 1548.845581
+            INSERTEVENT: future time will be 1588.845581
+
+EVENT time: 1551.596558,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1551.596558
+            INSERTEVENT: future time will be 1560.830322
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 1556.731201,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 40, check: -2261 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1556.731201
+            INSERTEVENT: future time will be 1566.612671
+
+EVENT time: 1560.830322,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1560.830322
+            INSERTEVENT: future time will be 1569.782837
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 1566.612671,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1569.782837,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1569.782837
+            INSERTEVENT: future time will be 1573.775635
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 1573.775635,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1573.775635
+            INSERTEVENT: future time will be 1580.605957
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 1580.605957,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1580.605957
+            INSERTEVENT: future time will be 1598.579346
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 1588.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 41, ack 0, check: -2282 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1588.845581
+            INSERTEVENT: future time will be 1592.583984
+          START TIMER: starting timer at 1588.845581
+            INSERTEVENT: time is 1588.845581
+            INSERTEVENT: future time will be 1628.845581
+
+EVENT time: 1592.583984,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 41, check: -2282 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1592.583984
+            INSERTEVENT: future time will be 1593.820557
+
+EVENT time: 1593.820557,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1598.579346,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1598.579346
+            INSERTEVENT: future time will be 1608.744629
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 1608.744629,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1608.744629
+            INSERTEVENT: future time will be 1616.219727
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 1616.219727,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1616.219727
+            INSERTEVENT: future time will be 1629.617554
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 1628.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 42, ack 0, check: -2303 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1628.845581
+            INSERTEVENT: future time will be 1635.718750
+          START TIMER: starting timer at 1628.845581
+            INSERTEVENT: time is 1628.845581
+            INSERTEVENT: future time will be 1668.845581
+
+EVENT time: 1629.617554,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1629.617554
+            INSERTEVENT: future time will be 1632.394531
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 1632.394531,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1632.394531
+            INSERTEVENT: future time will be 1645.229614
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 1635.718750,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: packet being lost
+
+EVENT time: 1645.229614,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1645.229614
+            INSERTEVENT: future time will be 1656.155518
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 1656.155518,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1656.155518
+            INSERTEVENT: future time will be 1667.631714
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 1667.631714,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1667.631714
+            INSERTEVENT: future time will be 1668.870361
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 1668.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 35, ack 0, check: -2156 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1668.845581
+            INSERTEVENT: future time will be 1671.772949
+          START TIMER: starting timer at 1668.845581
+            INSERTEVENT: time is 1668.845581
+            INSERTEVENT: future time will be 1708.845581
+
+EVENT time: 1668.870361,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1668.870361
+            INSERTEVENT: future time will be 1686.919434
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1671.772949,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: seq: 0, ack 35, check: -2156 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1671.772949
+            INSERTEVENT: future time will be 1673.009521
+
+EVENT time: 1673.009521,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 43, ack 0, check: -2324 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1673.009521
+            INSERTEVENT: future time will be 1677.208740
+
+EVENT time: 1677.208740,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 43, check: -2324 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1677.208740
+            INSERTEVENT: future time will be 1678.284546
+
+EVENT time: 1678.284546,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1686.919434,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1686.919434
+            INSERTEVENT: future time will be 1698.496338
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 1698.496338,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1698.496338
+            INSERTEVENT: future time will be 1710.932495
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 1708.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 36, ack 0, check: -2177 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1708.845581
+            INSERTEVENT: future time will be 1710.498291
+          START TIMER: starting timer at 1708.845581
+            INSERTEVENT: time is 1708.845581
+            INSERTEVENT: future time will be 1748.845581
+
+EVENT time: 1710.498291,  type: 2, fromlayer3  entity: 1
+          TOLAYER5: data received: kkkkkkkkkkkkkkkkkkkk
+          TOLAYER5: data received: llllllllllllllllllll
+          TOLAYER3: seq: 0, ack 36, check: -2177 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1710.498291
+            INSERTEVENT: future time will be 1714.829468
+
+EVENT time: 1710.932495,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1710.932495
+            INSERTEVENT: future time will be 1711.379883
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 1711.379883,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1711.379883
+            INSERTEVENT: future time will be 1730.288452
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 1714.829468,  type: 2, fromlayer3  entity: 0
+          TOLAYER3: seq: 44, ack 0, check: -2345 ssssssssssssssssssss
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1714.829468
+            INSERTEVENT: future time will be 1716.225220
+          TOLAYER3: seq: 45, ack 0, check: -2366 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1714.829468
+            INSERTEVENT: future time will be 1725.377686
+
+EVENT time: 1716.225220,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1725.377686,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 45, check: -2366 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1725.377686
+            INSERTEVENT: future time will be 1735.328735
+
+EVENT time: 1730.288452,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1730.288452
+            INSERTEVENT: future time will be 1735.908081
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 1735.328735,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1735.908081,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1735.908081
+            INSERTEVENT: future time will be 1745.586060
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 1745.586060,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1745.586060
+            INSERTEVENT: future time will be 1763.145630
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 1748.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1748.845581
+            INSERTEVENT: time is 1748.845581
+            INSERTEVENT: future time will be 1788.845581
+
+EVENT time: 1763.145630,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1763.145630
+            INSERTEVENT: future time will be 1767.851562
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 1767.851562,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1767.851562
+            INSERTEVENT: future time will be 1780.722412
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 1780.722412,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1780.722412
+            INSERTEVENT: future time will be 1781.994629
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 1781.994629,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1781.994629
+            INSERTEVENT: future time will be 1784.558228
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1784.558228,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1784.558228
+            INSERTEVENT: future time will be 1790.070557
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 1788.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 42, ack 0, check: -2303 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1788.845581
+            INSERTEVENT: future time will be 1796.714966
+          START TIMER: starting timer at 1788.845581
+            INSERTEVENT: time is 1788.845581
+            INSERTEVENT: future time will be 1828.845581
+
+EVENT time: 1790.070557,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1790.070557
+            INSERTEVENT: future time will be 1802.406982
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 1796.714966,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 42, check: -2303 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1796.714966
+            INSERTEVENT: future time will be 1799.800415
+
+EVENT time: 1799.800415,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1802.406982,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1802.406982
+            INSERTEVENT: future time will be 1814.409790
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 1814.409790,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1814.409790
+            INSERTEVENT: future time will be 1825.007080
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 1825.007080,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1825.007080
+            INSERTEVENT: future time will be 1832.687012
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 1828.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 44, ack 0, check: -2345 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1828.845581
+            INSERTEVENT: future time will be 1830.751343
+          START TIMER: starting timer at 1828.845581
+            INSERTEVENT: time is 1828.845581
+            INSERTEVENT: future time will be 1868.845581
+
+EVENT time: 1830.751343,  type: 2, fromlayer3  entity: 1
+          TOLAYER3: seq: 0, ack 44, check: -2345 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1830.751343
+            INSERTEVENT: future time will be 1834.366455
+
+EVENT time: 1832.687012,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1832.687012
+            INSERTEVENT: future time will be 1835.254639
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+EVENT time: 1834.366455,  type: 2, fromlayer3  entity: 0
+
+EVENT time: 1835.254639,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1835.254639
+            INSERTEVENT: future time will be 1848.855103
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+EVENT time: 1848.855103,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1848.855103
+            INSERTEVENT: future time will be 1852.670166
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 1852.670166,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1852.670166
+            INSERTEVENT: future time will be 1853.341797
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 1853.341797,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1853.341797
+            INSERTEVENT: future time will be 1861.972900
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 1861.972900,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1861.972900
+            INSERTEVENT: future time will be 1864.031982
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 1864.031982,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1864.031982
+            INSERTEVENT: future time will be 1871.977783
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 1868.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 38, ack 0, check: -2219 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1868.845581
+            INSERTEVENT: future time will be 1871.740234
+          START TIMER: starting timer at 1868.845581
+            INSERTEVENT: time is 1868.845581
+            INSERTEVENT: future time will be 1908.845581
+
+EVENT time: 1871.740234,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1871.977783,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1871.977783
+            INSERTEVENT: future time will be 1886.371582
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 1886.371582,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1886.371582
+            INSERTEVENT: future time will be 1902.095215
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 1902.095215,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1902.095215
+            INSERTEVENT: future time will be 1909.664795
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1908.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1908.845581
+            INSERTEVENT: time is 1908.845581
+            INSERTEVENT: future time will be 1948.845581
+
+EVENT time: 1909.664795,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1909.664795
+            INSERTEVENT: future time will be 1917.180298
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+EVENT time: 1917.180298,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1917.180298
+            INSERTEVENT: future time will be 1929.921631
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+EVENT time: 1929.921631,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1929.921631
+            INSERTEVENT: future time will be 1934.524170
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 1934.524170,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1934.524170
+            INSERTEVENT: future time will be 1950.080078
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+EVENT time: 1948.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: seq: 38, ack 0, check: -2219 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1948.845581
+            INSERTEVENT: future time will be 1950.109619
+          START TIMER: starting timer at 1948.845581
+            INSERTEVENT: time is 1948.845581
+            INSERTEVENT: future time will be 1988.845581
+
+EVENT time: 1950.080078,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1950.080078
+            INSERTEVENT: future time will be 1954.695801
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+EVENT time: 1950.109619,  type: 2, fromlayer3  entity: 1
+
+EVENT time: 1954.695801,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1954.695801
+            INSERTEVENT: future time will be 1971.275879
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 1971.275879,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1971.275879
+            INSERTEVENT: future time will be 1973.104858
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 1973.104858,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1973.104858
+            INSERTEVENT: future time will be 1973.371582
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 1973.371582,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1973.371582
+            INSERTEVENT: future time will be 1975.252930
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 1975.252930,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1975.252930
+            INSERTEVENT: future time will be 1994.838989
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+EVENT time: 1988.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 1988.845581
+            INSERTEVENT: time is 1988.845581
+            INSERTEVENT: future time will be 2028.845581
+
+EVENT time: 1994.838989,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1994.838989
+            INSERTEVENT: future time will be 1996.543823
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1996.543823,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1996.543823
+            INSERTEVENT: future time will be 2009.687378
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 2009.687378,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2009.687378
+            INSERTEVENT: future time will be 2012.579468
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+EVENT time: 2012.579468,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2012.579468
+            INSERTEVENT: future time will be 2019.147339
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+EVENT time: 2019.147339,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2019.147339
+            INSERTEVENT: future time will be 2025.563721
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 2025.563721,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2025.563721
+            INSERTEVENT: future time will be 2044.789062
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 2028.845581,  type: 0, timerinterrupt   entity: 0
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 2028.845581
+            INSERTEVENT: time is 2028.845581
+            INSERTEVENT: future time will be 2068.845703
+
+EVENT time: 2044.789062,  type: 1, fromlayer5  entity: 0
+
+\end{lstlisting}
+
+%%% End document
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
