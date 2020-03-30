@@ -29,7 +29,7 @@ typedef struct timeout_list_t {
   struct timeout_list_t *next;
 } timeout_list;
 
-timeout_list *timers, *timers_tail;
+timeout_list *timers;
 
 
 /* B Private Variables */
@@ -55,21 +55,25 @@ void debug_timer_list(){
 
 
 void insert_timer(float begin_time, int seqnum){
+  printf("Inserting timer for #%d\n", seqnum);
   if(timers == NULL){
     timers = malloc(sizeof(timeout_list));
     timers->next = NULL;
     timers->seqnum = seqnum;
     timers->begin_time = begin_time;
-    timers_tail = timers;
   }
   else{
     timeout_list *tl = malloc(sizeof(timeout_list));
+    timeout_list *tail = timers;
     tl = malloc(sizeof(timeout_list));
     tl->next = NULL;
     tl->seqnum = seqnum;
     tl->begin_time = begin_time;
-    timers_tail->next = tl;
-    timers_tail = tl;
+
+    while(tail->next != NULL){
+      tail = tail->next;
+    }
+    tail->next = tl;
   }
 
 }
@@ -83,8 +87,8 @@ int pop_timer(){
   }
 
   timeout_list *l = timers;
-  timers = timers->next;
   current_timer_seqnum = timers->seqnum;
+  timers = timers->next;
 
   free(l);
   /* starttimer(0, 40.0 - (time-ret)); */
@@ -175,7 +179,7 @@ void send_packet(int seqnum){
 // This function will
 int queue_msg(struct msg message){
   if(tail_queue == MAX_BUFFER_SIZE - 1){
-    fprintf(stderr, "Buffer is full, drop message\n");
+    printf("Buffer is full, drop message\n");
     /* exit(1); */
   }
 
@@ -226,8 +230,9 @@ int send_unsent(){
     effective_window = base + WINDOW_SIZE;
 
   for(int i = last_sent; i < effective_window; i++){
-    tolayer3(0, buffer_queue[i].packet);
-    last_sent = effective_window;
+    send_packet(i);
+    // tolayer3(0, buffer_queue[i].packet);
+    // last_sent = effective_window;
   }
 
   return 0;
@@ -308,11 +313,12 @@ int A_timerinterrupt() {
   printf("The packet was lost, resending #%d\n", current_timer_seqnum);
 
   send_packet(current_timer_seqnum);
-  pop_timer();
 
   if(timers != NULL)
-    current_timer_seqnum = timers->seqnum;
+    pop_timer();
+    // current_timer_seqnum = timers->seqnum;
 
+  debug_timer_list();
 
   return 0;
 }
@@ -326,7 +332,6 @@ int A_init() {
   last_sent = 0;
   /* A_expected_acknum = -1; */
   timers = NULL;
-  timers_tail = NULL;
 
   current_timer_seqnum = -1;
 
@@ -344,16 +349,21 @@ int fill_ack(struct pkt *packet, int ack){
 }
 
 int sendtolayer5(int seqnum){
-  if(seqnum == expected_seqnum){
-    while(acked_buffer[seqnum].acked == 1){
-      tolayer5(1, acked_buffer[seqnum].packet.payload);
-      seqnum++;
-    }
-    expected_seqnum = seqnum;
-    return 1;
+  // if there it is not in order, or it was already acked then ignore
+  if(seqnum != expected_seqnum || acked_buffer[seqnum].acked == 1){
+    acked_buffer[seqnum].acked = 1;
+    return seqnum;
   }
 
-  return 0;
+  acked_buffer[seqnum].acked = 1;
+  while(acked_buffer[seqnum].acked == 1){
+    tolayer5(1, acked_buffer[seqnum].packet.payload);
+    seqnum++;
+  }
+  expected_seqnum = seqnum;
+  printf("next expected_seqnum: %d\n", expected_seqnum);
+
+  return seqnum-1;
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
@@ -373,11 +383,12 @@ int B_input(struct pkt packet)
   }
   else {
     acked_buffer[packet.seqnum].packet = packet;
-    acked_buffer[packet.seqnum].acked = 1;
+    sendtolayer5(packet.seqnum);
 
+    // fill_ack(&packet, packet.seqnum);
     fill_ack(&packet, packet.seqnum);
+
     /* expected_seqnum++; */
-    /* tolayer5(1, packet.payload); */
     tolayer3(1, packet);
   }
 

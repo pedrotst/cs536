@@ -1,0 +1,6428 @@
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: Enter  packet loss probability [enter 0.0 for no loss]:Enter packet corruption probability [0.0 for no corruption]:Enter average time between messages from sender's layer5 [ > 0.0]:Enter TRACE:          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 0.000000
+            INSERTEVENT: future time will be 19.620251
+
+EVENT time: 19.620251,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 19.620251
+            INSERTEVENT: future time will be 34.355133
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 19.620251
+seqnum      = 0
+acknum      = 0
+checksum    = 1940
+base        = 0
+tail_queue  = 0
+payload: aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 19.620251
+            INSERTEVENT: time is 19.620251
+            INSERTEVENT: future time will be 59.620251
+
+-------- Debug timer --------- 
+current timer on: 0
+
+
+EVENT time: 34.355133,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 34.355133
+            INSERTEVENT: future time will be 41.475899
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 34.355133
+seqnum      = 1
+acknum      = 0
+checksum    = 1961
+base        = 0
+tail_queue  = 1
+payload: bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being lost
+Inserting timer for #1
+
+-------- Debug timer --------- 
+current timer on: 0
+seqnum: 1
+time:   34.355133
+
+
+
+EVENT time: 41.475899,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 41.475899
+            INSERTEVENT: future time will be 55.389782
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 41.475899
+seqnum      = 2
+acknum      = 0
+checksum    = 1982
+base        = 0
+tail_queue  = 2
+payload: cccccccccccccccccccc
+          TOLAYER3: packet being lost
+Inserting timer for #2
+
+-------- Debug timer --------- 
+current timer on: 0
+seqnum: 1
+time:   34.355133
+
+seqnum: 2
+time:   41.475899
+
+
+
+EVENT time: 55.389782,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 55.389782
+            INSERTEVENT: future time will be 68.215820
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 55.389782
+seqnum      = 3
+acknum      = 0
+checksum    = 2003
+base        = 0
+tail_queue  = 3
+payload: dddddddddddddddddddd
+          TOLAYER3: seq: 3, ack 0, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 55.389782
+            INSERTEVENT: future time will be 59.406094
+Inserting timer for #3
+
+-------- Debug timer --------- 
+current timer on: 0
+seqnum: 1
+time:   34.355133
+
+seqnum: 2
+time:   41.475899
+
+seqnum: 3
+time:   55.389782
+
+
+
+EVENT time: 59.406094,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 59.406094
+seqnum      = 3
+acknum      = 0
+checksum    = 2003
+base        = 0
+tail_queue  = 4
+payload: dddddddddddddddddddd
+          TOLAYER3: seq: 0, ack 3, check: -2004 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 59.406094
+            INSERTEVENT: future time will be 62.277336
+
+EVENT time: 59.620251,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #0
+          TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 59.620251
+            INSERTEVENT: future time will be 65.288208
+Inserting timer for #0
+
+-------- Debug timer --------- 
+current timer on: 0
+seqnum: 1
+time:   34.355133
+
+seqnum: 2
+time:   41.475899
+
+seqnum: 3
+time:   55.389782
+
+seqnum: 0
+time:   59.620251
+
+
+          START TIMER: starting timer at 59.620251
+            INSERTEVENT: time is 59.620251
+            INSERTEVENT: future time will be 99.620255
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 3
+time:   55.389782
+
+seqnum: 0
+time:   59.620251
+
+
+
+EVENT time: 62.277336,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 62.277336
+seqnum      = 0
+acknum      = 3
+checksum    = 2003
+base        = 0
+tail_queue  = 4
+payload: dddddddddddddddddddd
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 3
+time:   55.389782
+
+seqnum: 0
+time:   59.620251
+
+
+Trying to erase timer for 3
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 0
+time:   59.620251
+
+
+
+EVENT time: 65.288208,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 65.288208
+seqnum      = 0
+acknum      = 0
+checksum    = 1940
+base        = 0
+tail_queue  = 4
+payload: aaaaaaaaaaaaaaaaaaaa
+          TOLAYER5: data received: aaaaaaaaaaaaaaaaaaaa
+next expected_seqnum: 1
+          TOLAYER3: seq: 0, ack 0, check: -1941 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 65.288208
+            INSERTEVENT: future time will be 73.576584
+
+EVENT time: 68.215820,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 68.215820
+            INSERTEVENT: future time will be 86.601097
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 68.215820
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 0
+tail_queue  = 4
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 68.215820
+            INSERTEVENT: future time will be 76.621002
+Inserting timer for #4
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 0
+time:   59.620251
+
+seqnum: 4
+time:   68.215820
+
+
+
+EVENT time: 73.576584,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 73.576584
+seqnum      = 0
+acknum      = 0
+checksum    = 1940
+base        = 0
+tail_queue  = 5
+payload: aaaaaaaaaaaaaaaaaaaa
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 0
+time:   59.620251
+
+seqnum: 4
+time:   68.215820
+
+
+Trying to erase timer for 0
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 4
+time:   68.215820
+
+
+
+EVENT time: 76.621002,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 76.621002
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 1
+tail_queue  = 5
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being lost
+
+EVENT time: 86.601097,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 86.601097
+            INSERTEVENT: future time will be 88.546165
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 86.601097
+seqnum      = 5
+acknum      = 0
+checksum    = 2045
+base        = 1
+tail_queue  = 5
+payload: ffffffffffffffffffff
+          TOLAYER3: seq: 5, ack 0, check: -2046 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 86.601097
+            INSERTEVENT: future time will be 95.795387
+Inserting timer for #5
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+
+
+EVENT time: 88.546165,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 88.546165
+            INSERTEVENT: future time will be 88.717842
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 88.546165
+seqnum      = 6
+acknum      = 0
+checksum    = 2066
+base        = 1
+tail_queue  = 6
+payload: gggggggggggggggggggg
+          TOLAYER3: seq: 6, ack 0, check: -2067 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 88.546165
+            INSERTEVENT: future time will be 104.493103
+Inserting timer for #6
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+
+
+EVENT time: 88.717842,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 88.717842
+            INSERTEVENT: future time will be 103.668739
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 88.717842
+seqnum      = 7
+acknum      = 0
+checksum    = 2087
+base        = 1
+tail_queue  = 7
+payload: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: seq: 7, ack 0, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 88.717842
+            INSERTEVENT: future time will be 113.075165
+Inserting timer for #7
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+
+
+EVENT time: 95.795387,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 95.795387
+seqnum      = 5
+acknum      = 0
+checksum    = 2045
+base        = 1
+tail_queue  = 8
+payload: ffffffffffffffffffff
+          TOLAYER3: seq: 0, ack 5, check: -2046 ffffffffffffffffffff
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 95.795387
+            INSERTEVENT: future time will be 101.690041
+
+EVENT time: 99.620255,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #1
+          TOLAYER3: seq: 1, ack 0, check: -1962 bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 99.620255
+            INSERTEVENT: future time will be 117.186859
+Inserting timer for #1
+
+-------- Debug timer --------- 
+current timer on: 1
+seqnum: 2
+time:   41.475899
+
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 1
+time:   99.620255
+
+
+          START TIMER: starting timer at 99.620255
+            INSERTEVENT: time is 99.620255
+            INSERTEVENT: future time will be 139.620255
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 1
+time:   99.620255
+
+
+
+EVENT time: 101.690041,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 101.690041
+seqnum      = 0
+acknum      = 5
+checksum    = 2045
+base        = 1
+tail_queue  = 8
+payload: Zfffffffffffffffffff
+Packet was corrupted, do nothing
+
+EVENT time: 103.668739,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 103.668739
+            INSERTEVENT: future time will be 105.036575
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 103.668739
+seqnum      = 8
+acknum      = 0
+checksum    = 2108
+base        = 1
+tail_queue  = 8
+payload: iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: seq: 8, ack 0, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 103.668739
+            INSERTEVENT: future time will be 119.601845
+Inserting timer for #8
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 1
+time:   99.620255
+
+seqnum: 8
+time:   103.668739
+
+
+
+EVENT time: 104.493103,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 104.493103
+seqnum      = 6
+acknum      = 0
+checksum    = 2066
+base        = 1
+tail_queue  = 9
+payload: gggggggggggggggggggg
+          TOLAYER3: packet being lost
+
+EVENT time: 105.036575,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 105.036575
+            INSERTEVENT: future time will be 106.844101
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 105.036575
+seqnum      = 9
+acknum      = 0
+checksum    = 2129
+base        = 1
+tail_queue  = 9
+payload: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 106.844101,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 106.844101
+            INSERTEVENT: future time will be 125.463791
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 106.844101
+seqnum      = 10
+acknum      = 0
+checksum    = 2150
+base        = 1
+tail_queue  = 10
+payload: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 113.075165,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 113.075165
+seqnum      = 7
+acknum      = 0
+checksum    = 2087
+base        = 1
+tail_queue  = 11
+payload: Zhhhhhhhhhhhhhhhhhhh
+Packet was corrupted dropping packet
+
+EVENT time: 117.186859,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 117.186859
+seqnum      = 1
+acknum      = 0
+checksum    = 1961
+base        = 1
+tail_queue  = 11
+payload: bbbbbbbbbbbbbbbbbbbb
+          TOLAYER5: data received: bbbbbbbbbbbbbbbbbbbb
+next expected_seqnum: 2
+          TOLAYER3: seq: 0, ack 1, check: -1962 bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 117.186859
+            INSERTEVENT: future time will be 122.233444
+
+EVENT time: 119.601845,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 119.601845
+seqnum      = 8
+acknum      = 0
+checksum    = 2108
+base        = 1
+tail_queue  = 11
+payload: iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: seq: 0, ack 8, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 119.601845
+            INSERTEVENT: future time will be 123.893051
+
+EVENT time: 122.233444,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 122.233444
+seqnum      = 0
+acknum      = 1
+checksum    = 1961
+base        = 1
+tail_queue  = 11
+payload: bbbbbbbbbbbbbbbbbbbb
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 1
+time:   99.620255
+
+seqnum: 8
+time:   103.668739
+
+
+Trying to erase timer for 1
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+
+          TOLAYER3: seq: 9, ack 0, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 122.233444
+            INSERTEVENT: future time will be 125.853951
+Inserting timer for #9
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 9
+time:   122.233444
+
+
+
+EVENT time: 123.893051,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 123.893051
+seqnum      = 0
+acknum      = 8
+checksum    = 2108
+base        = 2
+tail_queue  = 11
+payload: Ziiiiiiiiiiiiiiiiiii
+Packet was corrupted, do nothing
+
+EVENT time: 125.463791,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 125.463791
+            INSERTEVENT: future time will be 132.791519
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 125.463791
+seqnum      = 11
+acknum      = 0
+checksum    = 2171
+base        = 2
+tail_queue  = 11
+payload: llllllllllllllllllll
+
+EVENT time: 125.853951,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 125.853951
+seqnum      = 9
+acknum      = 0
+checksum    = 2129
+base        = 2
+tail_queue  = 12
+payload: jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: seq: 0, ack 9, check: -2130 jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 125.853951
+            INSERTEVENT: future time will be 131.440125
+
+EVENT time: 131.440125,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 131.440125
+seqnum      = 0
+acknum      = 9
+checksum    = 2129
+base        = 2
+tail_queue  = 12
+payload: jjjjjjjjjjjjjjjjjjjj
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 9
+time:   122.233444
+
+
+Trying to erase timer for 9
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+
+
+EVENT time: 132.791519,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 132.791519
+            INSERTEVENT: future time will be 145.719879
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 132.791519
+seqnum      = 12
+acknum      = 0
+checksum    = 2192
+base        = 2
+tail_queue  = 12
+payload: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 139.620255,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #2
+          TOLAYER3: packet being lost
+Inserting timer for #2
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   68.215820
+
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+
+          START TIMER: starting timer at 139.620255
+            INSERTEVENT: time is 139.620255
+            INSERTEVENT: future time will be 179.620255
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+
+
+EVENT time: 145.719879,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 145.719879
+            INSERTEVENT: future time will be 146.366089
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 145.719879
+seqnum      = 13
+acknum      = 0
+checksum    = 2213
+base        = 2
+tail_queue  = 13
+payload: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 146.366089,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 146.366089
+            INSERTEVENT: future time will be 163.016129
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 146.366089
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 2
+tail_queue  = 14
+payload: oooooooooooooooooooo
+
+EVENT time: 163.016129,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 163.016129
+            INSERTEVENT: future time will be 177.933334
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 163.016129
+seqnum      = 15
+acknum      = 0
+checksum    = 2255
+base        = 2
+tail_queue  = 15
+payload: pppppppppppppppppppp
+
+EVENT time: 177.933334,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 177.933334
+            INSERTEVENT: future time will be 179.359619
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 177.933334
+seqnum      = 16
+acknum      = 0
+checksum    = 2276
+base        = 2
+tail_queue  = 16
+payload: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 179.359619,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 179.359619
+            INSERTEVENT: future time will be 182.110657
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 179.359619
+seqnum      = 17
+acknum      = 0
+checksum    = 2297
+base        = 2
+tail_queue  = 17
+payload: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 179.620255,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #4
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 179.620255
+            INSERTEVENT: future time will be 185.340332
+Inserting timer for #4
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 5
+time:   86.601097
+
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+
+          START TIMER: starting timer at 179.620255
+            INSERTEVENT: time is 179.620255
+            INSERTEVENT: future time will be 219.620255
+
+-------- Debug timer --------- 
+current timer on: 5
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+
+
+EVENT time: 182.110657,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 182.110657
+            INSERTEVENT: future time will be 186.729233
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 182.110657
+seqnum      = 18
+acknum      = 0
+checksum    = 2318
+base        = 2
+tail_queue  = 18
+payload: ssssssssssssssssssss
+
+EVENT time: 185.340332,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 185.340332
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 2
+tail_queue  = 19
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 0, ack 4, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 185.340332
+            INSERTEVENT: future time will be 187.960388
+
+EVENT time: 186.729233,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 186.729233
+            INSERTEVENT: future time will be 204.541550
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 186.729233
+seqnum      = 19
+acknum      = 0
+checksum    = 2339
+base        = 2
+tail_queue  = 19
+payload: tttttttttttttttttttt
+
+EVENT time: 187.960388,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 187.960388
+seqnum      = 0
+acknum      = 4
+checksum    = 2024
+base        = 2
+tail_queue  = 20
+payload: Zeeeeeeeeeeeeeeeeeee
+Packet was corrupted, do nothing
+
+EVENT time: 204.541550,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 204.541550
+            INSERTEVENT: future time will be 224.231384
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 204.541550
+seqnum      = 20
+acknum      = 0
+checksum    = 2360
+base        = 2
+tail_queue  = 20
+payload: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 219.620255,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #5
+          TOLAYER3: seq: 5, ack 0, check: -2046 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 219.620255
+            INSERTEVENT: future time will be 223.035187
+Inserting timer for #5
+
+-------- Debug timer --------- 
+current timer on: 5
+seqnum: 6
+time:   88.546165
+
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 5
+time:   219.620255
+
+
+          START TIMER: starting timer at 219.620255
+            INSERTEVENT: time is 219.620255
+            INSERTEVENT: future time will be 259.620239
+
+-------- Debug timer --------- 
+current timer on: 6
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 5
+time:   219.620255
+
+
+
+EVENT time: 223.035187,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 223.035187
+seqnum      = 5
+acknum      = 0
+checksum    = 2045
+base        = 2
+tail_queue  = 21
+payload: ffffffffffffffffffff
+          TOLAYER3: seq: 0, ack 5, check: -2046 ffffffffffffffffffff
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 223.035187
+            INSERTEVENT: future time will be 232.890411
+
+EVENT time: 224.231384,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 224.231384
+            INSERTEVENT: future time will be 234.870102
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 224.231384
+seqnum      = 21
+acknum      = 0
+checksum    = 2381
+base        = 2
+tail_queue  = 21
+payload: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 232.890411,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 232.890411
+seqnum      = 0
+acknum      = 5
+checksum    = 2045
+base        = 2
+tail_queue  = 22
+payload: ffffffffffffffffffff
+
+-------- Debug timer --------- 
+current timer on: 6
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 5
+time:   219.620255
+
+
+Trying to erase timer for 5
+
+-------- Debug timer --------- 
+current timer on: 6
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+
+
+EVENT time: 234.870102,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 234.870102
+            INSERTEVENT: future time will be 251.369537
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 234.870102
+seqnum      = 22
+acknum      = 0
+checksum    = 2402
+base        = 2
+tail_queue  = 22
+payload: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 251.369537,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 251.369537
+            INSERTEVENT: future time will be 256.822632
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 251.369537
+seqnum      = 23
+acknum      = 0
+checksum    = 2423
+base        = 2
+tail_queue  = 23
+payload: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 256.822632,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 256.822632
+            INSERTEVENT: future time will be 275.331146
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 256.822632
+seqnum      = 24
+acknum      = 0
+checksum    = 2444
+base        = 2
+tail_queue  = 24
+payload: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 259.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #6
+          TOLAYER3: seq: 6, ack 0, check: -2067 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 259.620239
+            INSERTEVENT: future time will be 262.582306
+Inserting timer for #6
+
+-------- Debug timer --------- 
+current timer on: 6
+seqnum: 7
+time:   88.717842
+
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 6
+time:   259.620239
+
+
+          START TIMER: starting timer at 259.620239
+            INSERTEVENT: time is 259.620239
+            INSERTEVENT: future time will be 299.620239
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 6
+time:   259.620239
+
+
+
+EVENT time: 262.582306,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 262.582306
+seqnum      = 6
+acknum      = 0
+checksum    = 2066
+base        = 2
+tail_queue  = 25
+payload: gggggggggggggggggggg
+          TOLAYER3: seq: 0, ack 6, check: -2067 gggggggggggggggggggg
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 262.582306
+            INSERTEVENT: future time will be 266.569580
+
+EVENT time: 266.569580,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 266.569580
+seqnum      = 0
+acknum      = 6
+checksum    = 2066
+base        = 2
+tail_queue  = 25
+payload: gggggggggggggggggggg
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 6
+time:   259.620239
+
+
+Trying to erase timer for 6
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+
+
+EVENT time: 275.331146,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 275.331146
+            INSERTEVENT: future time will be 291.573151
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 275.331146
+seqnum      = 25
+acknum      = 0
+checksum    = 2465
+base        = 2
+tail_queue  = 25
+payload: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 291.573151,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 291.573151
+            INSERTEVENT: future time will be 310.377472
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 291.573151
+seqnum      = 26
+acknum      = 0
+checksum    = 1966
+base        = 2
+tail_queue  = 26
+payload: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 299.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #7
+          TOLAYER3: packet being lost
+Inserting timer for #7
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 8
+time:   103.668739
+
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+
+          START TIMER: starting timer at 299.620239
+            INSERTEVENT: time is 299.620239
+            INSERTEVENT: future time will be 339.620239
+
+-------- Debug timer --------- 
+current timer on: 8
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+
+
+EVENT time: 310.377472,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 310.377472
+            INSERTEVENT: future time will be 329.337769
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 310.377472
+seqnum      = 27
+acknum      = 0
+checksum    = 1987
+base        = 2
+tail_queue  = 27
+payload: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 329.337769,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 329.337769
+            INSERTEVENT: future time will be 331.098724
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 329.337769
+seqnum      = 28
+acknum      = 0
+checksum    = 2008
+base        = 2
+tail_queue  = 28
+payload: cccccccccccccccccccc
+
+EVENT time: 331.098724,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 331.098724
+            INSERTEVENT: future time will be 347.665344
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 331.098724
+seqnum      = 29
+acknum      = 0
+checksum    = 2029
+base        = 2
+tail_queue  = 29
+payload: dddddddddddddddddddd
+
+EVENT time: 339.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #8
+          TOLAYER3: seq: 8, ack 0, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 339.620239
+            INSERTEVENT: future time will be 349.068268
+Inserting timer for #8
+
+-------- Debug timer --------- 
+current timer on: 8
+seqnum: 2
+time:   139.620255
+
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+seqnum: 8
+time:   339.620239
+
+
+          START TIMER: starting timer at 339.620239
+            INSERTEVENT: time is 339.620239
+            INSERTEVENT: future time will be 379.620239
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+seqnum: 8
+time:   339.620239
+
+
+
+EVENT time: 347.665344,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 347.665344
+            INSERTEVENT: future time will be 359.115356
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 347.665344
+seqnum      = 30
+acknum      = 0
+checksum    = 2050
+base        = 2
+tail_queue  = 30
+payload: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 349.068268,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 349.068268
+seqnum      = 8
+acknum      = 0
+checksum    = 2108
+base        = 2
+tail_queue  = 31
+payload: iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: seq: 0, ack 8, check: -2109 iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 349.068268
+            INSERTEVENT: future time will be 351.059418
+
+EVENT time: 351.059418,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 351.059418
+seqnum      = 0
+acknum      = 8
+checksum    = 2108
+base        = 2
+tail_queue  = 31
+payload: iiiiiiiiiiiiiiiiiiii
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+seqnum: 8
+time:   339.620239
+
+
+Trying to erase timer for 8
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+
+
+EVENT time: 359.115356,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 359.115356
+            INSERTEVENT: future time will be 375.910309
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 359.115356
+seqnum      = 31
+acknum      = 0
+checksum    = 2071
+base        = 2
+tail_queue  = 31
+payload: ffffffffffffffffffff
+
+EVENT time: 375.910309,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 375.910309
+            INSERTEVENT: future time will be 388.569458
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 375.910309
+seqnum      = 32
+acknum      = 0
+checksum    = 2092
+base        = 2
+tail_queue  = 32
+payload: gggggggggggggggggggg
+
+EVENT time: 379.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #2
+          TOLAYER3: packet being lost
+Inserting timer for #2
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   179.620255
+
+seqnum: 7
+time:   299.620239
+
+seqnum: 2
+time:   379.620239
+
+
+          START TIMER: starting timer at 379.620239
+            INSERTEVENT: time is 379.620239
+            INSERTEVENT: future time will be 419.620239
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   299.620239
+
+seqnum: 2
+time:   379.620239
+
+
+
+EVENT time: 388.569458,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 388.569458
+            INSERTEVENT: future time will be 396.876678
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 388.569458
+seqnum      = 33
+acknum      = 0
+checksum    = 2113
+base        = 2
+tail_queue  = 33
+payload: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 396.876678,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 396.876678
+            INSERTEVENT: future time will be 400.181519
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 396.876678
+seqnum      = 34
+acknum      = 0
+checksum    = 2134
+base        = 2
+tail_queue  = 34
+payload: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 400.181519,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 400.181519
+            INSERTEVENT: future time will be 409.029510
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 400.181519
+seqnum      = 35
+acknum      = 0
+checksum    = 2155
+base        = 2
+tail_queue  = 35
+payload: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 409.029510,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 409.029510
+            INSERTEVENT: future time will be 422.481934
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 409.029510
+seqnum      = 36
+acknum      = 0
+checksum    = 2176
+base        = 2
+tail_queue  = 36
+payload: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 419.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #4
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 419.620239
+            INSERTEVENT: future time will be 421.919312
+Inserting timer for #4
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   299.620239
+
+seqnum: 2
+time:   379.620239
+
+seqnum: 4
+time:   419.620239
+
+
+          START TIMER: starting timer at 419.620239
+            INSERTEVENT: time is 419.620239
+            INSERTEVENT: future time will be 459.620239
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 2
+time:   379.620239
+
+seqnum: 4
+time:   419.620239
+
+
+
+EVENT time: 421.919312,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 421.919312
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 2
+tail_queue  = 37
+payload: Zeeeeeeeeeeeeeeeeeee
+Packet was corrupted dropping packet
+
+EVENT time: 422.481934,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 422.481934
+            INSERTEVENT: future time will be 441.785339
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 422.481934
+seqnum      = 37
+acknum      = 0
+checksum    = 2197
+base        = 2
+tail_queue  = 37
+payload: llllllllllllllllllll
+
+EVENT time: 441.785339,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 441.785339
+            INSERTEVENT: future time will be 455.991302
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 441.785339
+seqnum      = 38
+acknum      = 0
+checksum    = 2218
+base        = 2
+tail_queue  = 38
+payload: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 455.991302,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 455.991302
+            INSERTEVENT: future time will be 467.758881
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 455.991302
+seqnum      = 39
+acknum      = 0
+checksum    = 2239
+base        = 2
+tail_queue  = 39
+payload: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 459.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #7
+          TOLAYER3: packet being lost
+Inserting timer for #7
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 2
+time:   379.620239
+
+seqnum: 4
+time:   419.620239
+
+seqnum: 7
+time:   459.620239
+
+
+          START TIMER: starting timer at 459.620239
+            INSERTEVENT: time is 459.620239
+            INSERTEVENT: future time will be 499.620239
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   419.620239
+
+seqnum: 7
+time:   459.620239
+
+
+
+EVENT time: 467.758881,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 467.758881
+            INSERTEVENT: future time will be 468.804749
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 467.758881
+seqnum      = 40
+acknum      = 0
+checksum    = 2260
+base        = 2
+tail_queue  = 40
+payload: oooooooooooooooooooo
+
+EVENT time: 468.804749,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 468.804749
+            INSERTEVENT: future time will be 469.138031
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 468.804749
+seqnum      = 41
+acknum      = 0
+checksum    = 2281
+base        = 2
+tail_queue  = 41
+payload: pppppppppppppppppppp
+
+EVENT time: 469.138031,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 469.138031
+            INSERTEVENT: future time will be 480.526794
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 469.138031
+seqnum      = 42
+acknum      = 0
+checksum    = 2302
+base        = 2
+tail_queue  = 42
+payload: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 480.526794,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 480.526794
+            INSERTEVENT: future time will be 493.131256
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 480.526794
+seqnum      = 43
+acknum      = 0
+checksum    = 2323
+base        = 2
+tail_queue  = 43
+payload: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 493.131256,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 493.131256
+            INSERTEVENT: future time will be 506.075439
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 493.131256
+seqnum      = 44
+acknum      = 0
+checksum    = 2344
+base        = 2
+tail_queue  = 44
+payload: ssssssssssssssssssss
+
+EVENT time: 499.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #2
+          TOLAYER3: seq: 2, ack 0, check: -1983 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 499.620239
+            INSERTEVENT: future time will be 507.799927
+Inserting timer for #2
+
+-------- Debug timer --------- 
+current timer on: 2
+seqnum: 4
+time:   419.620239
+
+seqnum: 7
+time:   459.620239
+
+seqnum: 2
+time:   499.620239
+
+
+          START TIMER: starting timer at 499.620239
+            INSERTEVENT: time is 499.620239
+            INSERTEVENT: future time will be 539.620239
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 2
+time:   499.620239
+
+
+
+EVENT time: 506.075439,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 506.075439
+            INSERTEVENT: future time will be 525.204468
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 506.075439
+seqnum      = 45
+acknum      = 0
+checksum    = 2365
+base        = 2
+tail_queue  = 45
+payload: tttttttttttttttttttt
+
+EVENT time: 507.799927,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 507.799927
+seqnum      = 2
+acknum      = 0
+checksum    = 1982
+base        = 2
+tail_queue  = 46
+payload: cccccccccccccccccccc
+          TOLAYER5: data received: cccccccccccccccccccc
+          TOLAYER5: data received: dddddddddddddddddddd
+          TOLAYER5: data received: eeeeeeeeeeeeeeeeeeee
+          TOLAYER5: data received: ffffffffffffffffffff
+          TOLAYER5: data received: gggggggggggggggggggg
+next expected_seqnum: 7
+          TOLAYER3: seq: 0, ack 2, check: -1983 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 507.799927
+            INSERTEVENT: future time will be 517.135071
+
+EVENT time: 517.135071,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 517.135071
+seqnum      = 0
+acknum      = 2
+checksum    = 1982
+base        = 2
+tail_queue  = 46
+payload: cccccccccccccccccccc
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 2
+time:   499.620239
+
+
+Trying to erase timer for 2
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+
+          TOLAYER3: seq: 10, ack 0, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 517.135071
+            INSERTEVENT: future time will be 520.138855
+Inserting timer for #10
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 10
+time:   517.135071
+
+
+          TOLAYER3: seq: 11, ack 0, check: -2172 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 517.135071
+            INSERTEVENT: future time will be 528.805786
+Inserting timer for #11
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 10
+time:   517.135071
+
+seqnum: 11
+time:   517.135071
+
+
+
+EVENT time: 520.138855,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 520.138855
+seqnum      = 10
+acknum      = 0
+checksum    = 2150
+base        = 4
+tail_queue  = 46
+payload: kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: seq: 0, ack 10, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 520.138855
+            INSERTEVENT: future time will be 525.658142
+
+EVENT time: 525.204468,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 525.204468
+            INSERTEVENT: future time will be 534.003418
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 525.204468
+seqnum      = 46
+acknum      = 0
+checksum    = 2386
+base        = 4
+tail_queue  = 46
+payload: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 525.658142,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 525.658142
+seqnum      = 0
+acknum      = 10
+checksum    = 2150
+base        = 4
+tail_queue  = 47
+payload: Zkkkkkkkkkkkkkkkkkkk
+Packet was corrupted, do nothing
+
+EVENT time: 528.805786,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 528.805786
+seqnum      = 11
+acknum      = 0
+checksum    = 2171
+base        = 4
+tail_queue  = 47
+payload: llllllllllllllllllll
+          TOLAYER3: seq: 0, ack 11, check: -2172 llllllllllllllllllll
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 528.805786
+            INSERTEVENT: future time will be 538.230469
+
+EVENT time: 534.003418,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 534.003418
+            INSERTEVENT: future time will be 538.058594
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 534.003418
+seqnum      = 47
+acknum      = 0
+checksum    = 2407
+base        = 4
+tail_queue  = 47
+payload: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 538.058594,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 538.058594
+            INSERTEVENT: future time will be 557.977051
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 538.058594
+seqnum      = 48
+acknum      = 0
+checksum    = 2428
+base        = 4
+tail_queue  = 48
+payload: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 538.230469,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 538.230469
+seqnum      = 0
+acknum      = 11
+checksum    = 2171
+base        = 4
+tail_queue  = 49
+payload: llllllllllllllllllll
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 10
+time:   517.135071
+
+seqnum: 11
+time:   517.135071
+
+
+Trying to erase timer for 11
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 10
+time:   517.135071
+
+
+
+EVENT time: 539.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #4
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 539.620239
+            INSERTEVENT: future time will be 543.649414
+Inserting timer for #4
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   459.620239
+
+seqnum: 10
+time:   517.135071
+
+seqnum: 4
+time:   539.620239
+
+
+          START TIMER: starting timer at 539.620239
+            INSERTEVENT: time is 539.620239
+            INSERTEVENT: future time will be 579.620239
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 10
+time:   517.135071
+
+seqnum: 4
+time:   539.620239
+
+
+
+EVENT time: 543.649414,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 543.649414
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 4
+tail_queue  = 49
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being lost
+
+EVENT time: 557.977051,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 557.977051
+            INSERTEVENT: future time will be 569.169922
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 557.977051
+seqnum      = 49
+acknum      = 0
+checksum    = 2449
+base        = 4
+tail_queue  = 49
+payload: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 569.169922,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 569.169922
+            INSERTEVENT: future time will be 587.116943
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 569.169922
+seqnum      = 50
+acknum      = 0
+checksum    = 2470
+base        = 4
+tail_queue  = 50
+payload: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 579.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #7
+          TOLAYER3: packet being lost
+Inserting timer for #7
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 10
+time:   517.135071
+
+seqnum: 4
+time:   539.620239
+
+seqnum: 7
+time:   579.620239
+
+
+          START TIMER: starting timer at 579.620239
+            INSERTEVENT: time is 579.620239
+            INSERTEVENT: future time will be 619.620239
+
+-------- Debug timer --------- 
+current timer on: 10
+seqnum: 4
+time:   539.620239
+
+seqnum: 7
+time:   579.620239
+
+
+
+EVENT time: 587.116943,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 587.116943
+            INSERTEVENT: future time will be 603.673035
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 587.116943
+seqnum      = 51
+acknum      = 0
+checksum    = 2491
+base        = 4
+tail_queue  = 51
+payload: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 603.673035,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 603.673035
+            INSERTEVENT: future time will be 605.998596
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 603.673035
+seqnum      = 52
+acknum      = 0
+checksum    = 1992
+base        = 4
+tail_queue  = 52
+payload: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 605.998596,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 605.998596
+            INSERTEVENT: future time will be 615.906067
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 605.998596
+seqnum      = 53
+acknum      = 0
+checksum    = 2013
+base        = 4
+tail_queue  = 53
+payload: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 615.906067,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 615.906067
+            INSERTEVENT: future time will be 632.444763
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 615.906067
+seqnum      = 54
+acknum      = 0
+checksum    = 2034
+base        = 4
+tail_queue  = 54
+payload: cccccccccccccccccccc
+
+EVENT time: 619.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #10
+          TOLAYER3: seq: 10, ack 0, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 619.620239
+            INSERTEVENT: future time will be 625.474915
+Inserting timer for #10
+
+-------- Debug timer --------- 
+current timer on: 10
+seqnum: 4
+time:   539.620239
+
+seqnum: 7
+time:   579.620239
+
+seqnum: 10
+time:   619.620239
+
+
+          START TIMER: starting timer at 619.620239
+            INSERTEVENT: time is 619.620239
+            INSERTEVENT: future time will be 659.620239
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   579.620239
+
+seqnum: 10
+time:   619.620239
+
+
+
+EVENT time: 625.474915,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 625.474915
+seqnum      = 10
+acknum      = 0
+checksum    = 2150
+base        = 4
+tail_queue  = 55
+payload: kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: seq: 0, ack 10, check: -2151 kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 625.474915
+            INSERTEVENT: future time will be 632.497986
+
+EVENT time: 632.444763,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 632.444763
+            INSERTEVENT: future time will be 644.911865
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 632.444763
+seqnum      = 55
+acknum      = 0
+checksum    = 2055
+base        = 4
+tail_queue  = 55
+payload: dddddddddddddddddddd
+
+EVENT time: 632.497986,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 632.497986
+seqnum      = 0
+acknum      = 10
+checksum    = 2150
+base        = 4
+tail_queue  = 56
+payload: kkkkkkkkkkkkkkkkkkkk
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   579.620239
+
+seqnum: 10
+time:   619.620239
+
+
+Trying to erase timer for 10
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   579.620239
+
+
+
+EVENT time: 644.911865,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 644.911865
+            INSERTEVENT: future time will be 649.941162
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 644.911865
+seqnum      = 56
+acknum      = 0
+checksum    = 2076
+base        = 4
+tail_queue  = 56
+payload: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 649.941162,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 649.941162
+            INSERTEVENT: future time will be 661.646912
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 649.941162
+seqnum      = 57
+acknum      = 0
+checksum    = 2097
+base        = 4
+tail_queue  = 57
+payload: ffffffffffffffffffff
+
+EVENT time: 659.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #4
+          TOLAYER3: seq: 4, ack 0, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 659.620239
+            INSERTEVENT: future time will be 666.876953
+Inserting timer for #4
+
+-------- Debug timer --------- 
+current timer on: 4
+seqnum: 7
+time:   579.620239
+
+seqnum: 4
+time:   659.620239
+
+
+          START TIMER: starting timer at 659.620239
+            INSERTEVENT: time is 659.620239
+            INSERTEVENT: future time will be 699.620239
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 4
+time:   659.620239
+
+
+
+EVENT time: 661.646912,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 661.646912
+            INSERTEVENT: future time will be 678.082275
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 661.646912
+seqnum      = 58
+acknum      = 0
+checksum    = 2118
+base        = 4
+tail_queue  = 58
+payload: gggggggggggggggggggg
+
+EVENT time: 666.876953,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 666.876953
+seqnum      = 4
+acknum      = 0
+checksum    = 2024
+base        = 4
+tail_queue  = 59
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 0, ack 4, check: -2025 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 666.876953
+            INSERTEVENT: future time will be 676.753723
+
+EVENT time: 676.753723,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 676.753723
+seqnum      = 0
+acknum      = 4
+checksum    = 2024
+base        = 4
+tail_queue  = 59
+payload: eeeeeeeeeeeeeeeeeeee
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 4
+time:   659.620239
+
+
+Trying to erase timer for 4
+
+-------- Debug timer --------- 
+current timer on: 7
+
+          TOLAYER3: seq: 12, ack 0, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 676.753723
+            INSERTEVENT: future time will be 678.154480
+Inserting timer for #12
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 12
+time:   676.753723
+
+
+          TOLAYER3: seq: 13, ack 0, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 676.753723
+            INSERTEVENT: future time will be 681.669617
+Inserting timer for #13
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 12
+time:   676.753723
+
+seqnum: 13
+time:   676.753723
+
+
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 676.753723
+            INSERTEVENT: future time will be 691.387756
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 12
+time:   676.753723
+
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+
+
+EVENT time: 678.082275,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 678.082275
+            INSERTEVENT: future time will be 688.760742
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 678.082275
+seqnum      = 59
+acknum      = 0
+checksum    = 2139
+base        = 7
+tail_queue  = 59
+payload: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 678.154480,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 678.154480
+seqnum      = 12
+acknum      = 0
+checksum    = 2192
+base        = 7
+tail_queue  = 60
+payload: mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: seq: 0, ack 12, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 678.154480
+            INSERTEVENT: future time will be 686.292053
+
+EVENT time: 681.669617,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 681.669617
+seqnum      = 13
+acknum      = 999999
+checksum    = 2213
+base        = 7
+tail_queue  = 60
+payload: nnnnnnnnnnnnnnnnnnnn
+Packet was corrupted dropping packet
+
+EVENT time: 686.292053,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 686.292053
+seqnum      = 999999
+acknum      = 12
+checksum    = 2192
+base        = 7
+tail_queue  = 60
+payload: mmmmmmmmmmmmmmmmmmmm
+Packet was corrupted, do nothing
+
+EVENT time: 688.760742,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 688.760742
+            INSERTEVENT: future time will be 703.695129
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 688.760742
+seqnum      = 60
+acknum      = 0
+checksum    = 2160
+base        = 7
+tail_queue  = 60
+payload: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 691.387756,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 691.387756
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 7
+tail_queue  = 61
+payload: oooooooooooooooooooo
+          TOLAYER3: packet being lost
+
+EVENT time: 699.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #7
+          TOLAYER3: seq: 7, ack 0, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 699.620239
+            INSERTEVENT: future time will be 701.820251
+Inserting timer for #7
+
+-------- Debug timer --------- 
+current timer on: 7
+seqnum: 12
+time:   676.753723
+
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 7
+time:   699.620239
+
+
+          START TIMER: starting timer at 699.620239
+            INSERTEVENT: time is 699.620239
+            INSERTEVENT: future time will be 739.620239
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 7
+time:   699.620239
+
+
+
+EVENT time: 701.820251,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 701.820251
+seqnum      = 7
+acknum      = 0
+checksum    = 2087
+base        = 7
+tail_queue  = 61
+payload: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER5: data received: hhhhhhhhhhhhhhhhhhhh
+          TOLAYER5: data received: iiiiiiiiiiiiiiiiiiii
+          TOLAYER5: data received: jjjjjjjjjjjjjjjjjjjj
+          TOLAYER5: data received: kkkkkkkkkkkkkkkkkkkk
+          TOLAYER5: data received: llllllllllllllllllll
+          TOLAYER5: data received: mmmmmmmmmmmmmmmmmmmm
+next expected_seqnum: 13
+          TOLAYER3: seq: 0, ack 7, check: -2088 hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 701.820251
+            INSERTEVENT: future time will be 710.109619
+
+EVENT time: 703.695129,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 703.695129
+            INSERTEVENT: future time will be 710.766602
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 703.695129
+seqnum      = 61
+acknum      = 0
+checksum    = 2181
+base        = 7
+tail_queue  = 61
+payload: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 710.109619,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 710.109619
+seqnum      = 0
+acknum      = 7
+checksum    = 2087
+base        = 7
+tail_queue  = 62
+payload: hhhhhhhhhhhhhhhhhhhh
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 7
+time:   699.620239
+
+
+Trying to erase timer for 7
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 710.109619
+            INSERTEVENT: future time will be 714.995178
+Inserting timer for #15
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+
+          TOLAYER3: packet being lost
+Inserting timer for #16
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+
+          TOLAYER3: seq: 17, ack 0, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 710.109619
+            INSERTEVENT: future time will be 716.380066
+Inserting timer for #17
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 17
+time:   710.109619
+
+
+          TOLAYER3: seq: 18, ack 0, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 710.109619
+            INSERTEVENT: future time will be 719.408813
+Inserting timer for #18
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 17
+time:   710.109619
+
+seqnum: 18
+time:   710.109619
+
+
+          TOLAYER3: seq: 19, ack 0, check: -2340 tttttttttttttttttttt
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 710.109619
+            INSERTEVENT: future time will be 727.840698
+Inserting timer for #19
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 17
+time:   710.109619
+
+seqnum: 18
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+
+
+EVENT time: 710.766602,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 710.766602
+            INSERTEVENT: future time will be 715.987488
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 710.766602
+seqnum      = 62
+acknum      = 0
+checksum    = 2202
+base        = 12
+tail_queue  = 62
+payload: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 714.995178,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 714.995178
+seqnum      = 15
+acknum      = 0
+checksum    = 2255
+base        = 12
+tail_queue  = 63
+payload: Zppppppppppppppppppp
+Packet was corrupted dropping packet
+
+EVENT time: 715.987488,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 715.987488
+            INSERTEVENT: future time will be 732.335571
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 715.987488
+seqnum      = 63
+acknum      = 0
+checksum    = 2223
+base        = 12
+tail_queue  = 63
+payload: llllllllllllllllllll
+
+EVENT time: 716.380066,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 716.380066
+seqnum      = 17
+acknum      = 0
+checksum    = 2297
+base        = 12
+tail_queue  = 64
+payload: rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: seq: 0, ack 17, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 716.380066
+            INSERTEVENT: future time will be 724.639160
+
+EVENT time: 719.408813,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 719.408813
+seqnum      = 18
+acknum      = 0
+checksum    = 2318
+base        = 12
+tail_queue  = 64
+payload: ssssssssssssssssssss
+          TOLAYER3: seq: 0, ack 18, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 719.408813
+            INSERTEVENT: future time will be 727.101562
+
+EVENT time: 724.639160,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 724.639160
+seqnum      = 0
+acknum      = 17
+checksum    = 2297
+base        = 12
+tail_queue  = 64
+payload: rrrrrrrrrrrrrrrrrrrr
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 17
+time:   710.109619
+
+seqnum: 18
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+
+Trying to erase timer for 17
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 18
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+
+
+EVENT time: 727.101562,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 727.101562
+seqnum      = 0
+acknum      = 18
+checksum    = 2318
+base        = 12
+tail_queue  = 64
+payload: ssssssssssssssssssss
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 18
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+
+Trying to erase timer for 18
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+
+
+EVENT time: 727.840698,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 727.840698
+seqnum      = 19
+acknum      = 0
+checksum    = 2339
+base        = 12
+tail_queue  = 64
+payload: Zttttttttttttttttttt
+Packet was corrupted dropping packet
+
+EVENT time: 732.335571,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 732.335571
+            INSERTEVENT: future time will be 743.870605
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 732.335571
+seqnum      = 64
+acknum      = 0
+checksum    = 2244
+base        = 12
+tail_queue  = 64
+payload: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 739.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #12
+          TOLAYER3: packet being lost
+Inserting timer for #12
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   676.753723
+
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+
+          START TIMER: starting timer at 739.620239
+            INSERTEVENT: time is 739.620239
+            INSERTEVENT: future time will be 779.620239
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+
+
+EVENT time: 743.870605,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 743.870605
+            INSERTEVENT: future time will be 759.950073
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 743.870605
+seqnum      = 65
+acknum      = 0
+checksum    = 2265
+base        = 12
+tail_queue  = 65
+payload: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 759.950073,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 759.950073
+            INSERTEVENT: future time will be 763.126892
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 759.950073
+seqnum      = 66
+acknum      = 0
+checksum    = 2286
+base        = 12
+tail_queue  = 66
+payload: oooooooooooooooooooo
+
+EVENT time: 763.126892,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 763.126892
+            INSERTEVENT: future time will be 780.513611
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 763.126892
+seqnum      = 67
+acknum      = 0
+checksum    = 2307
+base        = 12
+tail_queue  = 67
+payload: pppppppppppppppppppp
+
+EVENT time: 779.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #13
+          TOLAYER3: seq: 13, ack 0, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 779.620239
+            INSERTEVENT: future time will be 788.656860
+Inserting timer for #13
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   676.753723
+
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+
+          START TIMER: starting timer at 779.620239
+            INSERTEVENT: time is 779.620239
+            INSERTEVENT: future time will be 819.620239
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+
+
+EVENT time: 780.513611,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 780.513611
+            INSERTEVENT: future time will be 798.880005
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 780.513611
+seqnum      = 68
+acknum      = 0
+checksum    = 2328
+base        = 12
+tail_queue  = 68
+payload: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 788.656860,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 788.656860
+seqnum      = 13
+acknum      = 0
+checksum    = 2213
+base        = 12
+tail_queue  = 69
+payload: nnnnnnnnnnnnnnnnnnnn
+          TOLAYER5: data received: nnnnnnnnnnnnnnnnnnnn
+          TOLAYER5: data received: oooooooooooooooooooo
+next expected_seqnum: 15
+          TOLAYER3: seq: 0, ack 13, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 788.656860
+            INSERTEVENT: future time will be 793.905090
+
+EVENT time: 793.905090,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 793.905090
+seqnum      = 0
+acknum      = 13
+checksum    = 2213
+base        = 12
+tail_queue  = 69
+payload: Znnnnnnnnnnnnnnnnnnn
+Packet was corrupted, do nothing
+
+EVENT time: 798.880005,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 798.880005
+            INSERTEVENT: future time will be 800.263000
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 798.880005
+seqnum      = 69
+acknum      = 0
+checksum    = 2349
+base        = 12
+tail_queue  = 69
+payload: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 800.263000,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 800.263000
+            INSERTEVENT: future time will be 802.235779
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 800.263000
+seqnum      = 70
+acknum      = 0
+checksum    = 2370
+base        = 12
+tail_queue  = 70
+payload: ssssssssssssssssssss
+
+EVENT time: 802.235779,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 802.235779
+            INSERTEVENT: future time will be 811.276062
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 802.235779
+seqnum      = 71
+acknum      = 0
+checksum    = 2391
+base        = 12
+tail_queue  = 71
+payload: tttttttttttttttttttt
+
+EVENT time: 811.276062,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 811.276062
+            INSERTEVENT: future time will be 814.699402
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 811.276062
+seqnum      = 72
+acknum      = 0
+checksum    = 2412
+base        = 12
+tail_queue  = 72
+payload: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 814.699402,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 814.699402
+            INSERTEVENT: future time will be 827.588318
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 814.699402
+seqnum      = 73
+acknum      = 0
+checksum    = 2433
+base        = 12
+tail_queue  = 73
+payload: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 819.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #14
+          TOLAYER3: packet being lost
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 15
+time:   710.109619
+
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+
+          START TIMER: starting timer at 819.620239
+            INSERTEVENT: time is 819.620239
+            INSERTEVENT: future time will be 859.620239
+
+-------- Debug timer --------- 
+current timer on: 15
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+
+
+EVENT time: 827.588318,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 827.588318
+            INSERTEVENT: future time will be 838.040283
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 827.588318
+seqnum      = 74
+acknum      = 0
+checksum    = 2454
+base        = 12
+tail_queue  = 74
+payload: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 838.040283,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 838.040283
+            INSERTEVENT: future time will be 842.292053
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 838.040283
+seqnum      = 75
+acknum      = 0
+checksum    = 2475
+base        = 12
+tail_queue  = 75
+payload: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 842.292053,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 842.292053
+            INSERTEVENT: future time will be 854.432373
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 842.292053
+seqnum      = 76
+acknum      = 0
+checksum    = 2496
+base        = 12
+tail_queue  = 76
+payload: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 854.432373,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 854.432373
+            INSERTEVENT: future time will be 864.238159
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 854.432373
+seqnum      = 77
+acknum      = 0
+checksum    = 2517
+base        = 12
+tail_queue  = 77
+payload: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 859.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #15
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 859.620239
+            INSERTEVENT: future time will be 862.738464
+Inserting timer for #15
+
+-------- Debug timer --------- 
+current timer on: 15
+seqnum: 16
+time:   710.109619
+
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 15
+time:   859.620239
+
+
+          START TIMER: starting timer at 859.620239
+            INSERTEVENT: time is 859.620239
+            INSERTEVENT: future time will be 899.620239
+
+-------- Debug timer --------- 
+current timer on: 16
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 15
+time:   859.620239
+
+
+
+EVENT time: 862.738464,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 862.738464
+seqnum      = 15
+acknum      = 0
+checksum    = 2255
+base        = 12
+tail_queue  = 78
+payload: pppppppppppppppppppp
+          TOLAYER5: data received: pppppppppppppppppppp
+next expected_seqnum: 16
+          TOLAYER3: seq: 0, ack 15, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 862.738464
+            INSERTEVENT: future time will be 864.571106
+
+EVENT time: 864.238159,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 864.238159
+            INSERTEVENT: future time will be 882.564941
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 864.238159
+seqnum      = 78
+acknum      = 0
+checksum    = 2018
+base        = 12
+tail_queue  = 78
+payload: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 864.571106,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 864.571106
+seqnum      = 0
+acknum      = 15
+checksum    = 2255
+base        = 12
+tail_queue  = 79
+payload: pppppppppppppppppppp
+
+-------- Debug timer --------- 
+current timer on: 16
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 15
+time:   859.620239
+
+
+Trying to erase timer for 15
+
+-------- Debug timer --------- 
+current timer on: 16
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+
+
+EVENT time: 882.564941,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 882.564941
+            INSERTEVENT: future time will be 884.365784
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 882.564941
+seqnum      = 79
+acknum      = 0
+checksum    = 2039
+base        = 12
+tail_queue  = 79
+payload: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 884.365784,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 884.365784
+            INSERTEVENT: future time will be 897.818848
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 884.365784
+seqnum      = 80
+acknum      = 0
+checksum    = 2060
+base        = 12
+tail_queue  = 80
+payload: cccccccccccccccccccc
+
+EVENT time: 897.818848,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 897.818848
+            INSERTEVENT: future time will be 914.552612
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 897.818848
+seqnum      = 81
+acknum      = 0
+checksum    = 2081
+base        = 12
+tail_queue  = 81
+payload: dddddddddddddddddddd
+
+EVENT time: 899.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #16
+          TOLAYER3: seq: 16, ack 0, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 899.620239
+            INSERTEVENT: future time will be 907.026794
+Inserting timer for #16
+
+-------- Debug timer --------- 
+current timer on: 16
+seqnum: 19
+time:   710.109619
+
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 16
+time:   899.620239
+
+
+          START TIMER: starting timer at 899.620239
+            INSERTEVENT: time is 899.620239
+            INSERTEVENT: future time will be 939.620239
+
+-------- Debug timer --------- 
+current timer on: 19
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 16
+time:   899.620239
+
+
+
+EVENT time: 907.026794,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 907.026794
+seqnum      = 16
+acknum      = 0
+checksum    = 2276
+base        = 12
+tail_queue  = 82
+payload: qqqqqqqqqqqqqqqqqqqq
+          TOLAYER5: data received: qqqqqqqqqqqqqqqqqqqq
+          TOLAYER5: data received: rrrrrrrrrrrrrrrrrrrr
+          TOLAYER5: data received: ssssssssssssssssssss
+next expected_seqnum: 19
+          TOLAYER3: seq: 0, ack 16, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 907.026794
+            INSERTEVENT: future time will be 911.291016
+
+EVENT time: 911.291016,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 911.291016
+seqnum      = 0
+acknum      = 16
+checksum    = 2276
+base        = 12
+tail_queue  = 82
+payload: qqqqqqqqqqqqqqqqqqqq
+
+-------- Debug timer --------- 
+current timer on: 19
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 16
+time:   899.620239
+
+
+Trying to erase timer for 16
+
+-------- Debug timer --------- 
+current timer on: 19
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+
+
+EVENT time: 914.552612,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 914.552612
+            INSERTEVENT: future time will be 919.337219
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 914.552612
+seqnum      = 82
+acknum      = 0
+checksum    = 2102
+base        = 12
+tail_queue  = 82
+payload: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 919.337219,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 919.337219
+            INSERTEVENT: future time will be 926.132080
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 919.337219
+seqnum      = 83
+acknum      = 0
+checksum    = 2123
+base        = 12
+tail_queue  = 83
+payload: ffffffffffffffffffff
+
+EVENT time: 926.132080,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 926.132080
+            INSERTEVENT: future time will be 945.916565
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 926.132080
+seqnum      = 84
+acknum      = 0
+checksum    = 2144
+base        = 12
+tail_queue  = 84
+payload: gggggggggggggggggggg
+
+EVENT time: 939.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #19
+          TOLAYER3: seq: 19, ack 0, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 939.620239
+            INSERTEVENT: future time will be 948.393311
+Inserting timer for #19
+
+-------- Debug timer --------- 
+current timer on: 19
+seqnum: 12
+time:   739.620239
+
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 19
+time:   939.620239
+
+
+          START TIMER: starting timer at 939.620239
+            INSERTEVENT: time is 939.620239
+            INSERTEVENT: future time will be 979.620239
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 19
+time:   939.620239
+
+
+
+EVENT time: 945.916565,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 945.916565
+            INSERTEVENT: future time will be 959.766602
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 945.916565
+seqnum      = 85
+acknum      = 0
+checksum    = 2165
+base        = 12
+tail_queue  = 85
+payload: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 948.393311,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 948.393311
+seqnum      = 19
+acknum      = 0
+checksum    = 2339
+base        = 12
+tail_queue  = 86
+payload: tttttttttttttttttttt
+          TOLAYER5: data received: tttttttttttttttttttt
+next expected_seqnum: 20
+          TOLAYER3: seq: 0, ack 19, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 948.393311
+            INSERTEVENT: future time will be 954.163025
+
+EVENT time: 954.163025,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 954.163025
+seqnum      = 0
+acknum      = 19
+checksum    = 2339
+base        = 12
+tail_queue  = 86
+payload: tttttttttttttttttttt
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 19
+time:   939.620239
+
+
+Trying to erase timer for 19
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+
+
+EVENT time: 959.766602,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 959.766602
+            INSERTEVENT: future time will be 979.717224
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 959.766602
+seqnum      = 86
+acknum      = 0
+checksum    = 2186
+base        = 12
+tail_queue  = 86
+payload: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 979.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #12
+          TOLAYER3: seq: 12, ack 0, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 979.620239
+            INSERTEVENT: future time will be 987.390930
+Inserting timer for #12
+
+-------- Debug timer --------- 
+current timer on: 12
+seqnum: 13
+time:   779.620239
+
+seqnum: 14
+time:   819.620239
+
+seqnum: 12
+time:   979.620239
+
+
+          START TIMER: starting timer at 979.620239
+            INSERTEVENT: time is 979.620239
+            INSERTEVENT: future time will be 1019.620239
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+seqnum: 12
+time:   979.620239
+
+
+
+EVENT time: 979.717224,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 979.717224
+            INSERTEVENT: future time will be 981.644897
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 979.717224
+seqnum      = 87
+acknum      = 0
+checksum    = 2207
+base        = 12
+tail_queue  = 87
+payload: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 981.644897,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 981.644897
+            INSERTEVENT: future time will be 992.952637
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 981.644897
+seqnum      = 88
+acknum      = 0
+checksum    = 2228
+base        = 12
+tail_queue  = 88
+payload: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 987.390930,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 987.390930
+seqnum      = 12
+acknum      = 0
+checksum    = 2192
+base        = 12
+tail_queue  = 89
+payload: mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: seq: 0, ack 12, check: -2193 mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 987.390930
+            INSERTEVENT: future time will be 993.576538
+
+EVENT time: 992.952637,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 992.952637
+            INSERTEVENT: future time will be 1009.242737
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 992.952637
+seqnum      = 89
+acknum      = 0
+checksum    = 2249
+base        = 12
+tail_queue  = 89
+payload: llllllllllllllllllll
+
+EVENT time: 993.576538,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 993.576538
+seqnum      = 0
+acknum      = 12
+checksum    = 2192
+base        = 12
+tail_queue  = 90
+payload: mmmmmmmmmmmmmmmmmmmm
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+seqnum: 12
+time:   979.620239
+
+
+Trying to erase timer for 12
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+
+          TOLAYER3: seq: 20, ack 0, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 993.576538
+            INSERTEVENT: future time will be 999.028931
+Inserting timer for #20
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+seqnum: 20
+time:   993.576538
+
+
+
+EVENT time: 999.028931,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 999.028931
+seqnum      = 20
+acknum      = 0
+checksum    = 2360
+base        = 13
+tail_queue  = 90
+payload: uuuuuuuuuuuuuuuuuuuu
+          TOLAYER5: data received: uuuuuuuuuuuuuuuuuuuu
+next expected_seqnum: 21
+          TOLAYER3: seq: 0, ack 20, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 999.028931
+            INSERTEVENT: future time will be 1008.332642
+
+EVENT time: 1008.332642,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1008.332642
+seqnum      = 0
+acknum      = 20
+checksum    = 2360
+base        = 13
+tail_queue  = 90
+payload: uuuuuuuuuuuuuuuuuuuu
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+seqnum: 20
+time:   993.576538
+
+
+Trying to erase timer for 20
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+
+
+EVENT time: 1009.242737,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1009.242737
+            INSERTEVENT: future time will be 1023.668335
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1009.242737
+seqnum      = 90
+acknum      = 0
+checksum    = 2270
+base        = 13
+tail_queue  = 90
+payload: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1019.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #13
+          TOLAYER3: seq: 13, ack 0, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1019.620239
+            INSERTEVENT: future time will be 1028.442017
+Inserting timer for #13
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   819.620239
+
+seqnum: 13
+time:   1019.620239
+
+
+          START TIMER: starting timer at 1019.620239
+            INSERTEVENT: time is 1019.620239
+            INSERTEVENT: future time will be 1059.620239
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 13
+time:   1019.620239
+
+
+
+EVENT time: 1023.668335,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1023.668335
+            INSERTEVENT: future time will be 1033.201538
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1023.668335
+seqnum      = 91
+acknum      = 0
+checksum    = 2291
+base        = 13
+tail_queue  = 91
+payload: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 1028.442017,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1028.442017
+seqnum      = 13
+acknum      = 0
+checksum    = 2213
+base        = 13
+tail_queue  = 92
+payload: nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: packet being lost
+
+EVENT time: 1033.201538,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1033.201538
+            INSERTEVENT: future time will be 1034.281372
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1033.201538
+seqnum      = 92
+acknum      = 0
+checksum    = 2312
+base        = 13
+tail_queue  = 92
+payload: oooooooooooooooooooo
+
+EVENT time: 1034.281372,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1034.281372
+            INSERTEVENT: future time will be 1044.509399
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1034.281372
+seqnum      = 93
+acknum      = 0
+checksum    = 2333
+base        = 13
+tail_queue  = 93
+payload: pppppppppppppppppppp
+
+EVENT time: 1044.509399,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1044.509399
+            INSERTEVENT: future time will be 1064.137207
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1044.509399
+seqnum      = 94
+acknum      = 0
+checksum    = 2354
+base        = 13
+tail_queue  = 94
+payload: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 1059.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #14
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1059.620239
+            INSERTEVENT: future time will be 1060.964233
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 13
+time:   1019.620239
+
+seqnum: 14
+time:   1059.620239
+
+
+          START TIMER: starting timer at 1059.620239
+            INSERTEVENT: time is 1059.620239
+            INSERTEVENT: future time will be 1099.620239
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   1059.620239
+
+
+
+EVENT time: 1060.964233,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1060.964233
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 13
+tail_queue  = 95
+payload: Zooooooooooooooooooo
+Packet was corrupted dropping packet
+
+EVENT time: 1064.137207,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1064.137207
+            INSERTEVENT: future time will be 1066.348999
+          MAINLOOP: data given to student: rrrrrrrrrrrrrrrrrrrr
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1064.137207
+seqnum      = 95
+acknum      = 0
+checksum    = 2375
+base        = 13
+tail_queue  = 95
+payload: rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 1066.348999,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1066.348999
+            INSERTEVENT: future time will be 1068.219238
+          MAINLOOP: data given to student: ssssssssssssssssssss
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1066.348999
+seqnum      = 96
+acknum      = 0
+checksum    = 2396
+base        = 13
+tail_queue  = 96
+payload: ssssssssssssssssssss
+
+EVENT time: 1068.219238,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1068.219238
+            INSERTEVENT: future time will be 1072.603760
+          MAINLOOP: data given to student: tttttttttttttttttttt
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1068.219238
+seqnum      = 97
+acknum      = 0
+checksum    = 2417
+base        = 13
+tail_queue  = 97
+payload: tttttttttttttttttttt
+
+EVENT time: 1072.603760,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1072.603760
+            INSERTEVENT: future time will be 1072.889893
+          MAINLOOP: data given to student: uuuuuuuuuuuuuuuuuuuu
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1072.603760
+seqnum      = 98
+acknum      = 0
+checksum    = 2438
+base        = 13
+tail_queue  = 98
+payload: uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 1072.889893,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1072.889893
+            INSERTEVENT: future time will be 1089.588623
+          MAINLOOP: data given to student: vvvvvvvvvvvvvvvvvvvv
+
+-------------- A output --------------
+Sending Packet at A: 
+Buffer is full, drop message
+time        = 1072.889893
+seqnum      = 99
+acknum      = 0
+checksum    = 2459
+base        = 13
+tail_queue  = 99
+payload: vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 1089.588623,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1089.588623
+            INSERTEVENT: future time will be 1107.450562
+          MAINLOOP: data given to student: wwwwwwwwwwwwwwwwwwww
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1089.588623
+seqnum      = 100
+acknum      = 0
+checksum    = 2480
+base        = 13
+tail_queue  = 100
+payload: wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 1099.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #13
+          TOLAYER3: seq: 13, ack 0, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1099.620239
+            INSERTEVENT: future time will be 1103.019165
+Inserting timer for #13
+
+-------- Debug timer --------- 
+current timer on: 13
+seqnum: 14
+time:   1059.620239
+
+seqnum: 13
+time:   1099.620239
+
+
+          START TIMER: starting timer at 1099.620239
+            INSERTEVENT: time is 1099.620239
+            INSERTEVENT: future time will be 1139.620239
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 13
+time:   1099.620239
+
+
+
+EVENT time: 1103.019165,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1103.019165
+seqnum      = 13
+acknum      = 0
+checksum    = 2213
+base        = 13
+tail_queue  = 101
+payload: nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: seq: 0, ack 13, check: -2214 nnnnnnnnnnnnnnnnnnnn
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1103.019165
+            INSERTEVENT: future time will be 1112.369385
+
+EVENT time: 1107.450562,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1107.450562
+            INSERTEVENT: future time will be 1119.982422
+          MAINLOOP: data given to student: xxxxxxxxxxxxxxxxxxxx
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1107.450562
+seqnum      = 101
+acknum      = 0
+checksum    = 2501
+base        = 13
+tail_queue  = 101
+payload: xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 1112.369385,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1112.369385
+seqnum      = 0
+acknum      = 13
+checksum    = 2213
+base        = 13
+tail_queue  = 102
+payload: nnnnnnnnnnnnnnnnnnnn
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 13
+time:   1099.620239
+
+
+Trying to erase timer for 13
+
+-------- Debug timer --------- 
+current timer on: 14
+
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1121.482056
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+
+          TOLAYER3: seq: 15, ack 0, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1128.140503
+Inserting timer for #15
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+
+          TOLAYER3: seq: 16, ack 0, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1132.701172
+Inserting timer for #16
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+
+          TOLAYER3: seq: 17, ack 0, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1136.586304
+Inserting timer for #17
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+
+          TOLAYER3: seq: 18, ack 0, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1145.045654
+Inserting timer for #18
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+
+          TOLAYER3: seq: 19, ack 0, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1152.673218
+Inserting timer for #19
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+
+          TOLAYER3: seq: 20, ack 0, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1161.206787
+Inserting timer for #20
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+
+          TOLAYER3: seq: 21, ack 0, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1112.369385
+            INSERTEVENT: future time will be 1166.540161
+Inserting timer for #21
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+
+
+EVENT time: 1119.982422,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1119.982422
+            INSERTEVENT: future time will be 1128.978149
+          MAINLOOP: data given to student: yyyyyyyyyyyyyyyyyyyy
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1119.982422
+seqnum      = 102
+acknum      = 0
+checksum    = 2522
+base        = 14
+tail_queue  = 102
+payload: yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 1121.482056,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1121.482056
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 14
+tail_queue  = 103
+payload: oooooooooooooooooooo
+          TOLAYER3: packet being lost
+
+EVENT time: 1128.140503,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1128.140503
+seqnum      = 15
+acknum      = 0
+checksum    = 2255
+base        = 14
+tail_queue  = 103
+payload: pppppppppppppppppppp
+          TOLAYER3: seq: 0, ack 15, check: -2256 pppppppppppppppppppp
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1128.140503
+            INSERTEVENT: future time will be 1135.906860
+
+EVENT time: 1128.978149,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1128.978149
+            INSERTEVENT: future time will be 1137.678223
+          MAINLOOP: data given to student: zzzzzzzzzzzzzzzzzzzz
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1128.978149
+seqnum      = 103
+acknum      = 0
+checksum    = 2543
+base        = 14
+tail_queue  = 103
+payload: zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 1132.701172,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1132.701172
+seqnum      = 16
+acknum      = 0
+checksum    = 2276
+base        = 14
+tail_queue  = 104
+payload: qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: seq: 0, ack 16, check: -2277 qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1132.701172
+            INSERTEVENT: future time will be 1142.884155
+
+EVENT time: 1135.906860,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1135.906860
+seqnum      = 0
+acknum      = 15
+checksum    = 2255
+base        = 14
+tail_queue  = 104
+payload: pppppppppppppppppppp
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 15
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+
+Trying to erase timer for 15
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+
+
+EVENT time: 1136.586304,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1136.586304
+seqnum      = 17
+acknum      = 0
+checksum    = 2297
+base        = 14
+tail_queue  = 104
+payload: rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: seq: 0, ack 17, check: -2298 rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1136.586304
+            INSERTEVENT: future time will be 1146.569824
+
+EVENT time: 1137.678223,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1137.678223
+            INSERTEVENT: future time will be 1154.828979
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaaa
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1137.678223
+seqnum      = 104
+acknum      = 0
+checksum    = 2044
+base        = 14
+tail_queue  = 104
+payload: aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 1139.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #14
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1139.620239
+            INSERTEVENT: future time will be 1169.580444
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1112.369385
+
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+          START TIMER: starting timer at 1139.620239
+            INSERTEVENT: time is 1139.620239
+            INSERTEVENT: future time will be 1179.620239
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1142.884155,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1142.884155
+seqnum      = 0
+acknum      = 16
+checksum    = 2276
+base        = 14
+tail_queue  = 105
+payload: qqqqqqqqqqqqqqqqqqqq
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 16
+time:   1112.369385
+
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 16
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1145.045654,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1145.045654
+seqnum      = 18
+acknum      = 0
+checksum    = 2318
+base        = 14
+tail_queue  = 105
+payload: ssssssssssssssssssss
+          TOLAYER3: seq: 0, ack 18, check: -2319 ssssssssssssssssssss
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1145.045654
+            INSERTEVENT: future time will be 1149.858154
+
+EVENT time: 1146.569824,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1146.569824
+seqnum      = 0
+acknum      = 17
+checksum    = 2297
+base        = 14
+tail_queue  = 105
+payload: rrrrrrrrrrrrrrrrrrrr
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 17
+time:   1112.369385
+
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 17
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1149.858154,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1149.858154
+seqnum      = 0
+acknum      = 18
+checksum    = 2318
+base        = 14
+tail_queue  = 105
+payload: ssssssssssssssssssss
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 18
+time:   1112.369385
+
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 18
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1152.673218,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1152.673218
+seqnum      = 19
+acknum      = 0
+checksum    = 2339
+base        = 14
+tail_queue  = 105
+payload: tttttttttttttttttttt
+          TOLAYER3: seq: 0, ack 19, check: -2340 tttttttttttttttttttt
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1152.673218
+            INSERTEVENT: future time will be 1158.142456
+
+EVENT time: 1154.828979,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1154.828979
+            INSERTEVENT: future time will be 1164.122192
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbbb
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1154.828979
+seqnum      = 105
+acknum      = 0
+checksum    = 2065
+base        = 14
+tail_queue  = 105
+payload: bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1158.142456,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1158.142456
+seqnum      = 0
+acknum      = 19
+checksum    = 2339
+base        = 14
+tail_queue  = 106
+payload: tttttttttttttttttttt
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 19
+time:   1112.369385
+
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 19
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1161.206787,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1161.206787
+seqnum      = 20
+acknum      = 0
+checksum    = 2360
+base        = 14
+tail_queue  = 106
+payload: uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: seq: 0, ack 20, check: -2361 uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1161.206787
+            INSERTEVENT: future time will be 1167.499878
+
+EVENT time: 1164.122192,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1164.122192
+            INSERTEVENT: future time will be 1168.808105
+          MAINLOOP: data given to student: cccccccccccccccccccc
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1164.122192
+seqnum      = 106
+acknum      = 0
+checksum    = 2086
+base        = 14
+tail_queue  = 106
+payload: cccccccccccccccccccc
+
+EVENT time: 1166.540161,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1166.540161
+seqnum      = 21
+acknum      = 0
+checksum    = 2381
+base        = 14
+tail_queue  = 107
+payload: vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: seq: 0, ack 21, check: -2382 vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1166.540161
+            INSERTEVENT: future time will be 1172.481934
+
+EVENT time: 1167.499878,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1167.499878
+seqnum      = 0
+acknum      = 20
+checksum    = 2360
+base        = 14
+tail_queue  = 107
+payload: uuuuuuuuuuuuuuuuuuuu
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 20
+time:   1112.369385
+
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 20
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1168.808105,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1168.808105
+            INSERTEVENT: future time will be 1182.474243
+          MAINLOOP: data given to student: dddddddddddddddddddd
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1168.808105
+seqnum      = 107
+acknum      = 0
+checksum    = 2107
+base        = 14
+tail_queue  = 107
+payload: dddddddddddddddddddd
+
+EVENT time: 1169.580444,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1169.580444
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 14
+tail_queue  = 108
+payload: oooooooooooooooooooo
+          TOLAYER3: packet being lost
+
+EVENT time: 1172.481934,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1172.481934
+seqnum      = 0
+acknum      = 21
+checksum    = 2381
+base        = 14
+tail_queue  = 108
+payload: vvvvvvvvvvvvvvvvvvvv
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 21
+time:   1112.369385
+
+seqnum: 14
+time:   1139.620239
+
+
+Trying to erase timer for 21
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1139.620239
+
+
+
+EVENT time: 1179.620239,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #14
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1179.620239
+            INSERTEVENT: future time will be 1187.466064
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1139.620239
+
+seqnum: 14
+time:   1179.620239
+
+
+          START TIMER: starting timer at 1179.620239
+            INSERTEVENT: time is 1179.620239
+            INSERTEVENT: future time will be 1219.620239
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1179.620239
+
+
+
+EVENT time: 1182.474243,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1182.474243
+            INSERTEVENT: future time will be 1191.779663
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeeee
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1182.474243
+seqnum      = 108
+acknum      = 0
+checksum    = 2128
+base        = 14
+tail_queue  = 108
+payload: eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 1187.466064,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1187.466064
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 14
+tail_queue  = 109
+payload: oooooooooooooooooooo
+          TOLAYER3: seq: 0, ack 14, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1187.466064
+            INSERTEVENT: future time will be 1195.140381
+
+EVENT time: 1191.779663,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1191.779663
+            INSERTEVENT: future time will be 1200.092896
+          MAINLOOP: data given to student: ffffffffffffffffffff
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1191.779663
+seqnum      = 109
+acknum      = 0
+checksum    = 2149
+base        = 14
+tail_queue  = 109
+payload: ffffffffffffffffffff
+
+EVENT time: 1195.140381,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1195.140381
+seqnum      = 0
+acknum      = 14
+checksum    = 2234
+base        = 14
+tail_queue  = 110
+payload: oooooooooooooooooooo
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 14
+time:   1179.620239
+
+
+Trying to erase timer for 14
+          STOP TIMER: stopping timer at 1195.140381
+          START TIMER: starting timer at 1195.140381
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1235.140381
+          TOLAYER3: seq: 22, ack 0, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1205.071411
+Inserting timer for #22
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+
+          TOLAYER3: seq: 23, ack 0, check: -2424 xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1207.648682
+Inserting timer for #23
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+
+          TOLAYER3: packet being lost
+Inserting timer for #24
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+
+          TOLAYER3: packet being lost
+Inserting timer for #25
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+
+          TOLAYER3: seq: 26, ack 0, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1209.540161
+Inserting timer for #26
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 26
+time:   1195.140381
+
+
+          TOLAYER3: seq: 27, ack 0, check: -1988 bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1215.102661
+Inserting timer for #27
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 26
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+
+          TOLAYER3: seq: 28, ack 0, check: -2009 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1222.407715
+Inserting timer for #28
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 26
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 28
+time:   1195.140381
+
+
+          TOLAYER3: seq: 29, ack 0, check: -2030 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1195.140381
+            INSERTEVENT: future time will be 1229.083496
+Inserting timer for #29
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 26
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 28
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+
+
+EVENT time: 1200.092896,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1200.092896
+            INSERTEVENT: future time will be 1207.305542
+          MAINLOOP: data given to student: gggggggggggggggggggg
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1200.092896
+seqnum      = 110
+acknum      = 0
+checksum    = 2170
+base        = 22
+tail_queue  = 110
+payload: gggggggggggggggggggg
+
+EVENT time: 1205.071411,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1205.071411
+seqnum      = 22
+acknum      = 0
+checksum    = 2402
+base        = 22
+tail_queue  = 111
+payload: wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: packet being lost
+
+EVENT time: 1207.305542,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1207.305542
+            INSERTEVENT: future time will be 1215.406128
+          MAINLOOP: data given to student: hhhhhhhhhhhhhhhhhhhh
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1207.305542
+seqnum      = 111
+acknum      = 0
+checksum    = 2191
+base        = 22
+tail_queue  = 111
+payload: hhhhhhhhhhhhhhhhhhhh
+
+EVENT time: 1207.648682,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1207.648682
+seqnum      = 23
+acknum      = 0
+checksum    = 2423
+base        = 22
+tail_queue  = 112
+payload: xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: packet being lost
+
+EVENT time: 1209.540161,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1209.540161
+seqnum      = 26
+acknum      = 0
+checksum    = 1966
+base        = 22
+tail_queue  = 112
+payload: aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: seq: 0, ack 26, check: -1967 aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1209.540161
+            INSERTEVENT: future time will be 1213.897949
+
+EVENT time: 1213.897949,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1213.897949
+seqnum      = 0
+acknum      = 26
+checksum    = 1966
+base        = 22
+tail_queue  = 112
+payload: aaaaaaaaaaaaaaaaaaaa
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 26
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 28
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+
+Trying to erase timer for 26
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 28
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+
+
+EVENT time: 1215.102661,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1215.102661
+seqnum      = 27
+acknum      = 0
+checksum    = 1987
+base        = 22
+tail_queue  = 112
+payload: bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being lost
+
+EVENT time: 1215.406128,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1215.406128
+            INSERTEVENT: future time will be 1227.907349
+          MAINLOOP: data given to student: iiiiiiiiiiiiiiiiiiii
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1215.406128
+seqnum      = 112
+acknum      = 0
+checksum    = 2212
+base        = 22
+tail_queue  = 112
+payload: iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 1222.407715,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1222.407715
+seqnum      = 28
+acknum      = 0
+checksum    = 2008
+base        = 22
+tail_queue  = 113
+payload: cccccccccccccccccccc
+          TOLAYER3: seq: 0, ack 28, check: -2009 cccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1222.407715
+            INSERTEVENT: future time will be 1229.372070
+
+EVENT time: 1227.907349,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1227.907349
+            INSERTEVENT: future time will be 1227.923218
+          MAINLOOP: data given to student: jjjjjjjjjjjjjjjjjjjj
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1227.907349
+seqnum      = 113
+acknum      = 0
+checksum    = 2233
+base        = 22
+tail_queue  = 113
+payload: jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 1227.923218,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1227.923218
+            INSERTEVENT: future time will be 1234.733643
+          MAINLOOP: data given to student: kkkkkkkkkkkkkkkkkkkk
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1227.923218
+seqnum      = 114
+acknum      = 0
+checksum    = 2254
+base        = 22
+tail_queue  = 114
+payload: kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 1229.083496,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1229.083496
+seqnum      = 29
+acknum      = 0
+checksum    = 2029
+base        = 22
+tail_queue  = 115
+payload: dddddddddddddddddddd
+          TOLAYER3: seq: 0, ack 29, check: -2030 dddddddddddddddddddd
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1229.083496
+            INSERTEVENT: future time will be 1237.642456
+
+EVENT time: 1229.372070,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1229.372070
+seqnum      = 0
+acknum      = 28
+checksum    = 2008
+base        = 22
+tail_queue  = 115
+payload: cccccccccccccccccccc
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 28
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+
+Trying to erase timer for 28
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+
+
+EVENT time: 1234.733643,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1234.733643
+            INSERTEVENT: future time will be 1249.997559
+          MAINLOOP: data given to student: llllllllllllllllllll
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1234.733643
+seqnum      = 115
+acknum      = 0
+checksum    = 2275
+base        = 22
+tail_queue  = 115
+payload: llllllllllllllllllll
+
+EVENT time: 1235.140381,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #14
+          TOLAYER3: seq: 14, ack 0, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1235.140381
+            INSERTEVENT: future time will be 1241.001831
+Inserting timer for #14
+
+-------- Debug timer --------- 
+current timer on: 14
+seqnum: 22
+time:   1195.140381
+
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+seqnum: 14
+time:   1235.140381
+
+
+          START TIMER: starting timer at 1235.140381
+            INSERTEVENT: time is 1235.140381
+            INSERTEVENT: future time will be 1275.140381
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+seqnum: 14
+time:   1235.140381
+
+
+
+EVENT time: 1237.642456,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1237.642456
+seqnum      = 0
+acknum      = 29
+checksum    = 2029
+base        = 22
+tail_queue  = 116
+payload: dddddddddddddddddddd
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 29
+time:   1195.140381
+
+seqnum: 14
+time:   1235.140381
+
+
+Trying to erase timer for 29
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 14
+time:   1235.140381
+
+
+
+EVENT time: 1241.001831,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1241.001831
+seqnum      = 14
+acknum      = 0
+checksum    = 2234
+base        = 22
+tail_queue  = 116
+payload: oooooooooooooooooooo
+          TOLAYER3: seq: 0, ack 14, check: -2235 oooooooooooooooooooo
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1241.001831
+            INSERTEVENT: future time will be 1250.585449
+
+EVENT time: 1249.997559,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1249.997559
+            INSERTEVENT: future time will be 1265.968872
+          MAINLOOP: data given to student: mmmmmmmmmmmmmmmmmmmm
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1249.997559
+seqnum      = 116
+acknum      = 0
+checksum    = 2296
+base        = 22
+tail_queue  = 116
+payload: mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 1250.585449,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1250.585449
+seqnum      = 0
+acknum      = 14
+checksum    = 2234
+base        = 22
+tail_queue  = 117
+payload: oooooooooooooooooooo
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 14
+time:   1235.140381
+
+
+Trying to erase timer for 14
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+
+
+EVENT time: 1265.968872,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1265.968872
+            INSERTEVENT: future time will be 1267.947754
+          MAINLOOP: data given to student: nnnnnnnnnnnnnnnnnnnn
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1265.968872
+seqnum      = 117
+acknum      = 0
+checksum    = 2317
+base        = 22
+tail_queue  = 117
+payload: nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 1267.947754,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1267.947754
+            INSERTEVENT: future time will be 1271.536743
+          MAINLOOP: data given to student: oooooooooooooooooooo
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1267.947754
+seqnum      = 118
+acknum      = 0
+checksum    = 2338
+base        = 22
+tail_queue  = 118
+payload: oooooooooooooooooooo
+
+EVENT time: 1271.536743,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1271.536743
+            INSERTEVENT: future time will be 1285.931763
+          MAINLOOP: data given to student: pppppppppppppppppppp
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1271.536743
+seqnum      = 119
+acknum      = 0
+checksum    = 2359
+base        = 22
+tail_queue  = 119
+payload: pppppppppppppppppppp
+
+EVENT time: 1275.140381,  type: 0, timerinterrupt   entity: 0
+
+-------------- A timeout --------------
+The packet was lost, resending #22
+          TOLAYER3: seq: 22, ack 0, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1275.140381
+            INSERTEVENT: future time will be 1282.516235
+Inserting timer for #22
+
+-------- Debug timer --------- 
+current timer on: 22
+seqnum: 23
+time:   1195.140381
+
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 22
+time:   1275.140381
+
+
+          START TIMER: starting timer at 1275.140381
+            INSERTEVENT: time is 1275.140381
+            INSERTEVENT: future time will be 1315.140381
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 22
+time:   1275.140381
+
+
+
+EVENT time: 1282.516235,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1282.516235
+seqnum      = 22
+acknum      = 0
+checksum    = 2402
+base        = 22
+tail_queue  = 120
+payload: wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: seq: 0, ack 22, check: -2403 wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1282.516235
+            INSERTEVENT: future time will be 1283.786133
+
+EVENT time: 1283.786133,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1283.786133
+seqnum      = 0
+acknum      = 22
+checksum    = 2402
+base        = 22
+tail_queue  = 120
+payload: wwwwwwwwwwwwwwwwwwww
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 22
+time:   1275.140381
+
+
+Trying to erase timer for 22
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+
+          TOLAYER3: seq: 30, ack 0, check: -2051 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1283.786133
+            INSERTEVENT: future time will be 1285.100342
+Inserting timer for #30
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 30
+time:   1283.786133
+
+
+
+EVENT time: 1285.100342,  type: 2, fromlayer3  entity: 1
+
+-------------- B output --------------
+Got a packet with
+time        = 1285.100342
+seqnum      = 30
+acknum      = 0
+checksum    = 2050
+base        = 23
+tail_queue  = 120
+payload: eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 0, ack 30, check: -2051 eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1285.100342
+            INSERTEVENT: future time will be 1292.433594
+
+EVENT time: 1285.931763,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1285.931763
+            INSERTEVENT: future time will be 1294.770874
+          MAINLOOP: data given to student: qqqqqqqqqqqqqqqqqqqq
+
+-------------- A output --------------
+Sending Packet at A: 
+time        = 1285.931763
+seqnum      = 120
+acknum      = 0
+checksum    = 2380
+base        = 23
+tail_queue  = 120
+payload: qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 1292.433594,  type: 2, fromlayer3  entity: 0
+
+-------------- A input --------------
+time        = 1292.433594
+seqnum      = 0
+acknum      = 30
+checksum    = 2050
+base        = 23
+tail_queue  = 121
+payload: eeeeeeeeeeeeeeeeeeee
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+seqnum: 30
+time:   1283.786133
+
+
+Trying to erase timer for 30
+
+-------- Debug timer --------- 
+current timer on: 23
+seqnum: 24
+time:   1195.140381
+
+seqnum: 25
+time:   1195.140381
+
+seqnum: 27
+time:   1195.140381
+
+
+
+EVENT time: 1294.770874,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            IN
