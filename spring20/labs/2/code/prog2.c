@@ -2,7 +2,7 @@
 
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
-#define MAX_BUFFER_SIZE (100)
+#define MAX_BUFFER_SIZE (300)
 #define WINDOW_SIZE (8)
 #define RETRANSMIT 1
 #define TRANSMIT 0
@@ -81,7 +81,7 @@ void insert_timer(float begin_time, int seqnum){
 // Pops the timer and return the time elapsed since it was added to the list
 int pop_timer(){
   if(timers == NULL){
-    printf("nothing to pop\n");
+    // printf("nothing to pop\n");
     current_timer_seqnum = -1;
     return 0.0;
   }
@@ -173,7 +173,7 @@ void send_packet(int seqnum){
   else
     insert_timer(time, seqnum);
 
-  debug_timer_list();
+  // debug_timer_list();
 }
 
 // This function will
@@ -193,7 +193,7 @@ int queue_msg(struct msg message){
   strncpy(packet->payload, message.data, 20);
   fill_checksum(packet);
 
-  debug_packet(*packet);
+  // debug_packet(*packet);
 
   // if it is within window, ship it
   if(nextseqnum < base + WINDOW_SIZE){
@@ -209,8 +209,8 @@ int queue_msg(struct msg message){
 /* called from layer 5, passed the data to be sent to other side */
 int A_output(struct msg message)
 {
-  printf("\n-------------- A output --------------\n");
-  printf("Sending Packet at A: \n");
+  // printf("\n-------------- A output --------------\n");
+  // printf("Sending Packet at A: \n");
   /* debug_payload(message.data); */
 
   queue_msg(message);
@@ -240,8 +240,8 @@ int send_unsent(){
 
 // Search for the seqnum in the timer list and erase it
 int erase_timer(int seqnum){
-  debug_timer_list();
-  printf("Trying to erase timer for %d\n", seqnum);
+  // debug_timer_list();
+  // printf("Trying to erase timer for %d\n", seqnum);
   if(seqnum == current_timer_seqnum){
     stoptimer(0);
     pop_timer();
@@ -268,7 +268,7 @@ int erase_timer(int seqnum){
   if(tl == NULL)
     return 0;
   if (tl->seqnum != seqnum){
-    printf("Couldnt find timer\n");
+    // printf("Couldnt find timer\n");
     return 0;
   }
 
@@ -290,8 +290,8 @@ void ack_buffer(int acknum){
 /* called from layer 3, when a packet arrives for layer 4 */
 int A_input(struct pkt packet)
 {
-  printf("\n-------------- A input --------------\n");
-  debug_packet(packet);
+  // printf("\n-------------- A input --------------\n");
+  // debug_packet(packet);
 
   /* stoptimer(0); */
 
@@ -301,7 +301,7 @@ int A_input(struct pkt packet)
     send_unsent();
   }
   else{
-    printf("Packet was corrupted, do nothing\n");
+    // printf("Packet was corrupted, do nothing\n");
   }
 
   return 0;
@@ -309,8 +309,8 @@ int A_input(struct pkt packet)
 
 /* called when A's timer goes off */
 int A_timerinterrupt() {
-  printf("\n-------------- A timeout --------------\n");
-  printf("The packet was lost, resending #%d\n", current_timer_seqnum);
+  // printf("\n-------------- A timeout --------------\n");
+  // printf("The packet was lost, resending #%d\n", current_timer_seqnum);
 
   send_packet(current_timer_seqnum);
 
@@ -361,7 +361,7 @@ int sendtolayer5(int seqnum){
     seqnum++;
   }
   expected_seqnum = seqnum;
-  printf("next expected_seqnum: %d\n", expected_seqnum);
+  // printf("next expected_seqnum: %d\n", expected_seqnum);
 
   return seqnum-1;
 }
@@ -370,14 +370,14 @@ int sendtolayer5(int seqnum){
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 int B_input(struct pkt packet)
 {
-  printf("\n-------------- B output --------------\n");
-  printf("Got a packet with\n");
-  debug_packet(packet);
+  // printf("\n-------------- B output --------------\n");
+  // printf("Got a packet with\n");
+  // debug_packet(packet);
 
   /* int ack = packet.acknum; */
 
   if(is_corrupt(packet)){
-    printf("Packet was corrupted dropping packet\n");
+    // printf("Packet was corrupted dropping packet\n");
     /* printf("Acknowledge %d\n", ack); */
     /* fill_ack(&packet, ack); */
   }
