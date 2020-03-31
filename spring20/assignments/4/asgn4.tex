@@ -94,7 +94,63 @@
 
 \section*{Problem 1}
 \subsection*{a}
-We assign subnet A with 214.97.254.0/24, subnet B with 214.97.256.0/25, and subnet C with 214.97.256.128/25
+We assign subnet A with 214.97.255.0/24, subnet B with 214.97.255.128/25 and
+subnet C with 214.97.255.192/25, subnet D with 214.97.254.0/26,
+subnet E 214.97.254.128/26, subnet F 214.97.254.64/26
+
+Forward Table for R1:
+\begin{center}
+\begin{tabular}{ | c | c | c |}
+  \hline
+  Source IP & Dest IP & Action \\
+  \hline
+  * & 214.97.255.192/25 & forward(R2)\\
+  \hline
+  * & 214.97.254.64/26 & forward(R2) \\
+  \hline
+  * & 214.97.255.128/25 & forward(R3) \\
+  \hline
+  * & 214.97.254.0/26 & forward(R3) \\
+  \hline
+\end{tabular}
+\end{center}
+
+
+Forward Table for R2:
+\begin{center}
+\begin{tabular}{ | c | c | c |}
+  \hline
+  Source IP & Dest IP & Action \\
+  \hline
+  * & 214.97.255.0/24 & forward(R1)\\
+  \hline
+  * & 214.97.254.64/26 & forward(R1)\\
+  \hline
+  * & 214.97.255.128/25 & forward(R3) \\
+  \hline
+  * & 214.97.254.128/26 & forward(R3) \\
+  \hline
+\end{tabular}
+\end{center}
+
+
+
+Forward Table for R3:
+\begin{center}
+\begin{tabular}{ | c | c | c |}
+  \hline
+  Source IP & Dest IP & Action \\
+  \hline
+  * & 214.97.255.0/24 & forward(R1)\\
+  \hline
+  * & 214.97.254.0/26 & forward(R1)\\
+  \hline
+  * & 214.97.255.192/25 & forward(R2) \\
+  \hline
+  * & 214.97.254.128/26 & forward(R2) \\
+  \hline
+\end{tabular}
+\end{center}
 
 \section*{Problem 2}
 \subsection*{a}
