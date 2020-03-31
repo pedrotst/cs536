@@ -104,9 +104,9 @@ Only traffic arriving from hosts h1 and h6 should be delivered to hosts h3 or h4
   \hline
 Switch & Port & MAC src & MAC dst & Eth type & VLAN ID & IP Src & IP Dst & IP Prot & TCP sport & TCP dport & Action \\
   \hline
-  s2 & * & * & * & * & 10.1.0.2 & * & * & * & * & * & drop \\
+  s2 & * & * & * & * & * & 10.1.0.2 & * & * & * & * & drop \\
   \hline
-  s2 & * & * & * & * & 10.1.0.5 & * & * & * & * & * & drop \\
+  s2 & * & * & * & *  & * & 10.1.0.5 & * & * & * & * & drop \\
   \hline
 \end{tabular}
 \end{center}
@@ -121,9 +121,7 @@ UDP traffic is blocked).
   \hline
 Switch & Port & MAC src & MAC dst & Eth type & VLAN ID & IP Src & IP Dst & IP Prot & TCP sport & TCP dport & Action \\
   \hline
-  s2 & * & * & * & * & 10.1.0.2 & * & * & * & * & * & drop \\
-  \hline
-  s2 & * & * & * & * & 10.1.0.5 & * & * & * & * & * & drop \\
+  s2 & * & * & * & * & * & * & * & UDP & * & * & drop \\
   \hline
 \end{tabular}
 \end{center}
@@ -132,8 +130,34 @@ Switch & Port & MAC src & MAC dst & Eth type & VLAN ID & IP Src & IP Dst & IP Pr
 Only traffc destined to h3 is to be delivered (i.e., all traffic to h4 is
 blocked).
 
+\begin{center}
+\begin{tabular}{ | c | c | c | c | c | c | c | c | c | c | c | c | }
+  \hline
+Switch & Port & MAC src & MAC dst & Eth type & VLAN ID & IP Src & IP Dst & IP Prot & TCP sport & TCP dport & Action \\
+  \hline
+  s2 & * & * & * & * & * & * & 10.1.0.4 & * & * & * & drop \\
+  \hline
+\end{tabular}
+\end{center}
+
+
 \subsection*{d}
 Only UDP traffic from h1 and destined to h3 is to be delivered. All other traffic is blocked.
+
+
+
+\begin{center}
+\begin{tabular}{ | c | c | c | c | c | c | c | c | c | c | c | l | }
+  \hline
+Switch & Port & MAC src & MAC dst & Eth type & VLAN ID & IP Src & IP Dst & IP Prot & TCP sport & TCP dport & Action \\
+  \hline
+  s2 & * & * & * & * & * & 10.1.0.1 & 10.1.0.3 & UDP & * & * & deliver as is \\
+  \hline
+  s2 & * & * & * & * & * & * & * & * & * & * & drop \\
+  \hline
+
+\end{tabular}
+\end{center}
 
 %%% End document
 \end{document}
