@@ -95,10 +95,36 @@
 
 \section*{Problem 1}
 \begin{enumerate}
-  \item CSMA/CA, because we cannot perform collision detection due to the hidden terminal problem. CDMA can also be a good option.
-  \item CSMA/CD, because the probability of collision is fairly low, but when it happens it is possible to recover with exponential backoff.
+  \item CSMA/CA, because we cannot perform collision detection due to the hidden
+terminal problem. CDMA can also be a good option.
+  \item CSMA/CD, because the probability of collision is fairly low, but when it
+happens it is possible to recover with exponential backoff.
   \item CSMA/CA or CDMA for the same reasons as 1.
 \end{enumerate}
+
+\section*{Problem 2}
+\begin{enumerate}
+  \item No,
+    Src IP: 192.168.3.001
+    Dest IP: 192.168.3.003
+    Src Mac: 77-77-77-77-77-77
+    Dest Mac:99-99-99-99-99-99
+  
+  \item Yes,
+    Src IP: 192.168.3.001
+    Dest IP: 192.168.2.003
+    Src Mac: 77-77-77-77-77-77
+    Dest Mac:88-88-88-88-88-88,
+    At least three datagrams will be needed to deliver it to B.
+    First E must deliver a datagram to Router 2, then Router 2 must deliver it to Router 1 and then finally Router 1 will deliver it to B.
+
+  \item Yes, Router 1 will receive the ARP broadcast from A. However, Router 1 will not forward this ARP request to subnet 2. B will not send a ARP request to A because the broadcast will contain A MAC address. Router 1 will not receive the data frame from B to A. Assuming the that the switch forwarding table is initially empty, it will contain A and B IP and MAC addresses.
+
+\end{enumerate}
+
+\section*{Problem 3}
+First the host needs to get an IP address by sending a DHCP broadcast and the DHCP server will respond with DHCP ACK message, containing an allocated IP address for the host use, the IP address of the DNS server, the IP address of the default gateway router R, and a network mask. The host then contact the DNS server by sending its message to R. The DNS server responds with the IP address C the host wishes to download the page from. With C address, the host can finally create a TCP socket. After the three-way handshake the host can send an HTTP GET, C responds with an HTTP response message, places the requested webpage in the body of the message and sends it through the socket. When the message is finally received by the host it can extract the Web page and finally display it to the user.
+
 
 %%% End document
 \end{document}
