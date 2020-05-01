@@ -48,6 +48,8 @@ def get_filetype(filename):
         return "image/jpeg"
     if name == "html":
         return "text/html"
+    if name == "pdf":
+        return "application/pdf"
 
     return "text"
 

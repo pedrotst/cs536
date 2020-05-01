@@ -55,7 +55,7 @@ void debug_timer_list(){
 
 
 void insert_timer(float begin_time, int seqnum){
-  // printf("Inserting timer for #%d\n", seqnum);
+  printf("Inserting timer for #%d\n", seqnum);
   if(timers == NULL){
     timers = malloc(sizeof(timeout_list));
     timers->next = NULL;
@@ -254,7 +254,7 @@ int erase_timer(int seqnum){
   if(timers != NULL && timers->seqnum == seqnum){
     timers = timers->next;
     free(tl);
-    // debug_timer_list();
+    debug_timer_list();
     return 0;
   }
 
@@ -276,7 +276,7 @@ int erase_timer(int seqnum){
   helper->next = tl->next;
   free(tl);
 
-  // debug_timer_list();
+  debug_timer_list();
   return 1;
 }
 
@@ -318,7 +318,7 @@ int A_timerinterrupt() {
     pop_timer();
     // current_timer_seqnum = timers->seqnum;
 
-  // debug_timer_list();
+  debug_timer_list();
 
   return 0;
 }
